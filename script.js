@@ -106,7 +106,11 @@
             { time: 183.9, text: "la la la...", translation: " " },
             { time: 203, text: " ", translation: " " },
             { time: 204, text: " ", translation: " " },
-            { time: 205, text: " ", translation: " " }
+            { time: 205, text: " ", translation: " " },
+            { time: 206, text: " ", translation: " " },
+            { time: 207, text: " ", translation: " " },
+            { time: 208, text: " ", translation: " " },
+            { time: 209, text: " ", translation: " " }
         ]
     },
     {
@@ -147,7 +151,11 @@
             { time: 238, text: "no one can know, and it's okay", translation: "不知道也沒關係 " },
             { time: 248, text: " ", translation: " " },
             { time: 250, text: " ", translation: " " },
-            { time: 251, text: " ", translation: " " }
+            { time: 251, text: " ", translation: " " },
+            { time: 252, text: " ", translation: " " },
+            { time: 253, text: " ", translation: " " },
+            { time: 254, text: " ", translation: " " },
+            { time: 255, text: " ", translation: " " }
         ]
     },
     {
@@ -188,7 +196,10 @@
             { time: 144.5, text: "ให้รักเธออย่างฉัน  ", translation: "像我這般愛妳 " },
             { time: 148, text: " ", translation: " " },
             { time: 149, text: " ", translation: " " },
-            { time: 150, text: " ", translation: " " }
+            { time: 150, text: " ", translation: " " },
+            { time: 151, text: " ", translation: " " },
+            { time: 152, text: " ", translation: " " },
+            { time: 153, text: " ", translation: " " }
 
         ]
     },
@@ -236,6 +247,9 @@
             { time: 175, text: " ", translation: " " },
             { time: 176, text: " ", translation: " " },
             { time: 177, text: " ", translation: " " },
+            { time: 178, text: " ", translation: " " },
+            { time: 179, text: " ", translation: " " },
+            { time: 180, text: " ", translation: " " }
 
         ]
     }
@@ -375,16 +389,25 @@ mainAudio.addEventListener("timeupdate", (e) => {
     if (duration) {
         let progressWidth = (currentTime / duration) * 100;
         progressBar.style.width = `${progressWidth}%`;
+
         let curMin = Math.floor(currentTime / 60);
         let curSec = Math.floor(currentTime % 60);
         musicCurrentTime.innerText = `${curMin}:${curSec < 10 ? '0' + curSec : curSec}`;
+
         let durMin = Math.floor(duration / 60);
         let durSec = Math.floor(duration % 60);
         musicDuration.innerText = `${durMin}:${durSec < 10 ? '0' + durSec : durSec}`;
+
         updateLyrics(currentTime);
+
+        if ((currentTime / duration) > 0.8) {
+            let nextIndex = (musicIndex + 1) % allMusic.length;
+            let preloadAudio = new Audio();
+            preloadAudio.src = allMusic[nextIndex].src;
+            preloadAudio.preload = "auto"; 
+        }
     }
 });
-
 progressArea.addEventListener("click", (e) => {
     let progressWidth = progressArea.clientWidth;
     let clickedOffsetX = e.offsetX;
@@ -431,3 +454,4 @@ window.addEventListener("load", () => {
         if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
     }, { once: true });
 });
+
