@@ -457,11 +457,24 @@ mainAudio.addEventListener("timeupdate", (e) => {
 
         updateLyrics(currentTime);
 
-        if ((currentTime / duration) > 0.8) {
+        if ((currentTime / duration) > 0.5) {
             let nextIndex = (musicIndex + 1) % allMusic.length;
-            let preloadAudio = new Audio();
-            preloadAudio.src = allMusic[nextIndex].src;
-            preloadAudio.preload = "auto"; 
+
+            let preloadTag = document.getElementById('audio-preloader');
+            if (!preloadTag) {
+                preloadTag = document.createElement('audio');
+                preloadTag.id = 'audio-preloader';
+                preloadTag.style.display = 'none';
+                document.body.appendChild(preloadTag);
+            }
+
+            if (preloadTag.src !== window.location.origin + '/' + allMusic[nextIndex].src &&
+                preloadTag.getAttribute('data-index') !== String(nextIndex)) {
+                preloadTag.src = allMusic[nextIndex].src;
+                preloadTag.setAttribute('data-index', String(nextIndex));
+                preloadTag.preload = "auto";
+                preloadTag.load();
+            }
         }
     }
 });
