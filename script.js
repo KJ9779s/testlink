@@ -252,6 +252,54 @@
             { time: 180, text: " ", translation: " " }
 
         ]
+    },
+    {
+        name: "ฝากใจ | 寄託心意",
+        artist: "Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/bc/55/2b/bc552b4db500d5cb62fc44ae714a51b9.jpg",
+        src: "s6.mp3",
+        video: "tCo0VPlzyKE",
+        lyrics: [
+            { time: 0, text: "( 一首小葉送給姐姐的歌 ) ", translation: " " },
+            { time: 24.9, text: "เธอชอบพูดว่าเธอนั้นโชคดี ที่ชีวิตได้พบเจอกับฉัน", translation: "妳總喜歡說自己很幸運 生命中遇見了我" },
+            { time: 33, text: "แต่รู้บ้างหรือเปล่าว่าฉันโชคดีกว่า ที่ได้รับความรักจากเธอ", translation: "但妳知道嗎 我才更幸運 能夠得到妳的愛 " },
+            { time: 42.2, text: "เธอชอบพูดว่าเธอไม่เข้าใจ ว่าฉันนั้นชอบเธอที่ตรงไหน", translation: "妳總喜歡說自己不明白 我喜歡妳哪一點" },
+            { time: 50.5, text: "ก็ชอบที่เป็นเธอ แค่เธอเป็นเธอก็พอแล้ว", translation: "就喜歡這樣的妳 只要妳做自己就足夠了" },
+            { time: 59.6, text: "ฉันก็ไม่รู้ว่าอนาคตเป็นอย่างไร จะไม่นึกย้อนเสียใจ", translation: "我也不知道未來會怎麼樣 不想回想後悔" },
+            { time: 66, text: "เลือกกี่ครั้งก็เหมือนเดิม ใจฉันเลือกเธอไปแล้ว", translation: "無論做幾次選擇都一樣 我的心選擇妳了" },
+            { time: 74.5, text: "ฝากใจฉันไว้ที่เธอ ฝากให้เธอช่วยดูแล", translation: "我的心寄託於妳 請妳替我好好照顧" },
+            { time: 83, text: "ฉันไม่อ้อนวอน อะไรเธอมากมาย", translation: "我不懇求妳太多太多" },
+            { time: 88, text: "แค่ช่วยอยู่กับฉันตลอดไป", translation: "但求妳永遠和我在一起" },
+            { time: 91.5, text: "ฝากใจฉันไว้ที่เธอ ฝากให้เธอช่วยดูแล", translation: "我的心寄託於妳 請妳替我好好照顧" },
+            { time: 100, text: "ขอเธอไม่ลืม ขอให้เธอจดจำไว้", translation: "求妳別忘記 希望妳銘記於心" },
+            { time: 105.4, text: "จากนี้ หัวใจฉันอยู่ที่เธอแล้ว", translation: "從今往后 我的心已屬於妳了" },
+            { time: 111.7, text: "(間奏)", translation: "" },
+            { time: 119.5, text: "เธอรู้ไหมที่แท้โชคชะตา ก็แค่พาเธอพบเจอกับฉัน", translation: "妳知道嗎 其實命運就只是指引妳我相遇" },
+            { time: 128, text: "แต่ที่เรารักกัน มันเกิดขึ้นได้เพราะฉันกับเธอ", translation: "但我們愛上彼此 那是因為妳我的心意相通" },
+            { time: 136.5, text: "ฉันก็ไม่รู้ว่าอนาคตเป็นอย่างไร จะไม่นึกย้อนเสียใจ", translation: "我也不知道未來會怎麼樣 不想回想後悔" },
+            { time: 143.3, text: "เลือกกี่ครั้งก็เหมือนเดิม ใจฉันเลือกเธอไปแล้ว", translation: "無論做幾次選擇都一樣 我的心選擇妳了" },
+            { time: 151.2, text: "ฝากใจฉันไว้ที่เธอ ฝากให้เธอช่วยดูแล", translation: "我的心寄託於妳 請妳替我好好照顧" },
+            { time: 160, text: "ฉันไม่อ้อนวอน อะไรเธอมากมาย", translation: "我不懇求妳太多太多" },
+            { time: 165, text: "แค่ช่วยอยู่กับฉันตลอดไป", translation: "但求妳永遠和我在一起" },
+            { time: 168.9, text: "ฝากใจฉันไว้ที่เธอ ฝากให้เธอช่วยดูแล", translation: "我的心寄託於妳 請妳替我好好照顧" },
+            { time: 177.5, text: "ขอเธอไม่ลืม ขอให้เธอจดจำไว้", translation: "求妳別忘記 希望妳銘記於心" },
+            { time: 182.3, text: "จากนี้ หัวใจฉันอยู่ที่เธอแล้ว", translation: "從今往后 我的心已屬於妳了" },
+            { time: 191.5, text: "ฉันขอสัญญาว่าจะไม่ไปไหน", translation: "我發誓會不離不棄" },
+            { time: 196, text: "เธอไม่ต้องกลัวว่าฉันจะหายไป", translation: "妳不必擔心我會消失不見 " },
+            { time: 200, text: "ฉันพร้อมและมอบหัวใจฉันฝากไว้ที่เธอแล้ว", translation: "我準備獻出全心全意 寄託於妳" },
+            { time: 208.8, text: "ฉันขอสัญญาว่าจะไม่ไปไหน", translation: "我發誓會不離不棄" },
+            { time: 213, text: "เธอไม่ต้องกลัวว่าฉันจะหายไป", translation: "妳不必擔心我會消失不見 " },
+            { time: 217.3, text: "ฉันพร้อมและมอบหัวใจฉันฝากไว้ที่เธอแล้ว", translation: "我準備獻出全心全意 寄託於妳" },
+            { time: 226.9, text: "ฝากใจฉันไว้ที่เธอ ฝากให้เธอช่วยดูแล", translation: "我的心寄託於妳 請妳替我好好照顧" },
+            { time: 235.2, text: "ฉันไม่อ้อนวอน อะไรเธอมากมาย", translation: "我不懇求妳太多太多" },
+            { time: 240, text: "แค่ช่วยอยู่กับฉันตลอดไป", translation: "但求妳永遠和我在一起" },
+            { time: 243.8, text: "ฝากใจฉันไว้ที่เธอ ฝากให้เธอช่วยดูแล", translation: "我的心寄託於妳 請妳替我好好照顧" },
+            { time: 252.3, text: "ขอเธอไม่ลืม ขอให้เธอจดจำไว้", translation: "求妳別忘記 希望妳銘記於心" },
+            { time: 257.3, text: "จากนี้ หัวใจฉันอยู่ที่เธอแล้ว", translation: "從今往後 我的心已屬於妳了" },
+            { time: 264, text: "(小葉有那麼一刻把自己唱進去了吧...) ", translation: " " },
+            { time: 276.1, text: "หัวใจฉันอยู่ที่เธอแล้ว", translation: "我的心已屬於妳了" },
+
+        ]
     }
 ];
 const mainContainer = document.querySelector(".main-container"),
@@ -284,12 +332,22 @@ function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('player', {
         videoId: allMusic[musicIndex].video,
         playerVars: {
-            'autoplay': 1, 'mute': 1, 'controls': 0, 'loop': 1,
+            'autoplay': 1, 'mute': 1, 'controls': 0, 'loop': 0, 
             'playlist': allMusic[musicIndex].video,
             'playsinline': 1, 'modestbranding': 1, 'rel': 0
         },
         events: {
-            'onReady': (e) => e.target.playVideo(),
+            'onReady': (e) => {
+                e.target.playVideo();
+                setInterval(() => {
+                    const duration = ytPlayer.getDuration();
+                    const currentTime = ytPlayer.getCurrentTime();
+                    if (duration > 0 && (duration - currentTime) < 0.5) {
+                        ytPlayer.seekTo(0);
+                        ytPlayer.playVideo();
+                    }
+                }, 100);
+            },
             'onStateChange': (e) => {
                 if (e.data === YT.PlayerState.ENDED) {
                     ytPlayer.seekTo(0);
@@ -299,7 +357,6 @@ function onYouTubeIframeAPIReady() {
         }
     });
 }
-
 function loadMusic(index) {
     const music = allMusic[index];
     musicName.innerText = music.name;
@@ -439,7 +496,7 @@ function updateLyrics(currentTime) {
         lines.forEach((line, index) => {
             if (index === activeIndex) {
                 line.classList.add("active");
-                const offset = 220 - activeLine.offsetTop;
+                const offset = 200 - activeLine.offsetTop;
                 lyricsWrapper.style.transform = `translateY(${offset}px)`;
             } else {
                 line.classList.remove("active");
