@@ -417,6 +417,17 @@
             { time: 247, text: "Um-um, um-um-um", translation: "" },
 
         ]
+    },
+    {
+        name: "I'll Do It How You Like It",
+        artist: " Kao Supassara, Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/e4/6b/98/e46b98aa8e817decb56f5ec7e82f0289.jpg",
+        src: "s9.mp3",
+        video: "xG1BWRfr4Gg",
+        lyrics: [
+            { time: 0, text: "( 前奏 ) ", translation: " " },
+          
+        ]
     }
 ];
 const mainContainer = document.querySelector(".main-container"),
@@ -432,7 +443,8 @@ const mainContainer = document.querySelector(".main-container"),
     musicCurrentTime = mainContainer.querySelector(".current"),
     musicDuration = mainContainer.querySelector(".duration"),
     volumeSlider = mainContainer.querySelector("#volume-slider"),
-    lyricsWrapper = document.getElementById("lyrics-wrapper");
+    lyricsWrapper = document.getElementById("lyrics-wrapper"),
+    loadingOverlay = document.getElementById("loading-overlay"); 
 
 let musicIndex = 0;
 let mainAudio = new Audio();
@@ -449,9 +461,10 @@ function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('player', {
         videoId: allMusic[musicIndex].video,
         playerVars: {
-            'autoplay': 1, 'mute': 1, 'controls': 0, 'loop': 0, 
+            'autoplay': 1, 'mute': 1, 'controls': 0, 'loop': 0,
             'playlist': allMusic[musicIndex].video,
-            'playsinline': 1, 'modestbranding': 1, 'rel': 0
+            'playsinline': 1, 'modestbranding': 1, 'rel': 0,
+            'vq': 'hd2160'
         },
         events: {
             'onReady': (e) => {
@@ -474,7 +487,9 @@ function onYouTubeIframeAPIReady() {
         }
     });
 }
+
 function loadMusic(index) {
+    loadingOverlay.style.display = "flex"; 
     const music = allMusic[index];
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
@@ -492,6 +507,18 @@ function loadMusic(index) {
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
 }
+
+mainAudio.addEventListener("waiting", () => {
+    loadingOverlay.style.display = "flex"; 
+});
+
+mainAudio.addEventListener("playing", () => {
+    loadingOverlay.style.display = "none"; 
+});
+
+mainAudio.addEventListener("canplay", () => {
+    loadingOverlay.style.display = "none"; 
+});
 
 function playSong() {
     isPlaying = true;
@@ -531,31 +558,6 @@ volumeSlider.addEventListener("input", (e) => {
 
 mainAudio.addEventListener("ended", () => nextMusic());
 
-window.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-        e.preventDefault();
-        isPlaying ? pauseSong() : playSong();
-    }
-    else if (e.code === "ArrowLeft") {
-        mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 5);
-        currentLyricIndex = -1;
-    }
-    else if (e.code === "ArrowRight") {
-        mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 5);
-        currentLyricIndex = -1;
-    }
-    else if (e.code === "ArrowUp") {
-        e.preventDefault();
-        mainAudio.volume = Math.min(1, mainAudio.volume + 0.05);
-        volumeSlider.value = mainAudio.volume;
-    }
-    else if (e.code === "ArrowDown") {
-        e.preventDefault();
-        mainAudio.volume = Math.max(0, mainAudio.volume - 0.05);
-        volumeSlider.value = mainAudio.volume;
-    }
-});
-
 mainAudio.addEventListener("timeupdate", (e) => {
     const currentTime = e.target.currentTime;
     const duration = e.target.duration;
@@ -576,7 +578,6 @@ mainAudio.addEventListener("timeupdate", (e) => {
 
         if ((currentTime / duration) > 0.5) {
             let nextIndex = (musicIndex + 1) % allMusic.length;
-
             let preloadTag = document.getElementById('audio-preloader');
             if (!preloadTag) {
                 preloadTag = document.createElement('audio');
@@ -584,7 +585,6 @@ mainAudio.addEventListener("timeupdate", (e) => {
                 preloadTag.style.display = 'none';
                 document.body.appendChild(preloadTag);
             }
-
             if (preloadTag.src !== window.location.origin + '/' + allMusic[nextIndex].src &&
                 preloadTag.getAttribute('data-index') !== String(nextIndex)) {
                 preloadTag.src = allMusic[nextIndex].src;
@@ -595,6 +595,7 @@ mainAudio.addEventListener("timeupdate", (e) => {
         }
     }
 });
+
 progressArea.addEventListener("click", (e) => {
     let progressWidth = progressArea.clientWidth;
     let clickedOffsetX = e.offsetX;
@@ -626,7 +627,7 @@ function updateLyrics(currentTime) {
         lines.forEach((line, index) => {
             if (index === activeIndex) {
                 line.classList.add("active");
-                const offset = 200 - activeLine.offsetTop;
+                const offset = 170 - activeLine.offsetTop;
                 lyricsWrapper.style.transform = `translateY(${offset}px)`;
             } else {
                 line.classList.remove("active");
@@ -635,10 +636,34 @@ function updateLyrics(currentTime) {
     }
 }
 
+window.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+        e.preventDefault();
+        isPlaying ? pauseSong() : playSong();
+    }
+    else if (e.code === "ArrowLeft") {
+        mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 5);
+        currentLyricIndex = -1;
+    }
+    else if (e.code === "ArrowRight") {
+        mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 5);
+        currentLyricIndex = -1;
+    }
+    else if (e.code === "ArrowUp") {
+        e.preventDefault();
+        mainAudio.volume = Math.min(1, mainAudio.volume + 0.05);
+        volumeSlider.value = mainAudio.volume;
+    }
+    else if (e.code === "ArrowDown") {
+        e.preventDefault();
+        mainAudio.volume = Math.max(0, mainAudio.volume - 0.05);
+        volumeSlider.value = mainAudio.volume;
+    }
+});
+
 window.addEventListener("load", () => {
     loadMusic(musicIndex);
     document.body.addEventListener('click', () => {
         if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
     }, { once: true });
 });
-
