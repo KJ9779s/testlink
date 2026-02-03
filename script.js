@@ -458,6 +458,53 @@
             { time: 178.5, text: "I'll do it how you like it", translation: " " },
 
         ]
+    },
+    {
+        name: "理想情人",
+        artist: "Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/ab/70/64/ab7064fab9c6c4c94f24fc5b99ac945b.jpg",
+        src: "s11.mp3",
+        video: "VCio1RYu7u0",
+        lyrics: [
+            { time: 0, text: "( 前奏 ) ", translation: " " },
+            { time: 12.3, text: "穿上洋裝 看著手錶", translation: " " },
+            { time: 16.1, text: "時間快到 心碰碰的跳", translation: " " },
+            { time: 19.8, text: "和你的第一次約會來臨了", translation: " " },
+            { time: 26.9, text: "金色的陽光灑滿人行道", translation: " " },
+            { time: 30.5, text: "換了新脣膏把頭髮弄好", translation: " " },
+            { time: 33.2, text: "要你看到 我的好", translation: " " },
+            { time: 41.2, text: "喜歡看你走路充滿自信", translation: " " },
+            { time: 45, text: "說話時候你的專注眼神", translation: " " },
+            { time: 48.5, text: "溫柔的表情笑容裡的天真", translation: " " },
+            { time: 53.1, text: "我相信", translation: " " },
+            { time: 55.9, text: "找不到有比你更好的人", translation: " " },
+            { time: 59.1, text: "你心裡理想情人是幾分", translation: " " },
+            { time: 62, text: "是否也會 有我的份", translation: " " },
+            { time: 72.9, text: "好想知道你的100分 會給怎樣的人", translation: " " },
+            { time: 80, text: "親愛的你不要再陌生 增加我戲份", translation: " " },
+            { time: 86.2, text: "我想問 親愛的你把感情升等 朋友變成情人", translation: " " },
+            { time: 94.5, text: "可不可以 告訴我標準 不要讓我一直等", translation: " " },
+            { time: 106.3, text: "( 間奏 ) ", translation: " " },
+            { time: 117.6, text: "喜歡看你走路充滿自信", translation: " " },
+            { time: 121.1, text: "說話時候你的專注眼神", translation: " " },
+            { time: 125, text: "溫柔的表情笑容裡的天真", translation: " " },
+            { time: 129.4, text: "我相信", translation: " " },
+            { time: 132.2, text: "找不到有比你更好的人", translation: " " },
+            { time: 135.8, text: "你心裡理想情人是幾分", translation: " " },
+            { time: 138.8, text: "是否也會 有我的份", translation: " " },
+            { time: 146.5, text: "好想知道你的100分 會給怎樣的人", translation: " " },
+            { time: 153.7, text: "親愛的你不要再陌生 增加我戲份", translation: " " },
+            { time: 160, text: "我想問 親愛的你把感情升等 朋友變成情人", translation: " " },
+            { time: 168.3, text: "可不可以 告訴我標準 不要讓我一直等", translation: " " },
+            { time: 175.5, text: "聽著那時間滴答的走 對街的你在點頭", translation: " " },
+            { time: 185, text: "好像一個夢 漸漸 走到我前頭", translation: " " },
+            { time: 190.8, text: "好想知道你的100分 會給怎樣的人", translation: " " },
+            { time: 198.2, text: "親愛的你不要再陌生 增加我戲份", translation: " " },
+            { time: 204.5, text: "我想問 親愛的你把感情升等 朋友變成情人", translation: " " },
+            { time: 212.7, text: "可不可以 告訴我標準 不要讓我一直等", translation: " " }
+
+
+        ]
     }
 ];
 const mainContainer = document.querySelector(".main-container"),
