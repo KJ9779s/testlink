@@ -1001,7 +1001,7 @@ function initList() {
             animation: 150,
             delay: 150,
             delayOnTouchOnly: true,
-            touchStartThreshold: 5,
+            touchStartThreshold: 8,
             onEnd: function (evt) {
                 const currentPlayingName = allMusic[musicIndex].name;
                 const movedItem = allMusic.splice(evt.oldIndex, 1)[0];

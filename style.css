@@ -340,6 +340,25 @@ body {
     .volume-area {
         display: none;
     }
+    .music-list ul li {
+        list-style: none;
+        padding: 15px 25px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+
+    /* --- 新增以下屬性 --- */
+        user-select: none; /* 防止選取文字  */
+        -webkit-user-select: none; /* 針對 Safari */
+        -webkit-tap-highlight-color: transparent; /* 移除手機點擊時的藍色高亮 */
+        touch-action: pan-y; /* 只允許垂直方向滑動，避免干擾頁面縮放  */
+    }
+    .music-list ul {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 0;
+        -webkit-overflow-scrolling: touch; /* 優化 iOS 的滾動回彈效果 [cite: 54] */
+    }
     .music-list ul li:hover {
         background: transparent !important;
         transition: none;
