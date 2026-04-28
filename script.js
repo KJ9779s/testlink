@@ -1,4 +1,4 @@
-﻿const allMusic = [
+﻿﻿const allMusic = [
     {
         name: " วิมานเพลง | Love Design",
         artist: " Kao Supassara, Janeeyeh Methika",
@@ -460,6 +460,57 @@
         ]
     },
     {
+        name: "有妳在",
+        artist: "Kao Supassara",
+        img: "https://i.pinimg.com/736x/5f/eb/f9/5febf946bdb2add0fc4a01182a4512ac.jpg",
+        src: "s10.mp3",
+        video: "moEJJtx375I",
+        lyrics: [
+            { time: 0, text: "Baby you are my light", translation: " " },
+            { time: 4, text: "妳點亮我的愛", translation: " " },
+            { time: 8.5, text: "forever shine", translation: " " },
+            { time: 10.4, text: "命中註定的安排", translation: " " },
+            { time: 13.2, text: "我明白", translation: " " },
+            { time: 16.8, text: "第一次見面妳的開場白", translation: " " },
+            { time: 20.8, text: "沒有彩排 但卻意外可愛", translation: " " },
+            { time: 23.9, text: "晚風吹過來 霧氣散開", translation: " " },
+            { time: 27.9, text: "眼神在交換", translation: " " },
+            { time: 31.7, text: "我世界按部就班的狀態", translation: " " },
+            { time: 35.1, text: "遇見妳的瞬間 明亮起來", translation: " " },
+            { time: 38.8, text: "烏雲都散開 沒什麼陰霾", translation: " " },
+            { time: 42.7, text: "有妳在", translation: " " },
+            { time: 44.2, text: "Baby you are my light", translation: " " },
+            { time: 47.9, text: "妳點亮我的愛", translation: " " },
+            { time: 52.3, text: "forever shine", translation: " " },
+            { time: 54.5, text: "命中註定的安排", translation: " " },
+            { time: 57.1, text: "我明白", translation: " " },
+            { time: 58.9, text: "流星劃過窗臺", translation: " " },
+            { time: 62.7, text: "抹上極光的色彩", translation: " " },
+            { time: 67.2, text: "妳的存在 把我的夜空填滿", translation: " " },
+            { time: 71.9, text: "多絢爛 煙花在盛開", translation: " " },
+            { time: 79.4, text: "銀河裡星星彼此在呢喃", translation: " " },
+            { time: 82.9, text: "只要妳和我輕輕抬頭看", translation: " " },
+            { time: 87.1, text: "就能把愛 全部裝進宇宙的口袋", translation: " " },
+            { time: 94, text: "晚風吹走我的遲疑躲閃", translation: " " },
+            { time: 97.7, text: "月光灑下只想對妳依賴", translation: " " },
+            { time: 100.8, text: "夜色很浪漫 時間變很慢", translation: " " },
+            { time: 104.9, text: "有妳在", translation: " " },
+            { time: 106.6, text: "Baby you are my light", translation: " " },
+            { time: 110, text: "妳點亮我的愛", translation: " " },
+            { time: 115, text: "forever shine", translation: " " },
+            { time: 116.8, text: "命中註定的安排", translation: " " },
+            { time: 119.5, text: "我明白", translation: " " },
+            { time: 121.5, text: "流星劃過窗臺", translation: " " },
+            { time: 125, text: "抹上極光的色彩", translation: " " },
+            { time: 129.2, text: "妳的存在 把我的夜空填滿", translation: " " },
+            { time: 134.2, text: "多絢爛 煙花在盛開", translation: " " },
+            { time: 144.2, text: "不再孤單 朝著約定的彼岸", translation: " " },
+            { time: 148.8, text: "我明白 愛早已到來", translation: " " }
+
+
+        ]
+    },
+    {
         name: "理想情人",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/ab/70/64/ab7064fab9c6c4c94f24fc5b99ac945b.jpg",
@@ -505,6 +556,246 @@
 
 
         ]
+    },
+    {
+        name: "愛妳但說不出口",
+        artist: "Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/58/00/84/580084459ec9f52b9504eebce1bb81f9.jpg",
+        src: "s12.mp3",
+        video: "Q3xtNfYymFE",
+        lyrics: [
+            { time: 0, text: "( 前奏 ) ", translation: " " },
+            { time: 16, text: "寶貝 今晚的我有點醉", translation: " " },
+            { time: 22.1, text: "別理會妳聽的 那些謊話", translation: " " },
+            { time: 26, text: "我沒辦法", translation: " " },
+            { time: 28.1, text: "把真相都證明給妳啊", translation: " " },
+            { time: 31.2, text: "So 我的寶貝", translation: " " },
+            { time: 34.1, text: "妳別看我渣也會累", translation: " " },
+            { time: 38.3, text: "脆弱的心被妳一擊就碎", translation: " " },
+            { time: 41.8, text: "So what you say？", translation: " " },
+            { time: 44.4, text: "能不能再給個機會？", translation: " " },
+            { time: 48.5, text: "誰能把妳的心 撫慰", translation: " " },
+            { time: 50.8, text: "就算天黑 我也不怕會疲憊", translation: " " },
+            { time: 56.7, text: "犯過的罪 沒人能體會", translation: " " },
+            { time: 59.8, text: "是我不對 剩自己在流淚", translation: " " },
+            { time: 64.3, text: "我想念妳", translation: " " },
+            { time: 65.8, text: "我恨自己錯過", translation: " " },
+            { time: 69.2, text: "愛妳 但說不出口", translation: " " },
+            { time: 72.5, text: "妳說太累所以是誰惹的禍", translation: " " },
+            { time: 75.9, text: "是我", translation: " " },
+            { time: 77.3, text: "愛妳 但說不出口", translation: " " },
+            { time: 80.7, text: "( 間奏 )", translation: " " },
+            { time: 88.8, text: "妳說太累所以是誰惹的禍", translation: " " },
+            { time: 91.8, text: "是我", translation: " " },
+            { time: 93.5, text: "愛妳 但說不出口", translation: " " },
+            { time: 96, text: "寶貝 今晚的我有點累", translation: " " },
+            { time: 102.2, text: "不知道該跟妳說些什麼", translation: " " },
+            { time: 105.8, text: "寫了這首歌 送給妳一個交代", translation: " " },
+            { time: 112.2, text: "誰能把妳的心 撫慰", translation: " " },
+            { time: 114.9, text: "就算天黑 我也不怕會疲憊", translation: " " },
+            { time: 120.8, text: "犯過的罪 沒人能體會", translation: " " },
+            { time: 123.8, text: "是我不對 剩自己在流淚", translation: " " },
+            { time: 128.3, text: "我想念妳", translation: " " },
+            { time: 129.8, text: "我恨自己錯過", translation: " " },
+            { time: 133.2, text: "愛妳 但說不出口", translation: " " },
+            { time: 136.7, text: "妳說太累所以是誰惹的禍", translation: " " },
+            { time: 139.7, text: "是我", translation: " " },
+            { time: 141.5, text: "愛妳 但說不出口", translation: " " },
+            { time: 146.5, text: "( 耍帥中... )", translation: " " },
+            { time: 178.5, text: "我想念妳", translation: " " },
+            { time: 179.8, text: "我恨自己錯過", translation: " " },
+            { time: 183.5, text: "愛妳 但說不出口", translation: " " },
+            { time: 186.7, text: "妳說太累所以是誰惹的禍", translation: " " },
+            { time: 189.7, text: "是我", translation: " " },
+            { time: 191.4, text: "愛妳 但說不出口", translation: " " },
+        ]
+    },
+    {
+        name: "有點甜",
+        artist: "Kao Supassara, Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/cc/68/64/cc6864633acb15fba06431f6eca0debc.jpg",
+        src: "s13.mp3",
+        video: "rrN3U6nocnk",
+        lyrics: [
+            { time: 0, text: "摘一顆蘋果", translation: " " },
+            { time: 2.4, text: "等妳從門前經過", translation: " " },
+            { time: 5.2, text: "送到妳的手中幫你解渴", translation: " " },
+            { time: 8.7, text: "像夏天的可樂", translation: " " },
+            { time: 11.2, text: "像冬天的可可", translation: " " },
+            { time: 14, text: "妳是對的時間對的角色", translation: " " },
+            { time: 18.5, text: "已經約定過", translation: " " },
+            { time: 20.5, text: "一起過下個周末", translation: " " },
+            { time: 23.2, text: "妳的小小情緒對我來說", translation: " " },
+            { time: 27, text: "我也不知為何", translation: " " },
+            { time: 29.7, text: "傷口還没癒合", translation: " " },
+            { time: 32.5, text: "妳就這樣闖進我的心窩", translation: " " },
+            { time: 36.8, text: "是妳讓我看見乾枯沙漠開出花一朵", translation: " " },
+            { time: 41.4, text: "是妳讓我想要每天為你寫一首情歌", translation: " " },
+            { time: 46, text: "用最浪漫的副歌", translation: " " },
+            { time: 48.3, text: "妳也輕輕的附和", translation: " " },
+            { time: 50.7, text: "眼神堅定著我們的選擇", translation: " " },
+            { time: 55.1, text: "是妳讓我的世界從那刻變成粉紅色", translation: " " },
+            { time: 59.4, text: "是妳讓我的生活從此都只要妳配合", translation: " " },
+            { time: 64.2, text: "愛要精心來雕刻", translation: " " },
+            { time: 66.4, text: "我是米開朗基羅", translation: " " },
+            { time: 69, text: "用心刻畫最幸福的風格", translation: " " },
+            { time: 74, text: "用時間 去思念 愛情有點甜", translation: " " },
+            { time: 82.9, text: "這心願 不會變 愛情有點甜", translation: " " },
+            { time: 91.7, text: "已經約定過", translation: " " },
+            { time: 93.6, text: "一起過下個周末", translation: " " },
+            { time: 96.5, text: "妳的小小情緒對我來說", translation: " " },
+            { time: 100.4, text: "我也不知為何", translation: " " },
+            { time: 102.8,text: "傷口還没癒合", translation: " " },
+            { time: 105.6, text: "妳就這樣闖進我的心窩", translation: " " },
+            { time: 109.8, text: "是妳讓我看見乾枯沙漠開出花一朵", translation: " " },
+            { time: 114.4, text: "是妳讓我想要每天為你寫一首情歌", translation: " " },
+            { time: 119.1, text: "用最浪漫的副歌", translation: " " },
+            { time: 121.4, text: "妳也輕輕的附和", translation: " " },
+            { time: 123.8, text: "眼神堅定著我們的選擇", translation: " " },
+            { time: 128.2, text: "是妳讓我的世界從那刻變成粉紅色", translation: " " },
+            { time: 132.6, text: "是妳讓我的生活從此都只要妳配合", translation: " " },
+            { time: 137.4, text: "愛要精心來雕刻", translation: " " },
+            { time: 139.6, text: "我是米開朗基羅", translation: " " },
+            { time: 142.1, text: "用心刻畫最幸福的風格", translation: " " },
+            { time: 146.4, text: "是妳讓我看見乾枯沙漠開出花一朵", translation: " " },
+            { time: 151, text: "是妳讓我想要每天為你寫一首情歌", translation: " " },
+            { time: 155.7, text: "用最浪漫的副歌", translation: " " },
+            { time: 158, text: "妳也輕輕的附和", translation: " " },
+            { time: 160.4, text: "眼神堅定著我們的選擇", translation: " " },
+            { time: 164.7, text: "是妳讓我的世界從那刻變成粉紅色", translation: " " },
+            { time: 169.3, text: "是妳讓我的生活從此都只要妳配合", translation: " " },
+            { time: 174, text: "愛要精心來雕刻", translation: " " },
+            { time: 176.3, text: "我是米開朗基羅", translation: " " },
+            { time: 178.6, text: "用心刻畫最幸福的風格", translation: " " },
+            { time: 183.1, text: "用心刻畫最幸福的風格", translation: " " }
+
+        ]
+    },
+    {
+        name: "Your Love",
+        artist: "Kao Supassara, Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/5e/79/61/5e79613adfe20845cdfd56901315d925.jpg",
+        src: "s14.mp3",
+        video: "SrkjXH1s_9M",
+        lyrics: [
+            { time: 0, text: "( 前奏 )", translation: " " },
+            { time: 17, text: "You're the one that never lets me sleep", translation: "妳就是那個讓我輾轉難眠的人 " },
+            { time: 22.3, text: "To my mind down to my soul you touch my lips", translation: "從我的思緒到靈魂深處 妳觸碰著我的雙唇 " },
+            { time: 29, text: "You're the one that I can't wait to see", translation: "妳就是那個讓我迫不及待想見的人 " },
+            { time: 34, text: "With you here by my side I'm in ecstasy", translation: "只要妳在我身邊 我便沉浸在狂喜之中 " },
+            { time: 41, text: "I am all alone without you", translation: "沒有妳 我倍感孤獨" },
+            { time: 46.8, text: "My days are dark without a glimpse of you", translation: "若不見妳的身影 我的日子便一片漆黑 " },
+            { time: 52, text: "But now that you came into my life I feel complete", translation: "但自從妳走進我的生命 我感到人生完整 " },
+            { time: 57.8, text: "The flowers bloom, my morning shines and I can see", translation: "花兒綻放 晨光閃耀 我終於能看清世界 " },
+            { time: 70, text: "Your love is like the sun that lights up my whole world", translation: "妳的愛像太陽 照亮了我的整個世界 " },
+            { time: 76.3, text: "I feel the warmth inside", translation: "我感受到內心的溫暖 " },
+            { time: 81.9, text: "Your love is like a river that flows down through my veins", translation: "妳的愛像河流 在我的血管裡流淌 " },
+            { time: 88.5, text: "I feel the chill inside", translation: "我感受到內心的悸動 " },
+            { time: 106, text: "I am all alone without you", translation: "沒有妳 我倍感孤獨" },
+            { time: 112, text: "My days are dark without a glimpse of you", translation: "若不見妳的身影 我的日子便一片漆黑 " },
+            { time: 117, text: "But now that you came into my life I feel complete", translation: "但自從妳走進我的生命 我感到人生完整 " },
+            { time: 123, text: "The flowers bloom, my morning shines and I can see", translation: "花兒綻放 晨光閃耀 我終於能看清世界 " },
+            { time: 132, text: "Your love is like the sun that lights up my whole world", translation: "妳的愛像太陽 照亮了我的整個世界 " },
+            { time: 138.8, text: "I feel the warmth inside", translation: "我感受到內心的溫暖 " },
+            { time: 144, text: "Your love is like a river that flows down through my veins", translation: "妳的愛像河流 在我的血管裡流淌 " },
+            { time: 150.5, text: "I feel the chill inside", translation: "我感受到內心的悸動 " },
+            { time: 155.7, text: "(your love...)", translation: " " },
+            { time: 167.2, text: "Your love is like a river that flows down through my veins", translation: "妳的愛像河流 在我的血管裡流淌 " },
+            { time: 179, text: " ", translation: "" },
+            { time: 180, text: " ", translation: "" },
+            { time: 181, text: " ", translation: "" },
+            { time: 182, text: " ", translation: "" },
+            { time: 183, text: " ", translation: "" }          
+        ]
+    },
+    {
+        name: "So Easy",
+        artist: "Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/e2/b2/e0/e2b2e0e3178f8d2d881eaa5163d4ddfc.jpg",
+        src: "s15.mp3",
+        video: "Av_At5PSnFA",
+        lyrics: [
+            { time: 0, text: " ( 前奏 ) ", translation: "" },
+            { time: 7.3, text: "I could be the twist, the one to make you stop", translation: "我可以成為那個讓妳人生轉彎 為我停下腳步的人 " },
+            { time: 10.4, text: "The icing on your cake, the cherry on the top", translation: "像是錦上添花的那一筆 蛋糕上最完美的那顆櫻桃 " },
+            { time: 13.7, text: "It's heaven in my heart, and we could find you some space", translation: "我心裡藏著一片天堂　也願意留給妳一點空間 " },
+            { time: 20.9, text: "I could be the world to you, the missing piece", translation: "我可以成為妳的全世界 妳生命中缺少的那一塊 " },
+            { time: 24, text: "That extra sentimental kind of chemistry", translation: "那種多一點感性 多一點心動的化學反應 " },
+            { time: 27.6, text: "Some people make it hard, with me, that isn't the case", translation: "有些人讓愛變得困難　但跟我在一起一點都不困難 " },
+            { time: 32, text: "'Cause I make it so easy to fall in love", translation: "因為愛上我其實很簡單 " },
+            { time: 38.7, text: "So come give me a call, and we'll fall into us", translation: "打電話給我吧　我和妳可以慢慢變成「我們」 " },
+            { time: 45.5, text: "I'm the perfect mix of Saturday night and the rest of your life", translation: "我是那種既可以讓妳在週六夜晚心動　也能陪妳走過一輩子的人 " },
+            { time: 51, text: "Anyone with a heart would agree", translation: "只要是有心的人都會同意 " },
+            { time: 54.8, text: "It's so easy,To fall in love with", translation: "愛上 一點都不困難" },
+            { time: 60.1, text: "The way I do my hair, the way I make you laugh", translation: "我整理頭髮的樣子 我逗妳笑的方式 " },
+            { time: 63.5, text: "The way we like to share a walk in Central Park", translation: "我們喜歡在中央公園一起散步的那種日常 " },
+            { time: 67.3, text: "I could be fresh air, might be the girl of your dreams", translation: "我可以是讓妳感到自在的那個人　也可能是妳的夢中情人 " },
+            { time: 73.4, text: "There's no need to hide if you're into me", translation: "如果妳喜歡我　真的不用假裝 " },
+            { time: 76.9, text: "'Cause I'm into you quite intimately", translation: "因為我對妳　也不只是朋友那種喜歡 " },
+            { time: 80.2, text: "And maybe one night could turn into three", translation: "也許一個夜晚　會悄悄變成三個 " },
+            { time: 83.5, text: "Well, I'm down to see", translation: "我願意看看　我們會走到哪裡 " },
+            { time: 85.4, text: "'Cause I make it so easy to fall in love", translation: "因為愛上我其實很簡單 " },
+            { time: 92, text: "So come give me a call, and we'll fall into us", translation: "打電話給我吧　我和妳可以慢慢變成「我們」 " },
+            { time: 98.6, text: "I'm the perfect mix of Saturday night and the rest of your life", translation: "我是那種既可以讓妳在週六夜晚心動　也能陪妳走過一輩子的人 " },
+            { time: 104.2, text: "Anyone with a heart would agree", translation: "只要是有心的人都會同意 " },
+            { time: 107.9, text: "It's so easy,To fall in love with me", translation: "愛上我 一點都不困難" },
+            { time: 126.8, text: "It's so easy", translation: "其實很簡單" },
+            { time: 130.3, text: "It's so easy", translation: "其實很簡單" },
+            { time: 133.6, text: "It's so easy", translation: "其實很簡單" },
+            { time: 138.4, text: "'Cause I make it so easy to fall in love", translation: "因為愛上我其實很簡單 " },
+            { time: 145, text: "So come give me a call, and we'll fall into us", translation: "打電話給我吧　我和妳可以慢慢變成「我們」 " },
+            { time: 151.9, text: "I'm the perfect mix of Saturday night and the rest of your life", translation: "我是那種既可以讓妳在週六夜晚心動　也能陪妳走過一輩子的人 " },
+            { time: 157.3, text: "Anyone with a heart would agree", translation: "只要是有心的人都會同意 " },
+            { time: 161, text: "It's so easy,To fall in love with me", translation: "愛上我 一點都不困難" }
+        ]
+    },
+    {
+        name: "昨夜風今宵月",
+        artist: "Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/b9/65/3b/b9653b8829fdd9080d70a18396db53d0.jpg",
+        src: "s16.mp3",
+        video: "Oo_SnRnTjLk",
+        lyrics: [
+            { time: 0, text: " ( 前奏 ) ", translation: "" },
+            { time: 22.9, text: "我不愛 無聊人間", translation: "" },
+            { time: 28, text: "只偏愛 妳眉眼", translation: "" },
+            { time: 33.4, text: "如果妳 也有時間", translation: "" },
+            { time: 38.8, text: "陪我把這 風景看遍", translation: "" },
+            { time: 47.2, text: "想要牽住妳的左手 卻紅了臉", translation: "" },
+            { time: 52.5, text: "想要摟緊妳的左肩 卻又膽怯", translation: "" },
+            { time: 56.7, text: "陪妳走到飛花的街 如何能把故事續寫", translation: "" },
+            { time: 63.2, text: "原諒我太笨 風情不解", translation: "" },
+            { time: 68.2, text: "我不愛 無聊人間", translation: "" },
+            { time: 73.5, text: "只偏愛 妳眉眼", translation: "" },
+            { time: 78.9, text: "如果妳 也有時間", translation: "" },
+            { time: 84.25, text: "陪我把這 風景看遍", translation: "" },
+            { time: 88.55, text: "為妳寫", translation: "" },
+            { time: 89.5, text: "幾頁詩篇 幾行誓言", translation: "" },
+            { time: 92.15, text: "幾個長夜 幾次想念", translation: "" },
+            { time: 95.25, text: "妳的轉身 讓我又失眠", translation: "" },
+            { time: 99.25, text: "為妳寫", translation: "" },
+            { time: 100.25, text: "昨夜的風 今宵的月", translation: "" },
+            { time: 102.8, text: "前世的戀 今生的籤", translation: "" },
+            { time: 105.95, text: "和妳白頭 的那一場雪", translation: "" },
+            { time: 111, text: " ( 間奏 ) ", translation: "" },
+            { time: 132.45, text: "我不愛 無聊人間", translation: "" },
+            { time: 137.5, text: "只偏愛 妳眉眼", translation: "" },
+            { time: 142.9, text: "如果妳 也有時間", translation: "" },
+            { time: 148.2, text: "陪我把這 風景看遍", translation: "" },
+            { time: 152.6, text: "為妳寫", translation: "" },
+            { time: 153.5, text: "幾頁詩篇 幾行誓言", translation: "" },
+            { time: 156.25, text: "幾個長夜 幾次想念", translation: "" },
+            { time: 159.25, text: "妳的轉身 讓我又失眠", translation: "" },
+            { time: 163.3, text: "為妳寫", translation: "" },
+            { time: 164.25, text: "昨夜的風 今宵的月", translation: "" },
+            { time: 166.85, text: "前世的戀 今生的籤", translation: "" },
+            { time: 169.7, text: "和妳白頭 的那一場雪", translation: "" },
+            { time: 176, text: "", translation: "" },
+            { time: 177, text: "", translation: "" },
+            { time: 178, text: "", translation: "" },
+            { time: 179, text: "", translation: "" },
+            { time: 180, text: "", translation: "" },
+        ]
     }
 ];
 const mainContainer = document.querySelector(".main-container"),
@@ -515,98 +806,178 @@ const mainContainer = document.querySelector(".main-container"),
     playPauseIcon = mainContainer.querySelector(".play-pause i"),
     prevBtn = mainContainer.querySelector("#prev"),
     nextBtn = mainContainer.querySelector("#next"),
+    repeatBtn = mainContainer.querySelector("#repeat-plist"),
+    showListBtn = mainContainer.querySelector("#show-list"),
+    closeListBtn = mainContainer.querySelector("#close-list"),
+    musicList = mainContainer.querySelector(".music-list"),
+    ulTag = musicList.querySelector("ul"),
     progressBar = mainContainer.querySelector(".progress-bar"),
     progressArea = mainContainer.querySelector(".progress-area"),
     musicCurrentTime = mainContainer.querySelector(".current"),
     musicDuration = mainContainer.querySelector(".duration"),
     volumeSlider = mainContainer.querySelector("#volume-slider"),
     lyricsWrapper = document.getElementById("lyrics-wrapper"),
-    loadingOverlay = document.getElementById("loading-overlay"); 
+    loadingOverlay = document.getElementById("loading-overlay");
+    ACCESS_PASSWORD = "0619";
 
 let musicIndex = 0;
 let mainAudio = new Audio();
 let isPlaying = false;
+let isRepeat = false;
 let currentLyricIndex = -1;
 let ytPlayer;
 
-var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+function checkPassword() {
+    const input = document.getElementById("password-input").value;
+    const screen = document.getElementById("password-screen");
+    const errorMsg = document.getElementById("password-error");
 
-function onYouTubeIframeAPIReady() {
-    ytPlayer = new YT.Player('player', {
-        videoId: allMusic[musicIndex].video,
-        playerVars: {
-            'autoplay': 1, 'mute': 1, 'controls': 0, 'loop': 0,
-            'playlist': allMusic[musicIndex].video,
-            'playsinline': 1, 'modestbranding': 1, 'rel': 0,
-            'vq': 'hd2160'
-        },
-        events: {
-            'onReady': (e) => {
-                e.target.playVideo();
-                setInterval(() => {
-                    const duration = ytPlayer.getDuration();
-                    const currentTime = ytPlayer.getCurrentTime();
-                    if (duration > 0 && (duration - currentTime) < 0.5) {
-                        ytPlayer.seekTo(0);
-                        ytPlayer.playVideo();
-                    }
-                }, 100);
+    if (input === ACCESS_PASSWORD) {
+        screen.style.transition = "opacity 0.6s ease";
+        screen.style.opacity = "0";
+        setTimeout(() => {
+            screen.style.display = "none";
+        }, 600);
+        sessionStorage.setItem("kj_space_verified", "true");
+    } else {
+        errorMsg.style.display = "block";
+        document.getElementById("password-input").value = "";
+    }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    if (sessionStorage.getItem("kj_verified") === "true") {
+        document.getElementById("password-screen").style.display = "none";
+    }
+});
+
+document.getElementById("password-input").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") checkPassword();
+});
+
+function restoreMusicOrder() {
+    try {
+        const savedOrder = localStorage.getItem("musicPlaylistOrder");
+        if (savedOrder) {
+            const orderArray = JSON.parse(savedOrder);
+            allMusic.sort((a, b) => {
+                let indexA = orderArray.indexOf(a.name);
+                let indexB = orderArray.indexOf(b.name);
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                return indexA - indexB;
+            });
+        }
+    } catch (e) {
+        console.error("讀取播放清單順序失敗:", e);
+    }
+}
+
+function saveMusicOrder() {
+    const orderArray = allMusic.map(music => music.name);
+    localStorage.setItem("musicPlaylistOrder", JSON.stringify(orderArray));
+}
+
+function initList() {
+    restoreMusicOrder();
+    ulTag.innerHTML = "";
+    allMusic.forEach((music, index) => {
+        let liTag = `<li li-index="${index}">
+                        <i class="fas fa-bars drag-handle"></i> 
+                        <div class="row">
+                            <span>${music.name}</span>
+                            <p>${music.artist}</p>
+                        </div>
+                    </li>`;
+        ulTag.insertAdjacentHTML("beforeend", liTag);
+    });
+
+    const allLiTags = ulTag.querySelectorAll("li");
+    allLiTags.forEach(li => {
+        li.addEventListener("click", (e) => {
+            if (e.target.classList.contains('drag-handle')) return;
+            musicIndex = parseInt(li.getAttribute("li-index"));
+            loadMusic(musicIndex);
+            playSong();
+        });
+    });
+
+    if (typeof Sortable !== 'undefined') {
+        new Sortable(ulTag, {
+            handle: '.drag-handle',
+            animation: 150,
+            delay: 150,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 5,
+            onEnd: function (evt) {
+                const currentPlayingName = allMusic[musicIndex].name;
+                const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
+                allMusic.splice(evt.newIndex, 0, movedItem);
+                const liTags = ulTag.querySelectorAll("li");
+                liTags.forEach((li, index) => li.setAttribute("li-index", index));
+                musicIndex = allMusic.findIndex(music => music.name === currentPlayingName);
+                playingNow();
+                saveMusicOrder();
             },
-            'onStateChange': (e) => {
-                if (e.data === YT.PlayerState.ENDED) {
-                    ytPlayer.seekTo(0);
-                    ytPlayer.playVideo();
-                }
-            }
+        });
+    }
+}
+
+function playingNow() {
+    const allLiTags = ulTag.querySelectorAll("li");
+    allLiTags.forEach(li => {
+        if (parseInt(li.getAttribute("li-index")) === musicIndex) {
+            li.classList.add("playing");
+        } else {
+            li.classList.remove("playing");
         }
     });
 }
 
 function loadMusic(index) {
-    loadingOverlay.style.display = "flex"; 
+    loadingOverlay.style.display = "flex";
+    musicImg.style.opacity = "0.3"; 
+    
     const music = allMusic[index];
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
+    
     mainAudio.src = music.src;
     mainAudio.load();
 
+    mainAudio.oncanplaythrough = () => {
+        loadingOverlay.style.display = "none";
+        musicImg.style.opacity = "1";
+    };
+
+    mainAudio.onwaiting = () => {
+        loadingOverlay.style.display = "flex";
+    };
+
     if (ytPlayer && ytPlayer.loadVideoById) {
-        ytPlayer.loadVideoById({
-            videoId: music.video,
-            playlist: music.video,
-            startSeconds: 0
-        });
+        ytPlayer.loadVideoById({ videoId: music.video, playlist: music.video });
     }
+    
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
+    playingNow();
+    updateMediaSession();
 }
-
-mainAudio.addEventListener("waiting", () => {
-    loadingOverlay.style.display = "flex"; 
-});
-
-mainAudio.addEventListener("playing", () => {
-    loadingOverlay.style.display = "none"; 
-});
-
-mainAudio.addEventListener("canplay", () => {
-    loadingOverlay.style.display = "none"; 
-});
 
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
-    mainAudio.play();
+    mainAudio.play().then(syncPlaybackState).catch(() => {
+        console.log("Waiting for user interaction");
+    });
 }
 
 function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
     mainAudio.pause();
+    syncPlaybackState();
 }
 
 function nextMusic() {
@@ -621,63 +992,111 @@ function prevMusic() {
     playSong();
 }
 
-playPauseBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    isPlaying ? pauseSong() : playSong();
-});
+function updateMediaSession() {
+    if ('mediaSession' in navigator) {
+        const music = allMusic[musicIndex];
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: music.name,
+            artist: music.artist,
+            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+        });
 
-nextBtn.addEventListener("click", () => nextMusic());
-prevBtn.addEventListener("click", () => prevMusic());
+        navigator.mediaSession.setActionHandler('play', playSong);
+        navigator.mediaSession.setActionHandler('pause', pauseSong);
+        navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
+        navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
+        
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            mainAudio.currentTime = details.seekTime;
+        });
+    }
+}
 
-volumeSlider.addEventListener("input", (e) => {
-    mainAudio.volume = e.target.value;
-});
-
-mainAudio.addEventListener("ended", () => nextMusic());
+function syncPlaybackState() {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+        if (!isNaN(mainAudio.duration)) {
+            navigator.mediaSession.setPositionState({
+                duration: mainAudio.duration,
+                playbackRate: mainAudio.playbackRate,
+                position: mainAudio.currentTime
+            });
+        }
+    }
+}
 
 mainAudio.addEventListener("timeupdate", (e) => {
     const currentTime = e.target.currentTime;
     const duration = e.target.duration;
-
     if (duration) {
         let progressWidth = (currentTime / duration) * 100;
         progressBar.style.width = `${progressWidth}%`;
-
+        
         let curMin = Math.floor(currentTime / 60);
         let curSec = Math.floor(currentTime % 60);
         musicCurrentTime.innerText = `${curMin}:${curSec < 10 ? '0' + curSec : curSec}`;
-
+        
         let durMin = Math.floor(duration / 60);
         let durSec = Math.floor(duration % 60);
         musicDuration.innerText = `${durMin}:${durSec < 10 ? '0' + durSec : durSec}`;
-
+        
         updateLyrics(currentTime);
-
-        if ((currentTime / duration) > 0.5) {
-            let nextIndex = (musicIndex + 1) % allMusic.length;
-            let preloadTag = document.getElementById('audio-preloader');
-            if (!preloadTag) {
-                preloadTag = document.createElement('audio');
-                preloadTag.id = 'audio-preloader';
-                preloadTag.style.display = 'none';
-                document.body.appendChild(preloadTag);
-            }
-            if (preloadTag.src !== window.location.origin + '/' + allMusic[nextIndex].src &&
-                preloadTag.getAttribute('data-index') !== String(nextIndex)) {
-                preloadTag.src = allMusic[nextIndex].src;
-                preloadTag.setAttribute('data-index', String(nextIndex));
-                preloadTag.preload = "auto";
-                preloadTag.load();
-            }
-        }
+        if (Math.floor(currentTime) % 2 === 0) syncPlaybackState();
     }
 });
 
 progressArea.addEventListener("click", (e) => {
-    let progressWidth = progressArea.clientWidth;
-    let clickedOffsetX = e.offsetX;
-    mainAudio.currentTime = (clickedOffsetX / progressWidth) * mainAudio.duration;
+    mainAudio.currentTime = (e.offsetX / progressArea.clientWidth) * mainAudio.duration;
     playSong();
+});
+
+playPauseBtn.addEventListener("click", () => isPlaying ? pauseSong() : playSong());
+nextBtn.addEventListener("click", nextMusic);
+prevBtn.addEventListener("click", prevMusic);
+
+repeatBtn.addEventListener("click", () => {
+    isRepeat = !isRepeat;
+    repeatBtn.classList.toggle("active");
+});
+
+showListBtn.addEventListener("click", () => musicList.classList.toggle("show"));
+closeListBtn.addEventListener("click", () => musicList.classList.remove("show"));
+
+mainAudio.addEventListener("ended", () => isRepeat ? (mainAudio.currentTime = 0, playSong()) : nextMusic());
+
+volumeSlider.addEventListener("input", (e) => {
+    const vol = e.target.value;
+    mainAudio.volume = vol;
+    if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(vol * 100);
+});
+
+window.addEventListener("keydown", (e) => {
+    const keysToBlock = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (keysToBlock.includes(e.code)) e.preventDefault();
+
+    switch (e.code) {
+        case "Space": 
+            isPlaying ? pauseSong() : playSong();
+            break;
+        case "ArrowLeft": 
+            mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 5);
+            break;
+        case "ArrowRight": 
+            mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 5);
+            break;
+        case "ArrowUp": 
+            volumeSlider.value = Math.min(1, parseFloat(volumeSlider.value) + 0.05);
+            volumeSlider.dispatchEvent(new Event('input'));
+            break;
+        case "ArrowDown": 
+            volumeSlider.value = Math.max(0, parseFloat(volumeSlider.value) - 0.05);
+            volumeSlider.dispatchEvent(new Event('input'));
+            break;
+        case "Digit1": 
+        case "Numpad1":
+            repeatBtn.click();
+            break;
+    }
 });
 
 function displayLyrics(lyrics) {
@@ -696,15 +1115,13 @@ function updateLyrics(currentTime) {
     for (let i = 0; i < lyrics.length; i++) {
         if (currentTime >= lyrics[i].time) activeIndex = i;
     }
-
     if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
         currentLyricIndex = activeIndex;
         const lines = document.querySelectorAll(".lyric-line");
-        const activeLine = lines[activeIndex];
         lines.forEach((line, index) => {
             if (index === activeIndex) {
                 line.classList.add("active");
-                const offset = 170 - activeLine.offsetTop;
+                const offset = 170 - line.offsetTop;
                 lyricsWrapper.style.transform = `translateY(${offset}px)`;
             } else {
                 line.classList.remove("active");
@@ -713,34 +1130,55 @@ function updateLyrics(currentTime) {
     }
 }
 
-window.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-        e.preventDefault();
-        isPlaying ? pauseSong() : playSong();
-    }
-    else if (e.code === "ArrowLeft") {
-        mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 5);
-        currentLyricIndex = -1;
-    }
-    else if (e.code === "ArrowRight") {
-        mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 5);
-        currentLyricIndex = -1;
-    }
-    else if (e.code === "ArrowUp") {
-        e.preventDefault();
-        mainAudio.volume = Math.min(1, mainAudio.volume + 0.05);
-        volumeSlider.value = mainAudio.volume;
-    }
-    else if (e.code === "ArrowDown") {
-        e.preventDefault();
-        mainAudio.volume = Math.max(0, mainAudio.volume - 0.05);
-        volumeSlider.value = mainAudio.volume;
-    }
+window.addEventListener("load", () => {
+    initList();
+    loadMusic(musicIndex);
+    mainAudio.volume = volumeSlider.value;
 });
 
-window.addEventListener("load", () => {
-    loadMusic(musicIndex);
-    document.body.addEventListener('click', () => {
-        if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
-    }, { once: true });
-});
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('player', {
+        videoId: allMusic[musicIndex].video,
+        playerVars: { 
+            'autoplay': 1, 
+            'mute': 1, 
+            'controls': 0, 
+            'playsinline': 1,
+            'rel': 0,
+            'showinfo': 0,
+            'modestbranding': 1,
+            'iv_load_policy': 3 
+        },
+        events: {
+            'onReady': (e) => e.target.playVideo(),
+            'onStateChange': onPlayerStateChange 
+        }
+    });
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        const duration = ytPlayer.getDuration();
+        const checkLoop = setInterval(() => {
+            if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+                clearInterval(checkLoop);
+                return;
+            }
+            const currentTime = ytPlayer.getCurrentTime();
+            if (currentTime > duration - 0.2) {
+                ytPlayer.seekTo(0);
+                ytPlayer.playVideo();
+            }
+        }, 100);
+    }
+    
+    if (event.data === YT.PlayerState.ENDED) {
+        ytPlayer.seekTo(0); 
+        ytPlayer.playVideo();
+    }
+}
