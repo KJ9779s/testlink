@@ -999,7 +999,7 @@ function initList() {
         new Sortable(ulTag, {
             handle: '.drag-handle',
             animation: 150,
-            delay: 150,
+            delay: 100,
             delayOnTouchOnly: true,
             touchStartThreshold: 8,
             onEnd: function (evt) {
@@ -1061,8 +1061,11 @@ function loadMusic(index) {
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
-    mainAudio.play().then(syncPlaybackState).catch(() => {
-        console.log("Waiting for user interaction");
+    mainAudio.play().then(() => {
+        syncPlaybackState();
+        updateMediaSession(); // 每次播放都確保控制權拿回來
+    }).catch(error => {
+        console.error("Playback failed:", error);
     });
 }
 
@@ -1091,20 +1094,21 @@ function updateMediaSession() {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: music.name,
             artist: music.artist,
-            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+            artwork: [
+                { src: music.img, sizes: '96x96', type: 'image/jpeg' },
+                { src: music.img, sizes: '128x128', type: 'image/jpeg' },
+                { src: music.img, sizes: '256x256', type: 'image/jpeg' },
+                { src: music.img, sizes: '512x512', type: 'image/jpeg' }
+            ]
         });
 
-        navigator.mediaSession.setActionHandler('play', playSong);
-        navigator.mediaSession.setActionHandler('pause', pauseSong);
-        navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
-        navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
-        
-        navigator.mediaSession.setActionHandler('seekto', (details) => {
-            mainAudio.currentTime = details.seekTime;
-        });
+        // 確保 handler 重新綁定
+        navigator.mediaSession.setActionHandler('play', () => playSong());
+        navigator.mediaSession.setActionHandler('pause', () => pauseSong());
+        navigator.mediaSession.setActionHandler('previoustrack', () => prevMusic());
+        navigator.mediaSession.setActionHandler('nexttrack', () => nextMusic());
     }
 }
-
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
@@ -1275,3 +1279,9 @@ function onPlayerStateChange(event) {
         ytPlayer.playVideo();
     }
 }
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        syncPlaybackState(); 
+        playingNow();      
+    }
+});
