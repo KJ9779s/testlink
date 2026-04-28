@@ -1062,15 +1062,16 @@ function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
     
-    // 每次播放都重新執行權限宣告
     mainAudio.play().then(() => {
-        updateMediaSession(); // 播放成功立即重新宣告控制中心
-        syncPlaybackState();  // 播放成功立即宣告狀態
+
+        setTimeout(() => {
+            updateMediaSession();
+            syncPlaybackState();
+        }, 100);
     }).catch((e) => {
-        console.log("播放攔截修復中...", e);
+        console.log("等待用戶交互中...", e);
     });
-}
-function pauseSong() {
+}function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
     mainAudio.pause();
@@ -1100,27 +1101,18 @@ function updateMediaSession() {
             ]
         });
 
-        // 強制綁定處理程序
-        const handlers = {
-            'play': playSong,
-            'pause': pauseSong,
-            'previoustrack': prevMusic,
-            'nexttrack': nextMusic
-        };
 
-        // 使用循環確保所有 handler 都被正確賦值，並明確停用快進/快退鍵
-        Object.keys(handlers).forEach(action => {
-            try {
-                navigator.mediaSession.setActionHandler(action, handlers[action]);
-            } catch (error) {
-                console.log(`Action ${action} not supported.`);
-            }
-        });
+        navigator.mediaSession.setActionHandler('play', playSong);
+        navigator.mediaSession.setActionHandler('pause', pauseSong);
+        navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
+        navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
 
-        // 重點：這兩行能強制覆蓋掉系統預設的 ±10 秒按鍵，使其變回上下首
+
         navigator.mediaSession.setActionHandler('seekbackward', null);
         navigator.mediaSession.setActionHandler('seekforward', null);
-        
+
+        try { navigator.mediaSession.setActionHandler('skipad', null); } catch (e) {}
+
         navigator.mediaSession.setActionHandler('seekto', (details) => {
             mainAudio.currentTime = details.seekTime;
         });
@@ -1292,23 +1284,43 @@ function onPlayerStateChange(event) {
     }
     
     if (event.data === YT.PlayerState.ENDED) {
-        ytPlayer.seekTo(0); 
+        ytPlayer.seekTo(0);
         ytPlayer.playVideo();
     }
-
-    mainAudio.addEventListener("play", () => {
-        updateMediaSession();
-        syncPlaybackState();
-    });
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-            if (isPlaying && mainAudio.paused) {
-            // 如果邏輯上應該正在播放但音訊被系統暫停了，嘗試自動恢復
-                mainAudio.play().catch(() => {});
-            }
-            updateMediaSession();
-            syncPlaybackState();
-            playingNow();
-        }
-    });
 }
+
+
+const forceRefreshSession = () => {
+    updateMediaSession();
+    syncPlaybackState();
+};
+
+mainAudio.addEventListener("play", () => {
+    setTimeout(forceRefreshSession, 150);
+});
+
+mainAudio.addEventListener("playing", forceRefreshSession);
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        forceRefreshSession();
+        playingNow();
+        
+        if (isPlaying && mainAudio.paused) {
+            mainAudio.play().catch(() => {
+                console.log("背景恢復播放失敗，可能需要使用者點擊");
+            });
+        }
+    }
+});
+
+if ('mediaSession' in navigator) {
+    mainAudio.onpause = () => syncPlaybackState();
+    mainAudio.onplay = () => syncPlaybackState();
+}
+
+window.addEventListener("load", () => {
+    initList();
+    loadMusic(musicIndex);
+    mainAudio.volume = volumeSlider.value;
+});
