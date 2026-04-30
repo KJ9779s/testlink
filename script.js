@@ -1152,10 +1152,18 @@ function updateMediaSession() {
             artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
 
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            prevMusic();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            nextMusic();
+        });
+
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekforward', null);
+
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
-        navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
-        navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
         
         navigator.mediaSession.setActionHandler('seekto', (details) => {
             mainAudio.currentTime = details.seekTime;
@@ -1165,7 +1173,10 @@ function updateMediaSession() {
 
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
+        // 更新播放狀態
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+        
+        // 確保進度同步，這是維持背景控制權的關鍵
         if (!isNaN(mainAudio.duration)) {
             navigator.mediaSession.setPositionState({
                 duration: mainAudio.duration,
@@ -1192,7 +1203,11 @@ mainAudio.addEventListener("timeupdate", (e) => {
         musicDuration.innerText = `${durMin}:${durSec < 10 ? '0' + durSec : durSec}`;
         
         updateLyrics(currentTime);
-        if (Math.floor(currentTime) % 2 === 0) syncPlaybackState();
+
+        // 關鍵：每秒更新一次 MediaSession 狀態，防止手機鎖屏後控制權丟失
+        if (Math.floor(currentTime) % 1 === 0) { 
+            syncPlaybackState();
+        }
     }
 });
 
