@@ -889,6 +889,64 @@
             { time: 90, text: "如果我能給妳短暫的開心", translation: "" }
            
         ]
+    },
+    {
+        name: "只是太愛妳",
+        artist: "Janeeyeh Methika",
+        img: "https://i.pinimg.com/736x/42/11/a0/4211a09995e8d1dc387fc926ceb4bdc5.jpg",
+        src: "s19.mp3",
+        video: "bWkWBZFUnHE",
+        lyrics: [
+            { time: 0, text: "( 前奏 )", translation: "" },
+            { time: 12, text: "原諒我真的喝醉了", translation: "" },
+            { time: 15.70, text: "因為我真的想妳了", translation: "" },
+            { time: 19.4, text: "一不小心就被寂寞", translation: "" },
+            { time: 22.4, text: "吞噬了愛着妳的快樂", translation: "" },
+            { time: 26.75, text: "我知道這樣不應該", translation: "" },
+            { time: 30.4, text: "也知道妳會受傷害", translation: "" },
+            { time: 34.1, text: "只是不想再讓自己", translation: "" },
+            { time: 37.25, text: "對妳太過依賴", translation: "" },
+            { time: 41.1, text: "我明白妳給的愛是真實地存在", translation: "" },
+            { time: 48.45, text: "只是我不懂得如何去愛", translation: "" },
+            { time: 53.75, text: "才會讓妳想離開", translation: "" },
+            { time: 62, text: "因為我不知道", translation: "" },
+            { time: 64.5, text: "下一輩子還是否能遇見妳", translation: "" },
+            { time: 69.15, text: "所以我今生才會", translation: "" },
+            { time: 72.45, text: "那麼努力把最好的給妳", translation: "" },
+            { time: 77.5, text: "愛妳都變成傷害妳", translation: "" },
+            { time: 81.25, text: "我們的愛快要窒息", translation: "" },
+            { time: 85.15, text: "不是故意 只是太愛妳", translation: "" },
+            { time: 91, text: "( 間奏 )", translation: "" },
+            { time: 104.25, text: "原諒我真的喝醉了", translation: "" },
+            { time: 108, text: "因為我真的想妳了", translation: "" },
+            { time: 111.75, text: "一不小心就被寂寞", translation: "" },
+            { time: 114.75, text: "吞噬了愛着妳的快樂", translation: "" },
+            { time: 119.2, text: "我知道這樣不應該", translation: "" },
+            { time: 122.75, text: "也知道妳會受傷害", translation: "" },
+            { time: 126.5, text: "只是不想再讓自己", translation: "" },
+            { time: 129.5, text: "對妳太過依賴", translation: "" }, 
+            { time: 133.45, text: "我明白妳給的愛是真實地存在", translation: "" },
+            { time: 140.75, text: "只是我不懂得如何去愛", translation: "" },
+            { time: 146, text: "才會讓妳想離開", translation: "" },
+            { time: 154.25, text: "因為我不知道", translation: "" },
+            { time: 156.6, text: "下一輩子還是否能遇見妳", translation: "" },
+            { time: 161.45, text: "所以我今生才會", translation: "" },
+            { time: 164.75, text: "那麼努力把最好的給妳", translation: "" },
+            { time: 169.8, text: "愛妳都變成傷害妳", translation: "" },
+            { time: 173.5, text: "我們的愛快要窒息", translation: "" },
+            { time: 177.5, text: "不是故意 只是太愛妳", translation: "" },
+            { time: 183.75, text: "因為我不知道", translation: "" },
+            { time: 186.45, text: "下一輩子還是否能遇見妳", translation: "" },
+            { time: 191, text: "所以我今生才會", translation: "" },
+            { time: 194.25, text: "那麼努力把最好的給妳", translation: "" },
+            { time: 199.35, text: "愛妳都變成傷害妳", translation: "" },
+            { time: 203, text: "我們的愛快要窒息", translation: "" },
+            { time: 207, text: "不是故意 只是太愛妳", translation: "" },
+            { time: 217.75, text: "", translation: "" },
+            { time: 218.75, text: "", translation: "" },
+            { time: 219.75, text: "", translation: "" },
+            { time: 220.75, text: "", translation: "" },
+        ]
     }
 ];
 const mainContainer = document.querySelector(".main-container"),
@@ -999,9 +1057,9 @@ function initList() {
         new Sortable(ulTag, {
             handle: '.drag-handle',
             animation: 150,
-            delay: 100,
+            delay: 150,
             delayOnTouchOnly: true,
-            touchStartThreshold: 8,
+            touchStartThreshold: 5,
             onEnd: function (evt) {
                 const currentPlayingName = allMusic[musicIndex].name;
                 const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
@@ -1061,17 +1119,12 @@ function loadMusic(index) {
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
-    
-    mainAudio.play().then(() => {
-
-        setTimeout(() => {
-            updateMediaSession();
-            syncPlaybackState();
-        }, 100);
-    }).catch((e) => {
-        console.log("等待用戶交互中...", e);
+    mainAudio.play().then(syncPlaybackState).catch(() => {
+        console.log("Waiting for user interaction");
     });
-}function pauseSong() {
+}
+
+function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
     mainAudio.pause();
@@ -1096,28 +1149,20 @@ function updateMediaSession() {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: music.name,
             artist: music.artist,
-            artwork: [
-                { src: music.img, sizes: '512x512', type: 'image/jpeg' }
-            ]
+            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
-
 
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
-
-
-        navigator.mediaSession.setActionHandler('seekbackward', null);
-        navigator.mediaSession.setActionHandler('seekforward', null);
-
-        try { navigator.mediaSession.setActionHandler('skipad', null); } catch (e) {}
-
+        
         navigator.mediaSession.setActionHandler('seekto', (details) => {
             mainAudio.currentTime = details.seekTime;
         });
     }
 }
+
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
@@ -1284,43 +1329,7 @@ function onPlayerStateChange(event) {
     }
     
     if (event.data === YT.PlayerState.ENDED) {
-        ytPlayer.seekTo(0);
+        ytPlayer.seekTo(0); 
         ytPlayer.playVideo();
     }
 }
-
-
-const forceRefreshSession = () => {
-    updateMediaSession();
-    syncPlaybackState();
-};
-
-mainAudio.addEventListener("play", () => {
-    setTimeout(forceRefreshSession, 150);
-});
-
-mainAudio.addEventListener("playing", forceRefreshSession);
-
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        forceRefreshSession();
-        playingNow();
-        
-        if (isPlaying && mainAudio.paused) {
-            mainAudio.play().catch(() => {
-                console.log("背景恢復播放失敗，可能需要使用者點擊");
-            });
-        }
-    }
-});
-
-if ('mediaSession' in navigator) {
-    mainAudio.onpause = () => syncPlaybackState();
-    mainAudio.onplay = () => syncPlaybackState();
-}
-
-window.addEventListener("load", () => {
-    initList();
-    loadMusic(musicIndex);
-    mainAudio.volume = volumeSlider.value;
-});
