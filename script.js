@@ -1120,8 +1120,11 @@ function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
     
-    // 播放時強制重新宣告 MediaSession 以覆蓋系統預設
+    // 雙重保險：確保 MediaSession 狀態被激活
     updateMediaSession(); 
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = "playing";
+    }
 
     mainAudio.play().then(syncPlaybackState).catch(() => {
         console.log("Waiting for user interaction");
@@ -1326,6 +1329,15 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
+        // 核心修正 1：當 YouTube 開始播放時，強制「奪回」MediaSession 控制權
+        // 使用 setTimeout 確保在 YouTube API 完成初始化後才覆蓋它
+        setTimeout(() => {
+            updateMediaSession();
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "playing";
+            }
+        }, 800); 
+
         const duration = ytPlayer.getDuration();
         const checkLoop = setInterval(() => {
             if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
@@ -1340,8 +1352,17 @@ function onPlayerStateChange(event) {
         }, 100);
     }
     
+    // 核心修正 2：確保 YouTube 暫停或結束時，MediaSession 狀態依然同步
+    if (event.data === YT.PlayerState.PAUSED) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = "paused";
+        }
+    }
+
     if (event.data === YT.PlayerState.ENDED) {
         ytPlayer.seekTo(0); 
         ytPlayer.playVideo();
+        // 確保循環播放時 MediaSession 不會被重置
+        updateMediaSession();
     }
 }
