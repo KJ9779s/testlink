@@ -1119,14 +1119,8 @@ function loadMusic(index) {
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
-    
-    // 每次播放都重新整理 MediaSession 狀態，防止被系統回收[cite: 2]
-    updateMediaSession(); 
-    
-    mainAudio.play().then(() => {
-        syncPlaybackState();
-    }).catch((e) => {
-        console.log("Playback failed:", e);
+    mainAudio.play().then(syncPlaybackState).catch(() => {
+        console.log("Waiting for user interaction");
     });
 }
 
@@ -1152,52 +1146,33 @@ function prevMusic() {
 function updateMediaSession() {
     if ('mediaSession' in navigator) {
         const music = allMusic[musicIndex];
-        
-        // 設定歌曲資訊
         navigator.mediaSession.metadata = new MediaMetadata({
             title: music.name,
             artist: music.artist,
-            artwork: [
-                { src: music.img, sizes: '96x96',   type: 'image/jpeg' },
-                { src: music.img, sizes: '128x128', type: 'image/jpeg' },
-                { src: music.img, sizes: '192x192', type: 'image/jpeg' },
-                { src: music.img, sizes: '256x256', type: 'image/jpeg' },
-                { src: music.img, sizes: '384x384', type: 'image/jpeg' },
-                { src: music.img, sizes: '512x512', type: 'image/jpeg' },
-            ]
+            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        // 強制開啟上下首按鍵處理
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-            prevMusic();
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            nextMusic();
-        });
-
-        // 徹底刪除上下 10 秒按鍵
+        // 核心設定：確保只啟用 play, pause, previoustrack, nexttrack
+        // 這樣手機系統會因為沒有 seekbackward/seekforward 的處理器而自動隱藏跳轉按鈕
+        navigator.mediaSession.setActionHandler('play', playSong);
+        navigator.mediaSession.setActionHandler('pause', pauseSong);
+        navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
+        navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
+        
+        // 移除或註釋掉以下兩個處理器，可以完全防止手機控制中心出現快進退按鈕
         navigator.mediaSession.setActionHandler('seekbackward', null);
         navigator.mediaSession.setActionHandler('seekforward', null);
 
-        // 基礎控制
-        navigator.mediaSession.setActionHandler('play', playSong);
-        navigator.mediaSession.setActionHandler('pause', pauseSong);
-        
-        // 確保進度條同步[cite: 2]
+        // 保留進度條拖動功能（不影響上下首按鍵顯示）
         navigator.mediaSession.setActionHandler('seekto', (details) => {
-            if (details.seekTime) {
-                mainAudio.currentTime = details.seekTime;
-            }
+            mainAudio.currentTime = details.seekTime;
         });
     }
 }
 
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
-        // 更新播放狀態
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-        
-        // 確保進度同步，這是維持背景控制權的關鍵
         if (!isNaN(mainAudio.duration)) {
             navigator.mediaSession.setPositionState({
                 duration: mainAudio.duration,
@@ -1224,11 +1199,7 @@ mainAudio.addEventListener("timeupdate", (e) => {
         musicDuration.innerText = `${durMin}:${durSec < 10 ? '0' + durSec : durSec}`;
         
         updateLyrics(currentTime);
-
-        // 關鍵：每秒更新一次 MediaSession 狀態，防止手機鎖屏後控制權丟失
-        if (Math.floor(currentTime) % 1 === 0) { 
-            syncPlaybackState();
-        }
+        if (Math.floor(currentTime) % 2 === 0) syncPlaybackState();
     }
 });
 
@@ -1369,9 +1340,3 @@ function onPlayerStateChange(event) {
         ytPlayer.playVideo();
     }
 }
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && isPlaying) {
-        updateMediaSession();
-        syncPlaybackState();
-    }
-});
