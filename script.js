@@ -1119,8 +1119,14 @@ function loadMusic(index) {
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
-    mainAudio.play().then(syncPlaybackState).catch(() => {
-        console.log("Waiting for user interaction");
+    
+    // 每次播放都重新整理 MediaSession 狀態，防止被系統回收[cite: 2]
+    updateMediaSession(); 
+    
+    mainAudio.play().then(() => {
+        syncPlaybackState();
+    }).catch((e) => {
+        console.log("Playback failed:", e);
     });
 }
 
@@ -1146,12 +1152,22 @@ function prevMusic() {
 function updateMediaSession() {
     if ('mediaSession' in navigator) {
         const music = allMusic[musicIndex];
+        
+        // 設定歌曲資訊
         navigator.mediaSession.metadata = new MediaMetadata({
             title: music.name,
             artist: music.artist,
-            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+            artwork: [
+                { src: music.img, sizes: '96x96',   type: 'image/jpeg' },
+                { src: music.img, sizes: '128x128', type: 'image/jpeg' },
+                { src: music.img, sizes: '192x192', type: 'image/jpeg' },
+                { src: music.img, sizes: '256x256', type: 'image/jpeg' },
+                { src: music.img, sizes: '384x384', type: 'image/jpeg' },
+                { src: music.img, sizes: '512x512', type: 'image/jpeg' },
+            ]
         });
 
+        // 強制開啟上下首按鍵處理
         navigator.mediaSession.setActionHandler('previoustrack', () => {
             prevMusic();
         });
@@ -1159,14 +1175,19 @@ function updateMediaSession() {
             nextMusic();
         });
 
+        // 徹底刪除上下 10 秒按鍵
         navigator.mediaSession.setActionHandler('seekbackward', null);
         navigator.mediaSession.setActionHandler('seekforward', null);
 
+        // 基礎控制
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         
+        // 確保進度條同步[cite: 2]
         navigator.mediaSession.setActionHandler('seekto', (details) => {
-            mainAudio.currentTime = details.seekTime;
+            if (details.seekTime) {
+                mainAudio.currentTime = details.seekTime;
+            }
         });
     }
 }
@@ -1348,3 +1369,9 @@ function onPlayerStateChange(event) {
         ytPlayer.playVideo();
     }
 }
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && isPlaying) {
+        updateMediaSession();
+        syncPlaybackState();
+    }
+});
