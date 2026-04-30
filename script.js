@@ -1119,11 +1119,14 @@ function loadMusic(index) {
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
+    
+    // 播放時強制重新宣告 MediaSession 以覆蓋系統預設
+    updateMediaSession(); 
+
     mainAudio.play().then(syncPlaybackState).catch(() => {
         console.log("Waiting for user interaction");
     });
 }
-
 function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
