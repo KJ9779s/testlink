@@ -1057,7 +1057,7 @@ function initList() {
         new Sortable(ulTag, {
             handle: '.drag-handle',
             animation: 150,
-            delay: 150,
+            delay: 90,
             delayOnTouchOnly: true,
             touchStartThreshold: 5,
             onEnd: function (evt) {
