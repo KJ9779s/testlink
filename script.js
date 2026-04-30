@@ -1152,18 +1152,19 @@ function updateMediaSession() {
             artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        // 核心設定：確保只啟用 play, pause, previoustrack, nexttrack
-        // 這樣手機系統會因為沒有 seekbackward/seekforward 的處理器而自動隱藏跳轉按鈕
+        // 1. 強制指定必須顯示的功能
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
         
-        // 移除或註釋掉以下兩個處理器，可以完全防止手機控制中心出現快進退按鈕
+        // 2. 關鍵：將跳轉處理器明確設為 null
+        // 這樣 iOS/Android 的控制中心會因為找不到處理器而隱藏「上下10秒」按鈕
         navigator.mediaSession.setActionHandler('seekbackward', null);
         navigator.mediaSession.setActionHandler('seekforward', null);
-
-        // 保留進度條拖動功能（不影響上下首按鍵顯示）
+        
+        // 3. 可選：如果您想完全排除跳轉按鈕，可以連這行也刪除或設為 null
+        // 但保留 seekto 通常是為了讓使用者可以滑動鎖定畫面的進度條
         navigator.mediaSession.setActionHandler('seekto', (details) => {
             mainAudio.currentTime = details.seekTime;
         });
@@ -1173,7 +1174,8 @@ function updateMediaSession() {
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-        if (!isNaN(mainAudio.duration)) {
+        // 確保 duration 是有效數值
+        if (!isNaN(mainAudio.duration) && mainAudio.duration > 0) {
             navigator.mediaSession.setPositionState({
                 duration: mainAudio.duration,
                 playbackRate: mainAudio.playbackRate,
