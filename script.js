@@ -1107,12 +1107,16 @@ function loadMusic(index) {
     };
 
     if (ytPlayer && ytPlayer.loadVideoById) {
-        ytPlayer.loadVideoById({ videoId: music.video });
+        ytPlayer.loadVideoById({ 
+            videoId: music.video,
+            playlist: music.video 
+        });
     }
     
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
+
     setTimeout(() => {
         updateMediaSession();
     }, 300);
@@ -1310,6 +1314,7 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+// 尋找 script.js 中的 onYouTubeIframeAPIReady() 並替換：
 function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('player', {
         videoId: allMusic[musicIndex].video,
@@ -1321,7 +1326,10 @@ function onYouTubeIframeAPIReady() {
             'rel': 0,
             'showinfo': 0,
             'modestbranding': 1,
-            'iv_load_policy': 3 
+            'iv_load_policy': 3,
+            // ---- 以下為治本新增的參數 ----
+            'loop': 1,                                  // 啟用官方硬體循環
+            'playlist': allMusic[musicIndex].video      // 必須指定 playlist 官方循環才會生效
         },
         events: {
             'onReady': (e) => e.target.playVideo(),
@@ -1331,16 +1339,6 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerStateChange(event) {
-    const playerElement = document.getElementById('player');
-
-    // 核心優化：只有在真正「播放中」才顯示影片，其餘狀態（加載中、緩衝中、結束時）一律淡出隱藏
-    if (event.data === YT.PlayerState.PLAYING) {
-        if (playerElement) playerElement.style.opacity = "1"; // 淡入，此時暫停鍵和黑線已經消失了
-    } else {
-        if (playerElement) playerElement.style.opacity = "0"; // 淡出，遮住緩衝、重播、暫停時的醜畫面
-    }
-
-    // 保持我們之前的 MediaSession 奪回機制
     if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
         updateMediaSession();
         if ('mediaSession' in navigator) {
@@ -1352,9 +1350,8 @@ function onPlayerStateChange(event) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = "playing";
             }
-        }, 800);
+        }, 800); 
 
-        // 循環播放邏輯
         if (event.data === YT.PlayerState.PLAYING) {
             const duration = ytPlayer.getDuration();
             if (!window.ytLoopInterval) {
@@ -1366,12 +1363,9 @@ function onPlayerStateChange(event) {
                     }
                     const currentTime = ytPlayer.getCurrentTime();
                     
-                    // 當影片快結束時（倒數 0.3 秒），先主動讓它淡出，再執行重播
-                    if (currentTime > duration - 0.3) {
-                        if (playerElement) playerElement.style.opacity = "0"; 
-                    }
-                    
-                    if (currentTime > duration - 0.1) {
+                    // 治本關鍵：將原本的 duration - 0.2 提前到 0.5 秒
+                    // 在 YouTube 核心還沒反應過來要結束、要彈出暫停 UI 之前，網頁就強制拉回 0 秒
+                    if (currentTime > duration - 0.5) {
                         ytPlayer.seekTo(0);
                         ytPlayer.playVideo();
                     }
@@ -1387,7 +1381,6 @@ function onPlayerStateChange(event) {
     }
 
     if (event.data === YT.PlayerState.ENDED) {
-        if (playerElement) playerElement.style.opacity = "0";
         ytPlayer.seekTo(0); 
         ytPlayer.playVideo();
         updateMediaSession();
