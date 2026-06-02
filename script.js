@@ -1450,37 +1450,30 @@ if (pipBtn) {
                 return;
             }
 
-            // 1. 先現場繪製一次歌詞
+            // 1. 現場重繪歌詞畫布
             renderCanvasLyrics();
             
-            // 2. 建立或更新串流
+            // 2. 確保串流存在
             if (!canvasStream) {
                 canvasStream = lyricCanvas.captureStream(10);
             }
             
-            // 3. 現場直接灌入訊號源
+            // 3. 灌入訊號源並強制加載
             pipVideo.srcObject = canvasStream;
+            pipVideo.load();
 
-            // 4. 【iOS 治本修正】直接播放並立刻發起請求，不走異步等待，保證跟點擊事件完全同步
+            // 4. 【iOS 核心修正】先執行 play，隨後「立刻」發起畫中畫請求，不等待任何 event 監聽
             await pipVideo.play();
             await pipVideo.requestPictureInPicture();
             
-            // 成功開啟後的視覺反饋
+            // 成功後的按鈕亮起特效
             pipBtn.style.opacity = "1";
             pipBtn.style.textShadow = "0 0 10px #fff";
             
         } catch (error) {
             console.error("手機版畫中畫啟動失敗:", error);
-            // 這裡可以幫你抓出手機瀏覽器拒絕的真正原因
-            alert("啟動懸浮歌詞失敗，請確認音樂是否正在播放，或更換 Safari 瀏覽器再試一次！");
+            // 治本調試：如果還是失敗，彈窗會直接告訴我們 iOS 拒絕的錯誤代碼是什麼
+            alert("開啟失敗原因: " + error.message + "\n請確保音樂正在播放，並使用 Safari 瀏覽器打開！");
         }
-    });
-}
-
-// 當使用者在系統層面關閉畫中畫時，同步還原按鈕亮度
-if (pipVideo) {
-    pipVideo.addEventListener("leavepictureinpicture", () => {
-        pipBtn.style.opacity = "0.5";
-        pipBtn.style.textShadow = "none";
     });
 }
