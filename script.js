@@ -969,6 +969,8 @@ const mainContainer = document.querySelector(".main-container"),
     volumeSlider = mainContainer.querySelector("#volume-slider"),
     lyricsWrapper = document.getElementById("lyrics-wrapper"),
     loadingOverlay = document.getElementById("loading-overlay");
+    pipVideo = document.getElementById("pip-video"),
+    pipBtn = document.getElementById("pip-lyrics-btn");
     ACCESS_PASSWORD = "0619";
 
 let musicIndex = 0;
@@ -1116,6 +1118,8 @@ function loadMusic(index) {
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
+
+    renderCanvasLyrics();
 
     setTimeout(() => {
         updateMediaSession();
@@ -1300,6 +1304,8 @@ function updateLyrics(currentTime) {
                 line.classList.remove("active");
             }
         });
+
+        renderCanvasLyrics();
     }
 }
 
@@ -1386,3 +1392,87 @@ function onPlayerStateChange(event) {
         updateMediaSession();
     }
 }
+
+// ===================================================
+//  9779s Space 專屬 - 畫中畫（PiP）桌面懸浮歌詞核心
+// ===================================================
+
+// 建立背景虛擬畫布 (採用 16:9 高清比例，兼顧手機桌面字體清晰度)
+const lyricCanvas = document.createElement("canvas");
+lyricCanvas.width = 800;
+lyricCanvas.height = 450;
+const ctx = lyricCanvas.getContext("2d");
+let canvasStream = null;
+
+// 高清繪製畫布函數
+function renderCanvasLyrics() {
+    // 1. 清空並填入有質感的半透明黑底
+    ctx.fillStyle = "rgba(15, 15, 15, 0.85)";
+    ctx.fillRect(0, 0, lyricCanvas.width, lyricCanvas.height);
+
+    // 2. 抓取當前歌詞資料
+    const lyrics = allMusic[musicIndex].lyrics;
+    const currentLine = lyrics[currentLyricIndex] || { text: "9779s Space", translation: "專屬音樂空間" };
+    const nextLine = lyrics[currentLyricIndex + 1] || { text: "", translation: "" };
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // 3. 繪製主歌詞 (泰文/英文)
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 38px sans-serif";
+    // 如果文字太長，可以做個簡單的置中微調
+    ctx.fillText(currentLine.text, lyricCanvas.width / 2, lyricCanvas.height / 2 - 35);
+
+    // 4. 繪製副歌詞 (中文翻譯)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.font = "28px sans-serif";
+    ctx.fillText(currentLine.translation || "", lyricCanvas.width / 2, lyricCanvas.height / 2 + 35);
+    
+    // 5. 繪製底部下一句預告 (增加進度流暢感)
+    if (nextLine.text && nextLine.text.trim() !== "") {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.font = "20px sans-serif";
+        ctx.fillText("Next: " + nextLine.text, lyricCanvas.width / 2, lyricCanvas.height - 50);
+    }
+}
+
+// 監聽按鈕點擊，啟動或關閉畫中畫
+pipBtn.addEventListener("click", async () => {
+    try {
+        if (!document.pictureInPictureEnabled) {
+            alert("您的設備或瀏覽器不支援畫中畫功能");
+            return;
+        }
+
+        // 如果目前已經開啟，點擊就關閉
+        if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+            return;
+        }
+
+        // 核心黑科技：將 Canvas 畫布以 10 FPS（每秒10影格）的速度捕捉為動態視訊串流
+        // 10 FPS 既能保證歌詞切換毫無延遲，又不會造成 iPhone 處理器發燙耗電
+        if (!canvasStream) {
+            renderCanvasLyrics(); // 啟動前先畫一次，防止最初閃白屏
+            canvasStream = lyricCanvas.captureStream(10);
+            pipVideo.srcObject = canvasStream;
+        }
+
+        // 必須讓這個隱藏的虛擬 Video 跑起來，iOS 才會核准丟出畫中畫
+        await pipVideo.play();
+        await pipVideo.requestPictureInPicture();
+        
+        pipBtn.style.opacity = "1";
+        pipBtn.style.textShadow = "0 0 10px #fff";
+        
+    } catch (error) {
+        console.error("開啟桌面歌詞失敗:", error);
+    }
+});
+
+// 當使用者在系統層面關閉畫中畫（如按 X 或是點擊還原）時，同步還原按鈕亮度
+pipVideo.addEventListener("leavepictureinpicture", () => {
+    pipBtn.style.opacity = "0.5";
+    pipBtn.style.textShadow = "none";
+});
