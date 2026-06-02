@@ -1113,7 +1113,9 @@ function loadMusic(index) {
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
-    updateMediaSession();
+    setTimeout(() => {
+        updateMediaSession();
+    }, 300);
 }
 
 function playSong() {
@@ -1329,31 +1331,43 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING) {
-        // 核心修正 1：當 YouTube 開始播放時，強制「奪回」MediaSession 控制權
-        // 使用 setTimeout 確保在 YouTube API 完成初始化後才覆蓋它
+    // 不論是 BUFFERING (3) 還是 PLAYING (1)，只要 YouTube 開始有動靜，就立刻執行奪回
+    if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
+        
+        // 第一次奪回：立刻覆蓋
+        updateMediaSession();
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = "playing";
+        }
+
+        // 第二次防禦：延遲 800ms 再次覆蓋（防止 iOS 在影片真正播出來時又切換回去）
         setTimeout(() => {
             updateMediaSession();
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = "playing";
             }
-        }, 800); 
+        }, 800);
 
-        const duration = ytPlayer.getDuration();
-        const checkLoop = setInterval(() => {
-            if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-                clearInterval(checkLoop);
-                return;
+        // 以下是原本的 YouTube 循環播放邏輯，保持不變
+        if (event.data === YT.PlayerState.PLAYING) {
+            const duration = ytPlayer.getDuration();
+            if (!window.ytLoopInterval) { // 防止重複建立監聽
+                window.ytLoopInterval = setInterval(() => {
+                    if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+                        clearInterval(window.ytLoopInterval);
+                        window.ytLoopInterval = null;
+                        return;
+                    }
+                    const currentTime = ytPlayer.getCurrentTime();
+                    if (currentTime > duration - 0.2) {
+                        ytPlayer.seekTo(0);
+                        ytPlayer.playVideo();
+                    }
+                }, 100);
             }
-            const currentTime = ytPlayer.getCurrentTime();
-            if (currentTime > duration - 0.2) {
-                ytPlayer.seekTo(0);
-                ytPlayer.playVideo();
-            }
-        }, 100);
+        }
     }
     
-    // 核心修正 2：確保 YouTube 暫停或結束時，MediaSession 狀態依然同步
     if (event.data === YT.PlayerState.PAUSED) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.playbackState = "paused";
@@ -1363,7 +1377,6 @@ function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.ENDED) {
         ytPlayer.seekTo(0); 
         ytPlayer.playVideo();
-        // 確保循環播放時 MediaSession 不會被重置
         updateMediaSession();
     }
 }
