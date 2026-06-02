@@ -1394,7 +1394,7 @@ function onPlayerStateChange(event) {
 }
 
 // ===================================================
-//  9779s Space 專屬 - 畫中畫（PiP）桌面懸浮歌詞核心
+//  9779s Space 專屬 - 畫中畫（PiP）桌面懸浮歌詞核心 (強效穩固版)
 // ===================================================
 
 // 建立背景虛擬畫布 (採用 16:9 高清比例，兼顧手機桌面字體清晰度)
@@ -1407,7 +1407,7 @@ let canvasStream = null;
 // 高清繪製畫布函數
 function renderCanvasLyrics() {
     // 1. 清空並填入有質感的半透明黑底
-    ctx.fillStyle = "rgba(15, 15, 15, 0.85)";
+    ctx.fillStyle = "rgba(15, 15, 15, 0.9)";
     ctx.fillRect(0, 0, lyricCanvas.width, lyricCanvas.height);
 
     // 2. 抓取當前歌詞資料
@@ -1421,7 +1421,6 @@ function renderCanvasLyrics() {
     // 3. 繪製主歌詞 (泰文/英文)
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "bold 38px sans-serif";
-    // 如果文字太長，可以做個簡單的置中微調
     ctx.fillText(currentLine.text, lyricCanvas.width / 2, lyricCanvas.height / 2 - 35);
 
     // 4. 繪製副歌詞 (中文翻譯)
@@ -1429,7 +1428,7 @@ function renderCanvasLyrics() {
     ctx.font = "28px sans-serif";
     ctx.fillText(currentLine.translation || "", lyricCanvas.width / 2, lyricCanvas.height / 2 + 35);
     
-    // 5. 繪製底部下一句預告 (增加進度流暢感)
+    // 5. 繪製底部下一句預告
     if (nextLine.text && nextLine.text.trim() !== "") {
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
         ctx.font = "20px sans-serif";
@@ -1438,41 +1437,60 @@ function renderCanvasLyrics() {
 }
 
 // 監聽按鈕點擊，啟動或關閉畫中畫
-pipBtn.addEventListener("click", async () => {
-    try {
-        if (!document.pictureInPictureEnabled) {
-            alert("您的設備或瀏覽器不支援畫中畫功能");
-            return;
-        }
+if (pipBtn) {
+    pipBtn.addEventListener("click", async () => {
+        try {
+            // 檢查瀏覽器支援度
+            if (!document.pictureInPictureEnabled) {
+                alert("此瀏覽器或裝置的系統限制，不支援網頁懸浮視窗。");
+                return;
+            }
 
-        // 如果目前已經開啟，點擊就關閉
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-            return;
-        }
+            // 如果目前已經開啟，點擊就關閉
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+                return;
+            }
 
-        // 核心黑科技：將 Canvas 畫布以 10 FPS（每秒10影格）的速度捕捉為動態視訊串流
-        // 10 FPS 既能保證歌詞切換毫無延遲，又不會造成 iPhone 處理器發燙耗電
-        if (!canvasStream) {
-            renderCanvasLyrics(); // 啟動前先畫一次，防止最初閃白屏
-            canvasStream = lyricCanvas.captureStream(10);
+            // 治本修正：每次開啟時，都確保畫布先繪製，並當場賦予視訊串流
+            renderCanvasLyrics();
+            
+            if (!canvasStream) {
+                // 捕捉 10 FPS 影片串流
+                canvasStream = lyricCanvas.captureStream(10);
+            }
+            
+            // 強制重新綁定載體訊號
             pipVideo.srcObject = canvasStream;
+
+            // 關鍵安全防禦：必須在同一個點擊事件中「加載」並「立刻執行 request」
+            pipVideo.load();
+            
+            // 監聽影片載入完成的瞬間，立刻彈出畫中畫（繞過 iOS 的異步封鎖機制）
+            pipVideo.onloadedmetadata = async () => {
+                try {
+                    await pipVideo.play();
+                    await pipVideo.requestPictureInPicture();
+                    
+                    // 成功開啟後讓圖示變亮
+                    pipBtn.style.opacity = "1";
+                    pipBtn.style.textShadow = "0 0 10px #fff";
+                } catch (pipErr) {
+                    console.error("進入畫中畫失敗:", pipErr);
+                    alert("啟動懸浮歌詞失敗，請確保音樂正在播放中再試一次！");
+                }
+            };
+            
+        } catch (error) {
+            console.error("畫中畫主程序出錯:", error);
         }
+    });
+}
 
-        // 必須讓這個隱藏的虛擬 Video 跑起來，iOS 才會核准丟出畫中畫
-        await pipVideo.play();
-        await pipVideo.requestPictureInPicture();
-        
-        pipBtn.style.opacity = "1";
-        pipBtn.style.textShadow = "0 0 10px #fff";
-        
-    } catch (error) {
-        console.error("開啟桌面歌詞失敗:", error);
-    }
-});
-
-// 當使用者在系統層面關閉畫中畫（如按 X 或是點擊還原）時，同步還原按鈕亮度
-pipVideo.addEventListener("leavepictureinpicture", () => {
-    pipBtn.style.opacity = "0.5";
-    pipBtn.style.textShadow = "none";
-});
+// 當使用者在系統層面關閉畫中畫時，同步還原按鈕亮度
+if (pipVideo) {
+    pipVideo.addEventListener("leavepictureinpicture", () => {
+        pipBtn.style.opacity = "0.5";
+        pipBtn.style.textShadow = "none";
+    });
+}
