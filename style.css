@@ -53,7 +53,8 @@ body {
     height: 100vh;
     transform: translate(-50%, -50%) scale(1.5);
     filter: brightness(0.6) blur(0px);
-    transition: opacity 1s ease-in-out;
+    opacity: 0; /* 預設完全透明，遮住一開始加載時的黑畫面與按鈕 */
+    transition: opacity 0.4s ease-in-out; /* 讓畫面顯現和消失時有淡入淡出效果 */
 }
 
 .main-container {

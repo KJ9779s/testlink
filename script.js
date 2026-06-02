@@ -1331,16 +1331,22 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerStateChange(event) {
-    // 不論是 BUFFERING (3) 還是 PLAYING (1)，只要 YouTube 開始有動靜，就立刻執行奪回
+    const playerElement = document.getElementById('player');
+
+    // 核心優化：只有在真正「播放中」才顯示影片，其餘狀態（加載中、緩衝中、結束時）一律淡出隱藏
+    if (event.data === YT.PlayerState.PLAYING) {
+        if (playerElement) playerElement.style.opacity = "1"; // 淡入，此時暫停鍵和黑線已經消失了
+    } else {
+        if (playerElement) playerElement.style.opacity = "0"; // 淡出，遮住緩衝、重播、暫停時的醜畫面
+    }
+
+    // 保持我們之前的 MediaSession 奪回機制
     if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
-        
-        // 第一次奪回：立刻覆蓋
         updateMediaSession();
         if ('mediaSession' in navigator) {
             navigator.mediaSession.playbackState = "playing";
         }
 
-        // 第二次防禦：延遲 800ms 再次覆蓋（防止 iOS 在影片真正播出來時又切換回去）
         setTimeout(() => {
             updateMediaSession();
             if ('mediaSession' in navigator) {
@@ -1348,10 +1354,10 @@ function onPlayerStateChange(event) {
             }
         }, 800);
 
-        // 以下是原本的 YouTube 循環播放邏輯，保持不變
+        // 循環播放邏輯
         if (event.data === YT.PlayerState.PLAYING) {
             const duration = ytPlayer.getDuration();
-            if (!window.ytLoopInterval) { // 防止重複建立監聽
+            if (!window.ytLoopInterval) {
                 window.ytLoopInterval = setInterval(() => {
                     if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
                         clearInterval(window.ytLoopInterval);
@@ -1359,7 +1365,13 @@ function onPlayerStateChange(event) {
                         return;
                     }
                     const currentTime = ytPlayer.getCurrentTime();
-                    if (currentTime > duration - 0.2) {
+                    
+                    // 當影片快結束時（倒數 0.3 秒），先主動讓它淡出，再執行重播
+                    if (currentTime > duration - 0.3) {
+                        if (playerElement) playerElement.style.opacity = "0"; 
+                    }
+                    
+                    if (currentTime > duration - 0.1) {
                         ytPlayer.seekTo(0);
                         ytPlayer.playVideo();
                     }
@@ -1375,6 +1387,7 @@ function onPlayerStateChange(event) {
     }
 
     if (event.data === YT.PlayerState.ENDED) {
+        if (playerElement) playerElement.style.opacity = "0";
         ytPlayer.seekTo(0); 
         ytPlayer.playVideo();
         updateMediaSession();
