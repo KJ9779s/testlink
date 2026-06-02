@@ -1436,53 +1436,43 @@ function renderCanvasLyrics() {
     }
 }
 
-// 監聽按鈕點擊，啟動或關閉畫中畫
+
 if (pipBtn) {
     pipBtn.addEventListener("click", async () => {
         try {
-            // 檢查瀏覽器支援度
             if (!document.pictureInPictureEnabled) {
                 alert("此瀏覽器或裝置的系統限制，不支援網頁懸浮視窗。");
                 return;
             }
 
-            // 如果目前已經開啟，點擊就關閉
             if (document.pictureInPictureElement) {
                 await document.exitPictureInPicture();
                 return;
             }
 
-            // 治本修正：每次開啟時，都確保畫布先繪製，並當場賦予視訊串流
+            // 1. 先現場繪製一次歌詞
             renderCanvasLyrics();
             
+            // 2. 建立或更新串流
             if (!canvasStream) {
-                // 捕捉 10 FPS 影片串流
                 canvasStream = lyricCanvas.captureStream(10);
             }
             
-            // 強制重新綁定載體訊號
+            // 3. 現場直接灌入訊號源
             pipVideo.srcObject = canvasStream;
 
-            // 關鍵安全防禦：必須在同一個點擊事件中「加載」並「立刻執行 request」
-            pipVideo.load();
+            // 4. 【iOS 治本修正】直接播放並立刻發起請求，不走異步等待，保證跟點擊事件完全同步
+            await pipVideo.play();
+            await pipVideo.requestPictureInPicture();
             
-            // 監聽影片載入完成的瞬間，立刻彈出畫中畫（繞過 iOS 的異步封鎖機制）
-            pipVideo.onloadedmetadata = async () => {
-                try {
-                    await pipVideo.play();
-                    await pipVideo.requestPictureInPicture();
-                    
-                    // 成功開啟後讓圖示變亮
-                    pipBtn.style.opacity = "1";
-                    pipBtn.style.textShadow = "0 0 10px #fff";
-                } catch (pipErr) {
-                    console.error("進入畫中畫失敗:", pipErr);
-                    alert("啟動懸浮歌詞失敗，請確保音樂正在播放中再試一次！");
-                }
-            };
+            // 成功開啟後的視覺反饋
+            pipBtn.style.opacity = "1";
+            pipBtn.style.textShadow = "0 0 10px #fff";
             
         } catch (error) {
-            console.error("畫中畫主程序出錯:", error);
+            console.error("手機版畫中畫啟動失敗:", error);
+            // 這裡可以幫你抓出手機瀏覽器拒絕的真正原因
+            alert("啟動懸浮歌詞失敗，請確認音樂是否正在播放，或更換 Safari 瀏覽器再試一次！");
         }
     });
 }
