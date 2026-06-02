@@ -1107,7 +1107,7 @@ function loadMusic(index) {
     };
 
     if (ytPlayer && ytPlayer.loadVideoById) {
-        ytPlayer.loadVideoById({ videoId: music.video, playlist: music.video });
+        ytPlayer.loadVideoById({ videoId: music.video });
     }
     
     currentLyricIndex = -1;
@@ -1158,21 +1158,22 @@ function updateMediaSession() {
             artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        // 1. 強制指定必須顯示的功能
+        // 強制指定並綁定切換曲目功能
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
         
-        // 2. 關鍵：將跳轉處理器明確設為 null
-        // 這樣 iOS/Android 的控制中心會因為找不到處理器而隱藏「上下10秒」按鈕
+        // 關鍵：在 iOS 上，若要完全隱藏 +-10秒，必須將這些行為明確設為 null
         navigator.mediaSession.setActionHandler('seekbackward', null);
         navigator.mediaSession.setActionHandler('seekforward', null);
         
-        // 3. 可選：如果您想完全排除跳轉按鈕，可以連這行也刪除或設為 null
-        // 但保留 seekto 通常是為了讓使用者可以滑動鎖定畫面的進度條
+        // 保留 seekto 允許使用者在鎖定畫面拉動進度條，但不影響上下首按鈕
         navigator.mediaSession.setActionHandler('seekto', (details) => {
             mainAudio.currentTime = details.seekTime;
+            if (ytPlayer && ytPlayer.seekTo) {
+                ytPlayer.seekTo(details.seekTime, true);
+            }
         });
     }
 }
