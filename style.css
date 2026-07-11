@@ -495,3 +495,15 @@ body {
 #password-screen button:hover {
     background: #cccccc !important;
 }
+
+/* 強制隱藏 YouTube 播放器內部的控制 UI 與播放圖示 */
+.ytp-large-play-button,
+.ytp-error-content-wrap,
+.ytp-play-button,
+.ytp-gradient-top,
+.ytp-gradient-bottom {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
