@@ -969,7 +969,7 @@ const mainContainer = document.querySelector(".main-container"),
     volumeSlider = mainContainer.querySelector("#volume-slider"),
     lyricsWrapper = document.getElementById("lyrics-wrapper"),
     loadingOverlay = document.getElementById("loading-overlay"),
-    bgVideo = document.getElementById("bg-video"); // 新增：獲取 video 元素
+    bgVideo = document.getElementById("bg-video");
     ACCESS_PASSWORD = "0619";
 
 let musicIndex = 0;
@@ -1035,7 +1035,7 @@ function playingNow() {
     });
 }
 
-// --- 核心播放邏輯 (MP4 同步版) ---
+// --- 核心播放邏輯 ---
 function loadMusic(index) {
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
@@ -1045,7 +1045,11 @@ function loadMusic(index) {
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
     
+    // 強制歸零機制
     mainAudio.src = `music/s${index + 1}.mp3`;
+    mainAudio.currentTime = 0; 
+    progressBar.style.width = "0%";
+    musicCurrentTime.innerText = "0:00";
     mainAudio.load();
 
     mainAudio.oncanplaythrough = () => {
@@ -1053,11 +1057,10 @@ function loadMusic(index) {
         musicImg.style.opacity = "1";
     };
 
-    // MP4 背景影片載入邏輯
     if (bgVideo) {
         bgVideo.src = `video/v${index + 1}.mp4`;
+        bgVideo.currentTime = 0; // 影片同步歸零
         bgVideo.load();
-        if (isPlaying) bgVideo.play().catch(e => console.log(e));
     }
     
     currentLyricIndex = -1;
@@ -1069,21 +1072,16 @@ function loadMusic(index) {
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
-    
     mainAudio.play();
     if (bgVideo) bgVideo.play().catch(e => console.log(e));
-    
-    updateMediaSession();
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+    syncPlaybackState();
 }
 
 function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
-    
     mainAudio.pause();
     if (bgVideo) bgVideo.pause();
-    
     syncPlaybackState();
 }
 
@@ -1099,7 +1097,7 @@ function prevMusic() {
     playSong();
 }
 
-// --- 輔助邏輯 ---
+// --- 同步邏輯 ---
 function updateMediaSession() {
     if ('mediaSession' in navigator) {
         const music = allMusic[musicIndex];
@@ -1112,6 +1110,14 @@ function updateMediaSession() {
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
+        // 手機控制中心拖動處理
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.seekTime !== undefined) {
+                mainAudio.currentTime = details.seekTime;
+                if (bgVideo) bgVideo.currentTime = details.seekTime;
+                syncPlaybackState();
+            }
+        });
     }
 }
 
@@ -1130,6 +1136,9 @@ function syncPlaybackState() {
 
 // --- 事件監聽 ---
 mainAudio.addEventListener("timeupdate", (e) => {
+    // 限制更新頻率，避免手機效能卡頓
+    if (Math.floor(e.target.currentTime * 10) % 5 !== 0) return;
+    
     const cur = e.target.currentTime;
     const dur = e.target.duration;
     if (dur) {
@@ -1139,6 +1148,7 @@ mainAudio.addEventListener("timeupdate", (e) => {
         let dM = Math.floor(dur / 60), dS = Math.floor(dur % 60);
         musicDuration.innerText = `${dM}:${dS < 10 ? '0' + dS : dS}`;
         updateLyrics(cur);
+        syncPlaybackState(); // 定期向手機更新進度
     }
 });
 
@@ -1155,12 +1165,8 @@ repeatBtn.addEventListener("click", () => { isRepeat = !isRepeat; repeatBtn.clas
 showListBtn.addEventListener("click", () => musicList.classList.toggle("show"));
 closeListBtn.addEventListener("click", () => musicList.classList.remove("show"));
 mainAudio.addEventListener("ended", () => isRepeat ? (mainAudio.currentTime = 0, playSong()) : nextMusic());
+volumeSlider.addEventListener("input", (e) => { mainAudio.volume = e.target.value; });
 
-volumeSlider.addEventListener("input", (e) => {
-    mainAudio.volume = e.target.value;
-});
-
-// --- 歌詞與初始化 ---
 function displayLyrics(lyrics) {
     lyricsWrapper.innerHTML = lyrics.map(line =>
         `<div class="lyric-line">
