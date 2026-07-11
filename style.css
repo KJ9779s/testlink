@@ -49,13 +49,12 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    /* 稍微加大縮放比例，確保 iframe 的邊緣超出視窗，隱藏黑邊 */
-    width: 120vw;
-    height: 120vh;
-    transform: translate(-50%, -50%) scale(1.1);
+    width: 130vw;  /* 增加寬度 */
+    height: 130vh; /* 增加高度 */
+    transform: translate(-50%, -50%) scale(1.25); /* 擴大 scale */
     filter: brightness(0.6) blur(0px);
-    transition: opacity 1s ease-in-out;
-    pointer-events: none; /* 確保無法點擊到播放器 UI */
+    pointer-events: none;
+    z-index: -999;
 }
 
 .main-container {

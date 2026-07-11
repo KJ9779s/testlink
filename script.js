@@ -1086,37 +1086,51 @@ function playingNow() {
 }
 
 function loadMusic(index) {
+    // 顯示載入遮罩
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
     
     const music = allMusic[index];
+    
+    // 更新 UI 資訊
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
     
+    // 設定音訊來源
     mainAudio.src = music.src;
     mainAudio.load();
 
+    // 音訊載入完成後移除遮罩
     mainAudio.oncanplaythrough = () => {
         loadingOverlay.style.display = "none";
         musicImg.style.opacity = "1";
     };
 
+    // 處理緩衝狀態
     mainAudio.onwaiting = () => {
         loadingOverlay.style.display = "flex";
     };
 
-    if (ytPlayer && ytPlayer.loadVideoById) {
-        ytPlayer.loadVideoById({ 
+    // 優化後的背景影片載入：使用 cueVideoById 避免自動重新播放造成的 UI 彈出
+    if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+        ytPlayer.cueVideoById({ 
             videoId: music.video,
             playlist: music.video 
         });
+        
+        // 如果目前是播放狀態，確保背景影片跟隨播放
+        if (isPlaying) {
+            ytPlayer.playVideo();
+        }
     }
     
+    // 重置歌詞與播放清單狀態
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
 
+    // 更新 Media Session 資訊
     setTimeout(() => {
         updateMediaSession();
     }, 300);
@@ -1322,14 +1336,14 @@ function onYouTubeIframeAPIReady() {
             'autoplay': 1, 
             'mute': 1, 
             'controls': 0, 
+            'disablekb': 1, // 確實增加此參數
             'playsinline': 1,
             'rel': 0,
             'showinfo': 0,
             'modestbranding': 1,
             'iv_load_policy': 3,
-            // ---- 以下為治本新增的參數 ----
-            'loop': 1,                                  // 啟用官方硬體循環
-            'playlist': allMusic[musicIndex].video      // 必須指定 playlist 官方循環才會生效
+            'loop': 1,
+            'playlist': allMusic[musicIndex].video 
         },
         events: {
             'onReady': (e) => e.target.playVideo(),
@@ -1338,51 +1352,12 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
+// 移除原本的 window.ytLoopInterval 循環檢查邏輯
+// 移除 ENDED 事件中的 seekTo(0) 強制重播邏輯
+
 function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
-        updateMediaSession();
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = "playing";
-        }
-
-        setTimeout(() => {
-            updateMediaSession();
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = "playing";
-            }
-        }, 800); 
-
-        if (event.data === YT.PlayerState.PLAYING) {
-            const duration = ytPlayer.getDuration();
-            if (!window.ytLoopInterval) {
-                window.ytLoopInterval = setInterval(() => {
-                    if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-                        clearInterval(window.ytLoopInterval);
-                        window.ytLoopInterval = null;
-                        return;
-                    }
-                    const currentTime = ytPlayer.getCurrentTime();
-                    
-                    // 治本關鍵：將原本的 duration - 0.2 提前到 0.5 秒
-                    // 在 YouTube 核心還沒反應過來要結束、要彈出暫停 UI 之前，網頁就強制拉回 0 秒
-                    if (currentTime > duration - 0.5) {
-                        ytPlayer.seekTo(0);
-                        ytPlayer.playVideo();
-                    }
-                }, 100);
-            }
-        }
-    }
-    
-    if (event.data === YT.PlayerState.PAUSED) {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = "paused";
-        }
-    }
-
-    if (event.data === YT.PlayerState.ENDED) {
-        ytPlayer.seekTo(0); 
-        ytPlayer.playVideo();
+    // 僅保留必要的狀態更新
+    if (event.data === YT.PlayerState.PLAYING) {
         updateMediaSession();
     }
 }
