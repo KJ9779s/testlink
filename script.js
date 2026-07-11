@@ -1086,56 +1086,37 @@ function playingNow() {
 }
 
 function loadMusic(index) {
-    // 顯示載入遮罩，避免切換過程的視覺不連貫
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
     
     const music = allMusic[index];
-    
-    // 更新播放器 UI 資訊
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
     
-    // 設定並載入音訊檔案
     mainAudio.src = music.src;
     mainAudio.load();
 
-    // 音訊準備好後，移除遮罩並恢復顯示
     mainAudio.oncanplaythrough = () => {
         loadingOverlay.style.display = "none";
         musicImg.style.opacity = "1";
     };
 
-    // 若音訊中斷需重新緩衝，重新顯示遮罩
     mainAudio.onwaiting = () => {
         loadingOverlay.style.display = "flex";
     };
 
-    // 使用 loadVideoById 確保背景影片直接進入準備狀態
-    // 透過外部的 playSong/pauseSong 統一控制，不依賴 YT 官方循環
-    if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+    if (ytPlayer && ytPlayer.loadVideoById) {
         ytPlayer.loadVideoById({ 
-            videoId: music.video
+            videoId: music.video,
+            playlist: music.video 
         });
-        
-        // 確保剛載入時強制靜音
-        ytPlayer.mute();
-
-        // 根據目前的播放狀態決定是否立即播放背景影片
-        if (isPlaying) {
-            ytPlayer.playVideo();
-        } else {
-            ytPlayer.pauseVideo();
-        }
     }
     
-    // 重置歌詞索引並更新介面狀態
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
 
-    // 延遲更新 Media Session，確保狀態同步準確
     setTimeout(() => {
         updateMediaSession();
     }, 300);
@@ -1145,26 +1126,19 @@ function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
     
-    // 同步啟動兩者
-    mainAudio.play().then(() => {
-        if (ytPlayer && ytPlayer.playVideo) {
-            ytPlayer.playVideo();
-        }
-    }).catch(e => console.log("播放被攔截:", e));
-    
-    syncPlaybackState();
-}
+    updateMediaSession(); 
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = "playing";
+    }
 
+    mainAudio.play().then(syncPlaybackState).catch(() => {
+        console.log("Waiting for user interaction");
+    });
+}
 function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
-    
-    // 同步暫停兩者
     mainAudio.pause();
-    if (ytPlayer && ytPlayer.pauseVideo) {
-        ytPlayer.pauseVideo();
-    }
-    
     syncPlaybackState();
 }
 
@@ -1189,17 +1163,14 @@ function updateMediaSession() {
             artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        // 強制指定並綁定切換曲目功能
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
         
-        // 關鍵：在 iOS 上，若要完全隱藏 +-10秒，必須將這些行為明確設為 null
         navigator.mediaSession.setActionHandler('seekbackward', null);
         navigator.mediaSession.setActionHandler('seekforward', null);
         
-        // 保留 seekto 允許使用者在鎖定畫面拉動進度條，但不影響上下首按鈕
         navigator.mediaSession.setActionHandler('seekto', (details) => {
             mainAudio.currentTime = details.seekTime;
             if (ytPlayer && ytPlayer.seekTo) {
@@ -1212,7 +1183,6 @@ function updateMediaSession() {
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-        // 確保 duration 是有效數值
         if (!isNaN(mainAudio.duration) && mainAudio.duration > 0) {
             navigator.mediaSession.setPositionState({
                 duration: mainAudio.duration,
@@ -1339,7 +1309,6 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// 尋找 script.js 中的 onYouTubeIframeAPIReady() 並替換：
 function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('player', {
         videoId: allMusic[musicIndex].video,
@@ -1347,14 +1316,13 @@ function onYouTubeIframeAPIReady() {
             'autoplay': 1, 
             'mute': 1, 
             'controls': 0, 
-            'disablekb': 1, // 確實增加此參數
             'playsinline': 1,
             'rel': 0,
             'showinfo': 0,
             'modestbranding': 1,
             'iv_load_policy': 3,
-            'loop': 1,
-            'playlist': allMusic[musicIndex].video 
+            'loop': 1,                                  
+            'playlist': allMusic[musicIndex].video      
         },
         events: {
             'onReady': (e) => e.target.playVideo(),
@@ -1363,12 +1331,49 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// 移除原本的 window.ytLoopInterval 循環檢查邏輯
-// 移除 ENDED 事件中的 seekTo(0) 強制重播邏輯
-
 function onPlayerStateChange(event) {
-    // 僅保留必要的狀態更新
-    if (event.data === YT.PlayerState.PLAYING) {
+    if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
+        updateMediaSession();
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = "playing";
+        }
+
+        setTimeout(() => {
+            updateMediaSession();
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "playing";
+            }
+        }, 800); 
+
+        if (event.data === YT.PlayerState.PLAYING) {
+            const duration = ytPlayer.getDuration();
+            if (!window.ytLoopInterval) {
+                window.ytLoopInterval = setInterval(() => {
+                    if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+                        clearInterval(window.ytLoopInterval);
+                        window.ytLoopInterval = null;
+                        return;
+                    }
+                    const currentTime = ytPlayer.getCurrentTime();
+                    
+                    if (currentTime > duration - 0.5) {
+                        ytPlayer.seekTo(0);
+                        ytPlayer.playVideo();
+                    }
+                }, 100);
+            }
+        }
+    }
+    
+    if (event.data === YT.PlayerState.PAUSED) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = "paused";
+        }
+    }
+
+    if (event.data === YT.PlayerState.ENDED) {
+        ytPlayer.seekTo(0); 
+        ytPlayer.playVideo();
         updateMediaSession();
     }
 }

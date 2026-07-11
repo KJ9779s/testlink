@@ -49,14 +49,11 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    /* 擴大覆蓋範圍，確保 UI 元件溢出視窗之外 */
-    width: 140vw; 
-    height: 140vh;
-    transform: translate(-50%, -50%) scale(1.3); 
+    width: 100vw;
+    height: 100vh;
+    transform: translate(-50%, -50%) scale(1.5);
     filter: brightness(0.6) blur(0px);
     transition: opacity 1s ease-in-out;
-    /* 禁止對 iframe 內部的任何操作 */
-    pointer-events: none !important;
 }
 
 .main-container {
@@ -497,15 +494,3 @@ body {
 #password-screen button:hover {
     background: #cccccc !important;
 }
-
-/* 強制隱藏 YouTube 播放器內部的控制 UI 與播放圖示 */
-.ytp-large-play-button,
-.ytp-error-content-wrap,
-.ytp-play-button,
-.ytp-gradient-top,
-.ytp-gradient-bottom {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-}
-
