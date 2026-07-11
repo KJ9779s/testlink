@@ -1045,7 +1045,7 @@ function loadMusic(index) {
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
     
-    mainAudio.src = music.src;
+    mainAudio.src = `music/s${index + 1}.mp3`;
     mainAudio.load();
 
     mainAudio.oncanplaythrough = () => {
@@ -1055,7 +1055,7 @@ function loadMusic(index) {
 
     // MP4 背景影片載入邏輯
     if (bgVideo) {
-        bgVideo.src = `v${index + 1}.mp4`; // 對應 v1.mp4, v2.mp4...
+        bgVideo.src = `video/v${index + 1}.mp4`;
         bgVideo.load();
         if (isPlaying) bgVideo.play().catch(e => console.log(e));
     }
