@@ -968,7 +968,8 @@ const mainContainer = document.querySelector(".main-container"),
     musicDuration = mainContainer.querySelector(".duration"),
     volumeSlider = mainContainer.querySelector("#volume-slider"),
     lyricsWrapper = document.getElementById("lyrics-wrapper"),
-    loadingOverlay = document.getElementById("loading-overlay");
+    loadingOverlay = document.getElementById("loading-overlay"),
+    bgVideo = document.getElementById("bg-video"); // 新增：獲取 video 元素
     ACCESS_PASSWORD = "0619";
 
 let musicIndex = 0;
@@ -976,8 +977,8 @@ let mainAudio = new Audio();
 let isPlaying = false;
 let isRepeat = false;
 let currentLyricIndex = -1;
-let ytPlayer;
 
+// --- 密碼邏輯 ---
 function checkPassword() {
     const input = document.getElementById("password-input").value;
     const screen = document.getElementById("password-screen");
@@ -986,9 +987,7 @@ function checkPassword() {
     if (input === ACCESS_PASSWORD) {
         screen.style.transition = "opacity 0.6s ease";
         screen.style.opacity = "0";
-        setTimeout(() => {
-            screen.style.display = "none";
-        }, 600);
+        setTimeout(() => { screen.style.display = "none"; }, 600);
         sessionStorage.setItem("kj_space_verified", "true");
     } else {
         errorMsg.style.display = "block";
@@ -997,7 +996,7 @@ function checkPassword() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    if (sessionStorage.getItem("kj_verified") === "true") {
+    if (sessionStorage.getItem("kj_space_verified") === "true") {
         document.getElementById("password-screen").style.display = "none";
     }
 });
@@ -1006,31 +1005,8 @@ document.getElementById("password-input").addEventListener("keypress", (e) => {
     if (e.key === "Enter") checkPassword();
 });
 
-function restoreMusicOrder() {
-    try {
-        const savedOrder = localStorage.getItem("musicPlaylistOrder");
-        if (savedOrder) {
-            const orderArray = JSON.parse(savedOrder);
-            allMusic.sort((a, b) => {
-                let indexA = orderArray.indexOf(a.name);
-                let indexB = orderArray.indexOf(b.name);
-                if (indexA === -1) indexA = 999;
-                if (indexB === -1) indexB = 999;
-                return indexA - indexB;
-            });
-        }
-    } catch (e) {
-        console.error("讀取播放清單順序失敗:", e);
-    }
-}
-
-function saveMusicOrder() {
-    const orderArray = allMusic.map(music => music.name);
-    localStorage.setItem("musicPlaylistOrder", JSON.stringify(orderArray));
-}
-
+// --- 清單邏輯 ---
 function initList() {
-    restoreMusicOrder();
     ulTag.innerHTML = "";
     allMusic.forEach((music, index) => {
         let liTag = `<li li-index="${index}">
@@ -1043,8 +1019,7 @@ function initList() {
         ulTag.insertAdjacentHTML("beforeend", liTag);
     });
 
-    const allLiTags = ulTag.querySelectorAll("li");
-    allLiTags.forEach(li => {
+    ulTag.querySelectorAll("li").forEach(li => {
         li.addEventListener("click", (e) => {
             if (e.target.classList.contains('drag-handle')) return;
             musicIndex = parseInt(li.getAttribute("li-index"));
@@ -1052,39 +1027,15 @@ function initList() {
             playSong();
         });
     });
-
-    if (typeof Sortable !== 'undefined') {
-        new Sortable(ulTag, {
-            handle: '.drag-handle',
-            animation: 150,
-            delay: 90,
-            delayOnTouchOnly: true,
-            touchStartThreshold: 5,
-            onEnd: function (evt) {
-                const currentPlayingName = allMusic[musicIndex].name;
-                const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
-                allMusic.splice(evt.newIndex, 0, movedItem);
-                const liTags = ulTag.querySelectorAll("li");
-                liTags.forEach((li, index) => li.setAttribute("li-index", index));
-                musicIndex = allMusic.findIndex(music => music.name === currentPlayingName);
-                playingNow();
-                saveMusicOrder();
-            },
-        });
-    }
 }
 
 function playingNow() {
-    const allLiTags = ulTag.querySelectorAll("li");
-    allLiTags.forEach(li => {
-        if (parseInt(li.getAttribute("li-index")) === musicIndex) {
-            li.classList.add("playing");
-        } else {
-            li.classList.remove("playing");
-        }
+    ulTag.querySelectorAll("li").forEach(li => {
+        li.classList.toggle("playing", parseInt(li.getAttribute("li-index")) === musicIndex);
     });
 }
 
+// --- 核心播放邏輯 (MP4 同步版) ---
 function loadMusic(index) {
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
@@ -1102,43 +1053,37 @@ function loadMusic(index) {
         musicImg.style.opacity = "1";
     };
 
-    mainAudio.onwaiting = () => {
-        loadingOverlay.style.display = "flex";
-    };
-
-    if (ytPlayer && ytPlayer.loadVideoById) {
-        ytPlayer.loadVideoById({ 
-            videoId: music.video,
-            playlist: music.video 
-        });
+    // MP4 背景影片載入邏輯
+    if (bgVideo) {
+        bgVideo.src = `v${index + 1}.mp4`; // 對應 v1.mp4, v2.mp4...
+        bgVideo.load();
+        if (isPlaying) bgVideo.play().catch(e => console.log(e));
     }
     
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
-
-    setTimeout(() => {
-        updateMediaSession();
-    }, 300);
+    setTimeout(updateMediaSession, 300);
 }
 
 function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
     
-    updateMediaSession(); 
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = "playing";
-    }
-
-    mainAudio.play().then(syncPlaybackState).catch(() => {
-        console.log("Waiting for user interaction");
-    });
+    mainAudio.play();
+    if (bgVideo) bgVideo.play().catch(e => console.log(e));
+    
+    updateMediaSession();
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
 }
+
 function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
+    
     mainAudio.pause();
+    if (bgVideo) bgVideo.pause();
+    
     syncPlaybackState();
 }
 
@@ -1154,6 +1099,7 @@ function prevMusic() {
     playSong();
 }
 
+// --- 輔助邏輯 ---
 function updateMediaSession() {
     if ('mediaSession' in navigator) {
         const music = allMusic[musicIndex];
@@ -1162,28 +1108,17 @@ function updateMediaSession() {
             artist: music.artist,
             artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
-
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
-        
-        navigator.mediaSession.setActionHandler('seekbackward', null);
-        navigator.mediaSession.setActionHandler('seekforward', null);
-        
-        navigator.mediaSession.setActionHandler('seekto', (details) => {
-            mainAudio.currentTime = details.seekTime;
-            if (ytPlayer && ytPlayer.seekTo) {
-                ytPlayer.seekTo(details.seekTime, true);
-            }
-        });
     }
 }
 
 function syncPlaybackState() {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-        if (!isNaN(mainAudio.duration) && mainAudio.duration > 0) {
+        if (!isNaN(mainAudio.duration)) {
             navigator.mediaSession.setPositionState({
                 duration: mainAudio.duration,
                 playbackRate: mainAudio.playbackRate,
@@ -1193,80 +1128,39 @@ function syncPlaybackState() {
     }
 }
 
+// --- 事件監聽 ---
 mainAudio.addEventListener("timeupdate", (e) => {
-    const currentTime = e.target.currentTime;
-    const duration = e.target.duration;
-    if (duration) {
-        let progressWidth = (currentTime / duration) * 100;
-        progressBar.style.width = `${progressWidth}%`;
-        
-        let curMin = Math.floor(currentTime / 60);
-        let curSec = Math.floor(currentTime % 60);
-        musicCurrentTime.innerText = `${curMin}:${curSec < 10 ? '0' + curSec : curSec}`;
-        
-        let durMin = Math.floor(duration / 60);
-        let durSec = Math.floor(duration % 60);
-        musicDuration.innerText = `${durMin}:${durSec < 10 ? '0' + durSec : durSec}`;
-        
-        updateLyrics(currentTime);
-        if (Math.floor(currentTime) % 2 === 0) syncPlaybackState();
+    const cur = e.target.currentTime;
+    const dur = e.target.duration;
+    if (dur) {
+        progressBar.style.width = `${(cur / dur) * 100}%`;
+        let cM = Math.floor(cur / 60), cS = Math.floor(cur % 60);
+        musicCurrentTime.innerText = `${cM}:${cS < 10 ? '0' + cS : cS}`;
+        let dM = Math.floor(dur / 60), dS = Math.floor(dur % 60);
+        musicDuration.innerText = `${dM}:${dS < 10 ? '0' + dS : dS}`;
+        updateLyrics(cur);
     }
 });
 
 progressArea.addEventListener("click", (e) => {
     mainAudio.currentTime = (e.offsetX / progressArea.clientWidth) * mainAudio.duration;
+    if (bgVideo) bgVideo.currentTime = mainAudio.currentTime;
     playSong();
 });
 
 playPauseBtn.addEventListener("click", () => isPlaying ? pauseSong() : playSong());
 nextBtn.addEventListener("click", nextMusic);
 prevBtn.addEventListener("click", prevMusic);
-
-repeatBtn.addEventListener("click", () => {
-    isRepeat = !isRepeat;
-    repeatBtn.classList.toggle("active");
-});
-
+repeatBtn.addEventListener("click", () => { isRepeat = !isRepeat; repeatBtn.classList.toggle("active"); });
 showListBtn.addEventListener("click", () => musicList.classList.toggle("show"));
 closeListBtn.addEventListener("click", () => musicList.classList.remove("show"));
-
 mainAudio.addEventListener("ended", () => isRepeat ? (mainAudio.currentTime = 0, playSong()) : nextMusic());
 
 volumeSlider.addEventListener("input", (e) => {
-    const vol = e.target.value;
-    mainAudio.volume = vol;
-    if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(vol * 100);
+    mainAudio.volume = e.target.value;
 });
 
-window.addEventListener("keydown", (e) => {
-    const keysToBlock = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-    if (keysToBlock.includes(e.code)) e.preventDefault();
-
-    switch (e.code) {
-        case "Space": 
-            isPlaying ? pauseSong() : playSong();
-            break;
-        case "ArrowLeft": 
-            mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 5);
-            break;
-        case "ArrowRight": 
-            mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 5);
-            break;
-        case "ArrowUp": 
-            volumeSlider.value = Math.min(1, parseFloat(volumeSlider.value) + 0.05);
-            volumeSlider.dispatchEvent(new Event('input'));
-            break;
-        case "ArrowDown": 
-            volumeSlider.value = Math.max(0, parseFloat(volumeSlider.value) - 0.05);
-            volumeSlider.dispatchEvent(new Event('input'));
-            break;
-        case "Digit1": 
-        case "Numpad1":
-            repeatBtn.click();
-            break;
-    }
-});
-
+// --- 歌詞與初始化 ---
 function displayLyrics(lyrics) {
     lyricsWrapper.innerHTML = lyrics.map(line =>
         `<div class="lyric-line">
@@ -1301,79 +1195,4 @@ function updateLyrics(currentTime) {
 window.addEventListener("load", () => {
     initList();
     loadMusic(musicIndex);
-    mainAudio.volume = volumeSlider.value;
 });
-
-var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-function onYouTubeIframeAPIReady() {
-    ytPlayer = new YT.Player('player', {
-        videoId: allMusic[musicIndex].video,
-        playerVars: { 
-            'autoplay': 1, 
-            'mute': 1, 
-            'controls': 0, 
-            'playsinline': 1,
-            'rel': 0,
-            'showinfo': 0,
-            'modestbranding': 1,
-            'iv_load_policy': 3,
-            'loop': 1,                                  
-            'playlist': allMusic[musicIndex].video      
-        },
-        events: {
-            'onReady': (e) => e.target.playVideo(),
-            'onStateChange': onPlayerStateChange 
-        }
-    });
-}
-
-function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
-        updateMediaSession();
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = "playing";
-        }
-
-        setTimeout(() => {
-            updateMediaSession();
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = "playing";
-            }
-        }, 800); 
-
-        if (event.data === YT.PlayerState.PLAYING) {
-            const duration = ytPlayer.getDuration();
-            if (!window.ytLoopInterval) {
-                window.ytLoopInterval = setInterval(() => {
-                    if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-                        clearInterval(window.ytLoopInterval);
-                        window.ytLoopInterval = null;
-                        return;
-                    }
-                    const currentTime = ytPlayer.getCurrentTime();
-                    
-                    if (currentTime > duration - 0.5) {
-                        ytPlayer.seekTo(0);
-                        ytPlayer.playVideo();
-                    }
-                }, 100);
-            }
-        }
-    }
-    
-    if (event.data === YT.PlayerState.PAUSED) {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = "paused";
-        }
-    }
-
-    if (event.data === YT.PlayerState.ENDED) {
-        ytPlayer.seekTo(0); 
-        ytPlayer.playVideo();
-        updateMediaSession();
-    }
-}

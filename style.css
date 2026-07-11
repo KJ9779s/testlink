@@ -11,6 +11,20 @@ body {
     background-color: #000;
 }
 
+/* 背景影片樣式 (取代原先的 YouTube 播放器) */
+#bg-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    z-index: -999;
+    filter: brightness(0.6);
+    pointer-events: none;
+}
+
 .watermark {
     position: fixed;
     top: 25px;
@@ -31,29 +45,6 @@ body {
     color: rgba(255, 255, 255, 0.4);
     font-size: 15px;
     letter-spacing: 0.5px;
-}
-
-#yt-player-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -999;
-    pointer-events: none;
-    overflow: hidden;
-    background: #000;
-}
-
-#player {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100vw;
-    height: 100vh;
-    transform: translate(-50%, -50%) scale(1.5);
-    filter: brightness(0.6) blur(0px);
-    transition: opacity 1s ease-in-out;
 }
 
 .main-container {
@@ -445,17 +436,6 @@ body {
     cursor: grabbing;
 }
 
-.sortable-ghost {
-    opacity: 0.8 !important; 
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: 2px solid #ffffff !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-}
-.sortable-drag {
-    background: rgba(255, 255, 255, 0.2) !important;
-    opacity: 1 !important;
-}
-
 .drag-handle {
     width: 44px;
     height: 44px;
@@ -473,8 +453,7 @@ body {
 }
 
 .sortable-ghost {
-    opacity: 0.2;
-    background: rgba(255, 255, 255, 0.1opacity: 0.8 !important; 
+    opacity: 0.8 !important; 
     background: rgba(255, 255, 255, 0.3) !important; 
     border: 1px solid #fff;
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); 
