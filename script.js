@@ -1086,51 +1086,56 @@ function playingNow() {
 }
 
 function loadMusic(index) {
-    // 顯示載入遮罩
+    // 顯示載入遮罩，避免切換過程的視覺不連貫
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
     
     const music = allMusic[index];
     
-    // 更新 UI 資訊
+    // 更新播放器 UI 資訊
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
     
-    // 設定音訊來源
+    // 設定並載入音訊檔案
     mainAudio.src = music.src;
     mainAudio.load();
 
-    // 音訊載入完成後移除遮罩
+    // 音訊準備好後，移除遮罩並恢復顯示
     mainAudio.oncanplaythrough = () => {
         loadingOverlay.style.display = "none";
         musicImg.style.opacity = "1";
     };
 
-    // 處理緩衝狀態
+    // 若音訊中斷需重新緩衝，重新顯示遮罩
     mainAudio.onwaiting = () => {
         loadingOverlay.style.display = "flex";
     };
 
-    // 優化後的背景影片載入：使用 cueVideoById 避免自動重新播放造成的 UI 彈出
-    if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
-        ytPlayer.cueVideoById({ 
-            videoId: music.video,
-            playlist: music.video 
+    // 使用 loadVideoById 確保背景影片直接進入準備狀態
+    // 透過外部的 playSong/pauseSong 統一控制，不依賴 YT 官方循環
+    if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        ytPlayer.loadVideoById({ 
+            videoId: music.video
         });
         
-        // 如果目前是播放狀態，確保背景影片跟隨播放
+        // 確保剛載入時強制靜音
+        ytPlayer.mute();
+
+        // 根據目前的播放狀態決定是否立即播放背景影片
         if (isPlaying) {
             ytPlayer.playVideo();
+        } else {
+            ytPlayer.pauseVideo();
         }
     }
     
-    // 重置歌詞與播放清單狀態
+    // 重置歌詞索引並更新介面狀態
     currentLyricIndex = -1;
     displayLyrics(music.lyrics);
     playingNow();
 
-    // 更新 Media Session 資訊
+    // 延遲更新 Media Session，確保狀態同步準確
     setTimeout(() => {
         updateMediaSession();
     }, 300);
@@ -1140,20 +1145,26 @@ function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
     
-    // 雙重保險：確保 MediaSession 狀態被激活
-    updateMediaSession(); 
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = "playing";
-    }
-
-    mainAudio.play().then(syncPlaybackState).catch(() => {
-        console.log("Waiting for user interaction");
-    });
+    // 同步啟動兩者
+    mainAudio.play().then(() => {
+        if (ytPlayer && ytPlayer.playVideo) {
+            ytPlayer.playVideo();
+        }
+    }).catch(e => console.log("播放被攔截:", e));
+    
+    syncPlaybackState();
 }
+
 function pauseSong() {
     isPlaying = false;
     playPauseIcon.classList.replace("fa-pause", "fa-play");
+    
+    // 同步暫停兩者
     mainAudio.pause();
+    if (ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
+    }
+    
     syncPlaybackState();
 }
 
