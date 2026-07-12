@@ -1238,7 +1238,10 @@ function updateLyrics(currentTime) {
 
 window.addEventListener("load", () => {
     initList();
-    setTimeout(() => loadMusic(musicIndex), 100);
+    // 直接載入，不需要 setTimeout 延遲
+    loadMusic(musicIndex);
+    // 預載下一首，提升切換體驗
+    preloadNextMusic(musicIndex); 
 });
 
 // 鍵盤快捷鍵控制
@@ -1271,3 +1274,24 @@ window.addEventListener("keydown", (e) => {
             break;
     }
 });
+
+// 在 script.js 加入預載函數
+function preloadNextMusic(index) {
+    const nextIndex = (index + 1) % allMusic.length;
+    const nextMusic = allMusic[nextIndex];
+    
+    // 預載圖片
+    const img = new Image();
+    img.src = nextMusic.img;
+    
+    // 預載音訊 (使用 Audio 物件但不播放)
+    const audio = new Audio(`music/s${nextMusic.id}.mp3`);
+    audio.preload = "auto"; 
+    
+    // 預載影片 (如果有的話)
+    const video = document.createElement('video');
+    video.src = `video/v${nextMusic.id}.mp4`;
+    video.preload = "auto";
+    
+    console.log(`已預載歌曲: ${nextMusic.name}`);
+}
