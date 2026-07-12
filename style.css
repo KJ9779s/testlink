@@ -446,7 +446,9 @@ body {
     opacity: 0.4;
     cursor: grab;
     flex-shrink: 0;
-    touch-action: none;
+    touch-action: manipulation; 
+    -webkit-user-select: none;
+    user-select: none;
 }
 .drag-handle:active {
     cursor: grabbing;

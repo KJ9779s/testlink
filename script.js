@@ -1019,6 +1019,7 @@ let mainAudio = new Audio();
 let isPlaying = false;
 let isRepeat = false;
 let currentLyricIndex = -1;
+let sortableInstance = null; // 確保實例變數已宣告
 
 function saveMusicOrder() {
     localStorage.setItem("musicPlaylistOrder", JSON.stringify(allMusic.map(m => m.id)));
@@ -1028,13 +1029,44 @@ function restoreMusicOrder() {
     const savedOrder = localStorage.getItem("musicPlaylistOrder");
     if (savedOrder) {
         const orderIds = JSON.parse(savedOrder);
-        allMusic.sort((a, b) => orderIds.indexOf(a.id) - orderIds.indexOf(b.id));
+        allMusic.sort((a, b) => {
+            let ia = orderIds.indexOf(a.id);
+            let ib = orderIds.indexOf(b.id);
+            if (ia === -1) ia = 9999;
+            if (ib === -1) ib = 9999;
+            return ia - ib;
+        });
     }
 }
 
 function initList() {
     restoreMusicOrder();
     renderList();
+    initSortable();
+}
+
+function initSortable() {
+    if (sortableInstance) sortableInstance.destroy();
+    sortableInstance = new Sortable(ulTag, {
+        handle: '.drag-handle',
+        animation: 150,
+        delay: 90,
+        delayOnTouchOnly: true,
+        touchStartThreshold: 5,
+        forceFallback: true,
+        fallbackTolerance: 3,
+        onEnd: function (evt) {
+            const playingId = allMusic[musicIndex].id;
+            const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
+            allMusic.splice(evt.newIndex, 0, movedItem);
+
+            musicIndex = allMusic.findIndex(m => m.id === playingId);
+            saveMusicOrder();
+            
+            ulTag.querySelectorAll("li").forEach((li, index) => li.setAttribute("li-index", index));
+            playingNow();
+        },
+    });
 }
 
 function renderList() {
@@ -1050,7 +1082,6 @@ function renderList() {
         ulTag.insertAdjacentHTML("beforeend", liTag);
     });
 
-    // 重新綁定點擊事件
     ulTag.querySelectorAll("li").forEach(li => {
         li.addEventListener("click", (e) => {
             if (e.target.classList.contains('drag-handle')) return;
@@ -1059,80 +1090,45 @@ function renderList() {
             playSong();
         });
     });
-
-    if (typeof Sortable !== 'undefined') {
-        new Sortable(ulTag, {
-            handle: '.drag-handle',
-            animation: 150,
-            onEnd: function (evt) {
-                // 1. 記錄目前播放中的 ID
-                const playingId = allMusic[musicIndex].id;
-
-                // 2. 移動陣列順序
-                const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
-                allMusic.splice(evt.newIndex, 0, movedItem);
-
-                // 3. 更新 musicIndex 為該 ID 在新陣列中的索引
-                musicIndex = allMusic.findIndex(m => m.id === playingId);
-
-                // 4. 儲存順序
-                saveMusicOrder();
-
-                // 5. 重新渲染清單，確保 li-index 與陣列完全對齊
-                renderList(); 
-                
-                // 6. 強制更新發光樣式
-                playingNow(); 
-            },
-        });
-    }
     playingNow();
 }
 
 function playingNow() {
-    const playingId = allMusic[musicIndex].id; // 取得當前播放歌曲的 ID
-    
+    const playingId = allMusic[musicIndex].id;
     ulTag.querySelectorAll("li").forEach(li => {
         const index = parseInt(li.getAttribute("li-index"));
         const music = allMusic[index];
-        
-        // 使用 ID 比對，這絕對不會出錯
-        if (music.id === playingId) {
-            li.classList.add("playing");
-        } else {
-            li.classList.remove("playing");
-        }
+        li.classList.toggle("playing", music.id === playingId);
     });
 }
+
 function loadMusic(index) {
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
     
     const music = allMusic[index];
-    
-    // 1. 更新文字與圖片
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
-    musicImg.src = music.img;
     
-    // 讓圖片顯示出來 (這是你封面一直轉圈載入的主因)
+    // 修正：先綁定事件，後賦值 src，並處理快取情況
     musicImg.onload = () => {
         musicImg.style.opacity = "1";
         musicImg.classList.add("visible");
         loadingOverlay.style.display = "none";
     };
+    musicImg.src = music.img;
+    if (musicImg.complete) musicImg.onload();
     
-    // 2. 載入音訊
     mainAudio.src = `music/s${music.id}.mp3`;
-    
-    // 3. 載入歌詞 (這是你歌詞不見的主因)
     displayLyrics(music.lyrics);
     
-    // 4. 背景影片
     if (bgVideo) {
-        bgVideo.src = `video/v${music.id}.mp4`;
-        bgVideo.load();
-        bgVideo.play().catch(e => console.log("自動播放被阻擋")); 
+        const videoSrc = `video/v${music.id}.mp4`;
+        if (bgVideo.getAttribute('src') !== videoSrc) {
+            bgVideo.src = videoSrc;
+            bgVideo.load();
+            bgVideo.play().catch(e => console.log("自動播放被阻擋")); 
+        }
     }
     
     mainAudio.load();
@@ -1180,21 +1176,12 @@ function updateMediaSession() {
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
-        navigator.mediaSession.setActionHandler('seekto', (details) => {
-            mainAudio.currentTime = details.seekTime || 0;
-            syncPlaybackState();
-        });
     }
 }
 
 function syncPlaybackState() {
     if ('mediaSession' in navigator && !isNaN(mainAudio.duration)) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-        navigator.mediaSession.setPositionState({
-            duration: mainAudio.duration,
-            playbackRate: mainAudio.playbackRate,
-            position: mainAudio.currentTime
-        });
     }
 }
 
@@ -1208,7 +1195,6 @@ mainAudio.addEventListener("timeupdate", () => {
         let dM = Math.floor(dur / 60), dS = Math.floor(dur % 60);
         musicDuration.innerText = `${dM}:${dS < 10 ? '0' + dS : dS}`;
         updateLyrics(cur);
-        if (Math.floor(cur * 10) % 10 === 0) syncPlaybackState();
     }
 });
 
@@ -1244,7 +1230,8 @@ function updateLyrics(currentTime) {
         });
     }
 }
+
 window.addEventListener("load", () => {
     initList();
-    loadMusic(musicIndex); // 強制載入第一首歌
+    setTimeout(() => loadMusic(musicIndex), 100);
 });
