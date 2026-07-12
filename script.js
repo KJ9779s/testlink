@@ -1,10 +1,9 @@
 ﻿const allMusic = [
     {
+        id: 1,
         name: " วิมานเพลง | Love Design",
         artist: " Kao Supassara, Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/85/7b/da/857bda2aab209e80f20fca0fbb38391f.jpg",
-        src: "s1.mp3",
-        video: "phP8xHNDP5E",
         lyrics: [
             { time: 0, text: "（前奏）", translation: " " },
             { time: 15, text: "ความรักเกิดขึ้นเมื่อไหร่ ก็ไม่รู้ แต่ก็เกิดไปแล้ว", translation: "我不知道愛情是何時開始的 但它就這樣發生了" },
@@ -41,11 +40,10 @@
         ]
     },
     {
+        id: 2,
         name: "Loving You",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/e9/d9/39/e9d9395a0ec6e582ce2e7c73562a56cd.jpg",
-        src: "s2.mp3",
-        video: "NjnlW04Q01A",
         lyrics: [
             { time: 0, text: " ", translation: " " },
             { time: 4, text: "ยังไงอ่ะใจ มันเป็นอะไร", translation: "這是怎麼了 心跳失了控" },
@@ -114,11 +112,10 @@
         ]
     },
     {
+        id: 3,
         name: "Our Little Thing",
         artist: "Palm Paramee",
         img: "https://i.pinimg.com/736x/c2/95/27/c29527731c80709e56483f79bd40c3f6.jpg",
-        src: "s3.mp3",
-        video: "675RmjZMDXM",
         lyrics: [
             { time: 0, text: " ", translation: " " },
             { time: 23.8, text: "I'll meet you there at our city's fair ", translation: "我會在城市的市集遇見妳" },
@@ -159,11 +156,10 @@
         ]
     },
     {
+        id: 4,
         name: "ฤดูรัก (Cover Version)",
         artist: " Kao Supassara, Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/1c/69/3f/1c693f8b964ab2d2b899b39950bc1bb2.jpg",
-        src: "s4.mp3",
-        video: "Rbr1O0UBvZo",
         lyrics: [
             { time: 0, text: "（前奏）", translation: " " },
             { time: 17, text: "ตั้งแต่วันที่ฉันได้พบเธอ", translation: "從遇見妳的那天起" },
@@ -204,11 +200,11 @@
         ]
     },
     {
+        id: 5,
         name: " Last Christmas ",
         artist: " Kao Supassara, Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/80/4d/f2/804df27bde16e748afa65bb49f44d2eb.jpg",
-        src: "s5.mp3",
-        video: "F1FXa56T0WE",
+
         lyrics: [
             { time: 0, text: "(前奏)", translation: " " },
             { time: 19.9, text: "Last Christmas I gave you my heart", translation: "去年聖誕 我把心交給妳 " },
@@ -254,11 +250,10 @@
         ]
     },
     {
+        id: 6,
         name: "ฝากใจ | 寄託心意",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/4c/7b/cf/4c7bcfd7a55fd9d28d269d5248c64d9f.jpg",
-        src: "s6.mp3",
-        video: "tCo0VPlzyKE",
         lyrics: [
             { time: 0, text: "( 前奏 ) ", translation: " " },
             { time: 24.9, text: "เธอชอบพูดว่าเธอนั้นโชคดี ที่ชีวิตได้พบเจอกับฉัน", translation: "妳總喜歡說自己很幸運 生命中遇見了我" },
@@ -302,11 +297,10 @@
         ]
     },
     {
+        id: 7,
         name: " Let it end ",
         artist: " Kao Supassara ",
         img: "https://i.pinimg.com/736x/9e/53/f8/9e53f814a569734340eb7865d0f8b181.jpg",
-        src: "s7.mp3",
-        video: "bMlm4nb8g9A",
         lyrics: [
             { time: 0, text: "(前奏)", translation: " " },
             { time: 14.1, text: "ผิดเอง ที่หลงเชื่อเธอหมดใจ", translation: "都怪我 當初太全心全意相信妳" },
@@ -361,11 +355,10 @@
 
     
     {
+        id: 8,
         name: "Dum Dum",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/92/ad/c3/92adc30e8e0378bbf751f3cf2c06a77a.jpg",
-        src: "s8.mp3",
-        video: "xG1BWRfr4Gg",
         lyrics: [
             { time: 0, text: "( 前奏 ) ", translation: " " },
             { time: 23.4, text: "Hmm, hmm, hmm-hmm", translation: "" },
@@ -420,11 +413,10 @@
         ]
     },
     {
+        id: 9,
         name: "I'll Do It How You Like It",
         artist: " Kao Supassara, Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/e4/6b/98/e46b98aa8e817decb56f5ec7e82f0289.jpg",
-        src: "s9.mp3",
-        video: "yCizek9nmTE",
         lyrics: [
             { time: 0, text: "( 前奏 ) ", translation: " " },
             { time: 10.1, text: "เธอไม่ต้องพูดอะไร", translation: "妳不必多說什麼 " },
@@ -461,11 +453,11 @@
         ]
     },
     {
+        id: 10,
         name: "有妳在",
         artist: "Kao Supassara",
         img: "https://i.pinimg.com/736x/5f/eb/f9/5febf946bdb2add0fc4a01182a4512ac.jpg",
-        src: "s10.mp3",
-        video: "moEJJtx375I",
+
         lyrics: [
             { time: 0, text: "Baby you are my light", translation: " " },
             { time: 4, text: "妳點亮我的愛", translation: " " },
@@ -512,11 +504,11 @@
         ]
     },
     {
+        id: 11,
         name: "理想情人",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/ab/70/64/ab7064fab9c6c4c94f24fc5b99ac945b.jpg",
-        src: "s11.mp3",
-        video: "VCio1RYu7u0",
+
         lyrics: [
             { time: 0, text: "( 前奏 ) ", translation: " " },
             { time: 12.3, text: "穿上洋裝 看著手錶", translation: " " },
@@ -559,11 +551,11 @@
         ]
     },
     {
+        id: 12,
         name: "愛妳但說不出口",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/58/00/84/580084459ec9f52b9504eebce1bb81f9.jpg",
-        src: "s12.mp3",
-        video: "Q3xtNfYymFE",
+
         lyrics: [
             { time: 0, text: "( 前奏 ) ", translation: " " },
             { time: 16, text: "寶貝 今晚的我有點醉", translation: " " },
@@ -612,11 +604,11 @@
         ]
     },
     {
+        id: 13,
         name: "有點甜",
         artist: "Kao Supassara, Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/cc/68/64/cc6864633acb15fba06431f6eca0debc.jpg",
-        src: "s13.mp3",
-        video: "rrN3U6nocnk",
+
         lyrics: [
             { time: 0, text: "摘一顆蘋果", translation: " " },
             { time: 2.4, text: "等妳從門前經過", translation: " " },
@@ -673,11 +665,11 @@
         ]
     },
     {
+        id: 14,
         name: "Your Love",
         artist: "Kao Supassara, Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/5e/79/61/5e79613adfe20845cdfd56901315d925.jpg",
-        src: "s14.mp3",
-        video: "SrkjXH1s_9M",
+
         lyrics: [
             { time: 0, text: "( 前奏 )", translation: " " },
             { time: 17, text: "You're the one that never lets me sleep", translation: "妳就是那個讓我輾轉難眠的人 " },
@@ -710,11 +702,11 @@
         ]
     },
     {
+        id: 15,
         name: "So Easy",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/e2/b2/e0/e2b2e0e3178f8d2d881eaa5163d4ddfc.jpg",
-        src: "s15.mp3",
-        video: "Av_At5PSnFA",
+
         lyrics: [
             { time: 0, text: " ( 前奏 ) ", translation: "" },
             { time: 7.3, text: "I could be the twist, the one to make you stop", translation: "我可以成為那個讓妳人生轉彎 為我停下腳步的人 " },
@@ -751,11 +743,11 @@
         ]
     },
     {
+        id: 16,
         name: "昨夜風今宵月",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/b9/65/3b/b9653b8829fdd9080d70a18396db53d0.jpg",
-        src: "s16.mp3",
-        video: "Oo_SnRnTjLk",
+   
         lyrics: [
             { time: 0, text: " ( 前奏 ) ", translation: "" },
             { time: 22.9, text: "我不愛 無聊人間", translation: "" },
@@ -799,11 +791,11 @@
         ]
     },
     {
+        id: 17,
         name: "戀人未滿",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/e1/21/b3/e121b38ddde89ad769c1d7f8ee778879.jpg",
-        src: "s17.mp3",
-        video: "EmfivQb4J7U",
+
         lyrics: [
             { time: 0, text: "再靠近一點點", translation: "" },
             { time: 3.1, text: "再靠近一點點 就讓妳牽手", translation: "" },
@@ -862,11 +854,11 @@
         ]
     },
     {
+        id: 18,
         name: "像晴天像雨天",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/2d/a6/b5/2da6b508e3b2080e471a2443cc3558e9.jpg",
-        src: "s18.mp3",
-        video: "iDs1ElSfM60",
+
         lyrics: [
             { time: 7, text: "措手不及", translation: "" },
             { time: 9.5, text: "遇見妳 我開始變得不太聰明", translation: "" },
@@ -892,11 +884,11 @@
         ]
     },
     {
+        id: 19,
         name: "只是太愛妳",
         artist: "Janeeyeh Methika",
         img: "https://i.pinimg.com/736x/42/11/a0/4211a09995e8d1dc387fc926ceb4bdc5.jpg",
-        src: "s19.mp3",
-        video: "bWkWBZFUnHE",
+
         lyrics: [
             { time: 0, text: "( 前奏 )", translation: "" },
             { time: 12, text: "原諒我真的喝醉了", translation: "" },
@@ -970,7 +962,7 @@ const mainContainer = document.querySelector(".main-container"),
     volumeSlider = mainContainer.querySelector("#volume-slider"),
     lyricsWrapper = document.getElementById("lyrics-wrapper"),
     loadingOverlay = document.getElementById("loading-overlay"),
-    bgVideo = document.getElementById("bg-video"); // 獲取 HTML5 <video>
+    bgVideo = document.getElementById("bg-video");
 
 let musicIndex = 0;
 let mainAudio = new Audio();
@@ -978,8 +970,24 @@ let isPlaying = false;
 let isRepeat = false;
 let currentLyricIndex = -1;
 
-// --- 初始化清單 ---
+function saveMusicOrder() {
+    localStorage.setItem("musicPlaylistOrder", JSON.stringify(allMusic.map(m => m.id)));
+}
+
+function restoreMusicOrder() {
+    const savedOrder = localStorage.getItem("musicPlaylistOrder");
+    if (savedOrder) {
+        const orderIds = JSON.parse(savedOrder);
+        allMusic.sort((a, b) => orderIds.indexOf(a.id) - orderIds.indexOf(b.id));
+    }
+}
+
 function initList() {
+    restoreMusicOrder();
+    renderList();
+}
+
+function renderList() {
     ulTag.innerHTML = "";
     allMusic.forEach((music, index) => {
         let liTag = `<li li-index="${index}">
@@ -992,6 +1000,7 @@ function initList() {
         ulTag.insertAdjacentHTML("beforeend", liTag);
     });
 
+    // 重新綁定點擊事件
     ulTag.querySelectorAll("li").forEach(li => {
         li.addEventListener("click", (e) => {
             if (e.target.classList.contains('drag-handle')) return;
@@ -1000,34 +1009,84 @@ function initList() {
             playSong();
         });
     });
+
+    if (typeof Sortable !== 'undefined') {
+        new Sortable(ulTag, {
+            handle: '.drag-handle',
+            animation: 150,
+            onEnd: function (evt) {
+                // 1. 記錄目前播放中的 ID
+                const playingId = allMusic[musicIndex].id;
+
+                // 2. 移動陣列順序
+                const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
+                allMusic.splice(evt.newIndex, 0, movedItem);
+
+                // 3. 更新 musicIndex 為該 ID 在新陣列中的索引
+                musicIndex = allMusic.findIndex(m => m.id === playingId);
+
+                // 4. 儲存順序
+                saveMusicOrder();
+
+                // 5. 重新渲染清單，確保 li-index 與陣列完全對齊
+                renderList(); 
+                
+                // 6. 強制更新發光樣式
+                playingNow(); 
+            },
+        });
+    }
+    playingNow();
 }
 
-// --- 載入與播放邏輯 ---
+function playingNow() {
+    const playingId = allMusic[musicIndex].id; // 取得當前播放歌曲的 ID
+    
+    ulTag.querySelectorAll("li").forEach(li => {
+        const index = parseInt(li.getAttribute("li-index"));
+        const music = allMusic[index];
+        
+        // 使用 ID 比對，這絕對不會出錯
+        if (music.id === playingId) {
+            li.classList.add("playing");
+        } else {
+            li.classList.remove("playing");
+        }
+    });
+}
 function loadMusic(index) {
     loadingOverlay.style.display = "flex";
     musicImg.style.opacity = "0.3"; 
     
     const music = allMusic[index];
+    
+    // 1. 更新文字與圖片
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
     musicImg.src = music.img;
     
-    // 強制重置雙重進度
-    mainAudio.src = `music/s${index + 1}.mp3`;
+    // 讓圖片顯示出來 (這是你封面一直轉圈載入的主因)
+    musicImg.onload = () => {
+        musicImg.style.opacity = "1";
+        musicImg.classList.add("visible");
+        loadingOverlay.style.display = "none";
+    };
+    
+    // 2. 載入音訊
+    mainAudio.src = `music/s${music.id}.mp3`;
+    
+    // 3. 載入歌詞 (這是你歌詞不見的主因)
+    displayLyrics(music.lyrics);
+    
+    // 4. 背景影片
     if (bgVideo) {
-        bgVideo.src = `video/v${index + 1}.mp4`;
+        bgVideo.src = `video/v${music.id}.mp4`;
         bgVideo.load();
+        bgVideo.play().catch(e => console.log("自動播放被阻擋")); 
     }
     
     mainAudio.load();
-    mainAudio.oncanplaythrough = () => {
-        loadingOverlay.style.display = "none";
-        musicImg.style.opacity = "1";
-    };
-    
-    currentLyricIndex = -1;
-    displayLyrics(music.lyrics);
-    playingNow();
+    playingNow(); 
     updateMediaSession();
 }
 
@@ -1035,7 +1094,7 @@ function playSong() {
     isPlaying = true;
     playPauseIcon.classList.replace("fa-play", "fa-pause");
     mainAudio.play();
-    if (bgVideo) bgVideo.play().catch(e => console.log("Video play failed:", e));
+    if (bgVideo) bgVideo.play().catch(e => {});
     syncPlaybackState();
 }
 
@@ -1047,7 +1106,6 @@ function pauseSong() {
     syncPlaybackState();
 }
 
-// --- 歸零同步修正 ---
 function nextMusic() {
     musicIndex = (musicIndex + 1) % allMusic.length;
     loadMusic(musicIndex);
@@ -1060,7 +1118,6 @@ function prevMusic() {
     playSong();
 }
 
-// --- 手機控制中心與進度條同步 ---
 function updateMediaSession() {
     if ('mediaSession' in navigator) {
         const music = allMusic[musicIndex];
@@ -1073,36 +1130,27 @@ function updateMediaSession() {
         navigator.mediaSession.setActionHandler('pause', pauseSong);
         navigator.mediaSession.setActionHandler('previoustrack', prevMusic);
         navigator.mediaSession.setActionHandler('nexttrack', nextMusic);
-        
-        // 核心修正：拖動進度條時，強制雙重歸零並同步
         navigator.mediaSession.setActionHandler('seekto', (details) => {
-            const time = details.seekTime || 0;
-            mainAudio.currentTime = time;
-            if (bgVideo) bgVideo.currentTime = time;
+            mainAudio.currentTime = details.seekTime || 0;
             syncPlaybackState();
         });
     }
 }
 
 function syncPlaybackState() {
-    if ('mediaSession' in navigator) {
+    if ('mediaSession' in navigator && !isNaN(mainAudio.duration)) {
         navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-        if (!isNaN(mainAudio.duration)) {
-            navigator.mediaSession.setPositionState({
-                duration: mainAudio.duration,
-                playbackRate: mainAudio.playbackRate,
-                position: mainAudio.currentTime
-            });
-        }
+        navigator.mediaSession.setPositionState({
+            duration: mainAudio.duration,
+            playbackRate: mainAudio.playbackRate,
+            position: mainAudio.currentTime
+        });
     }
 }
 
-// --- 嚴謹的時間更新事件 ---
-mainAudio.addEventListener("timeupdate", (e) => {
-    const cur = e.target.currentTime;
-    const dur = e.target.duration;
-    
-    // 更新進度條 UI
+mainAudio.addEventListener("timeupdate", () => {
+    const cur = mainAudio.currentTime;
+    const dur = mainAudio.duration;
     if (dur) {
         progressBar.style.width = `${(cur / dur) * 100}%`;
         let cM = Math.floor(cur / 60), cS = Math.floor(cur % 60);
@@ -1110,20 +1158,15 @@ mainAudio.addEventListener("timeupdate", (e) => {
         let dM = Math.floor(dur / 60), dS = Math.floor(dur % 60);
         musicDuration.innerText = `${dM}:${dS < 10 ? '0' + dS : dS}`;
         updateLyrics(cur);
+        if (Math.floor(cur * 10) % 10 === 0) syncPlaybackState();
     }
-    
-    // 手機 MediaSession 狀態更新 (降低頻率，避免卡頓)
-    if (Math.floor(cur * 10) % 10 === 0) syncPlaybackState();
 });
 
 progressArea.addEventListener("click", (e) => {
-    const time = (e.offsetX / progressArea.clientWidth) * mainAudio.duration;
-    mainAudio.currentTime = time;
-    if (bgVideo) bgVideo.currentTime = time;
+    mainAudio.currentTime = (e.offsetX / progressArea.clientWidth) * mainAudio.duration;
     playSong();
 });
 
-// --- 事件處理 ---
 playPauseBtn.addEventListener("click", () => isPlaying ? pauseSong() : playSong());
 nextBtn.addEventListener("click", nextMusic);
 prevBtn.addEventListener("click", prevMusic);
@@ -1133,44 +1176,25 @@ closeListBtn.addEventListener("click", () => musicList.classList.remove("show"))
 mainAudio.addEventListener("ended", () => isRepeat ? (mainAudio.currentTime = 0, playSong()) : nextMusic());
 volumeSlider.addEventListener("input", (e) => { mainAudio.volume = e.target.value; });
 
-function playingNow() {
-    ulTag.querySelectorAll("li").forEach(li => {
-        li.classList.toggle("playing", parseInt(li.getAttribute("li-index")) === musicIndex);
-    });
-}
-
 function displayLyrics(lyrics) {
     lyricsWrapper.innerHTML = lyrics.map(line =>
-        `<div class="lyric-line">
-            <div class="main-text">${line.text}</div>
-            <div class="sub-text">${line.translation || ""}</div>
-        </div>`
+        `<div class="lyric-line"><div class="main-text">${line.text}</div><div class="sub-text">${line.translation || ""}</div></div>`
     ).join("");
     lyricsWrapper.style.transform = `translateY(180px)`;
 }
 
 function updateLyrics(currentTime) {
     const lyrics = allMusic[musicIndex].lyrics;
-    let activeIndex = -1;
-    for (let i = 0; i < lyrics.length; i++) {
-        if (currentTime >= lyrics[i].time) activeIndex = i;
-    }
+    let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
     if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
         currentLyricIndex = activeIndex;
-        const lines = document.querySelectorAll(".lyric-line");
-        lines.forEach((line, index) => {
-            if (index === activeIndex) {
-                line.classList.add("active");
-                const offset = 170 - line.offsetTop;
-                lyricsWrapper.style.transform = `translateY(${offset}px)`;
-            } else {
-                line.classList.remove("active");
-            }
+        document.querySelectorAll(".lyric-line").forEach((line, index) => {
+            line.classList.toggle("active", index === activeIndex);
+            if (index === activeIndex) lyricsWrapper.style.transform = `translateY(${170 - line.offsetTop}px)`;
         });
     }
 }
-
 window.addEventListener("load", () => {
     initList();
-    loadMusic(musicIndex);
+    loadMusic(musicIndex); // 強制載入第一首歌
 });
