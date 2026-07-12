@@ -5,6 +5,7 @@ let musicIndex = 0;
 let mainAudio = new Audio();
 let isPlaying = false;
 let currentLyricIndex = -1;
+let isTranslated = false;
 
 // 輔助函式：將秒數轉為分:秒格式
 function formatTime(seconds) {
@@ -148,6 +149,43 @@ const app = {
             if (activeLine) {
                 activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+        }
+    },
+
+    toggleTranslation() {
+    // 1. 取得當前捲動位置
+        const wrapper = document.getElementById("lyrics-wrapper");
+        const scrollTop = wrapper.scrollTop; 
+    
+        isTranslated = !isTranslated;
+        const music = allMusic[musicIndex];
+    
+    // 2. 重新渲染內容
+        this.displayLyrics(music.lyrics);
+    
+    // 3. 使用 requestAnimationFrame 確保在 DOM 更新完成後才設定捲動位置
+        requestAnimationFrame(() => {
+            wrapper.scrollTop = scrollTop;
+        });
+    },
+
+    displayLyrics(lyrics) {
+        const wrapper = document.getElementById("lyrics-wrapper");
+        wrapper.innerHTML = lyrics.map(line => {
+            const textToDisplay = (isTranslated && line.translation) ? line.translation : line.text;
+            return `
+                <div class="lyric-line">
+                    <div class="main-text">${textToDisplay}</div>
+                </div>`;
+        }).join("");
+    
+    // 重新校正當前播放行的發亮狀態
+        const lines = document.querySelectorAll(".lyric-line");
+        if (lines[currentLyricIndex]) {
+            lines[currentLyricIndex].classList.add("active");
+        
+        // 確保切換翻譯後，當前行依然在視野內
+            lines[currentLyricIndex].scrollIntoView({ block: 'center' });
         }
     }
 };
