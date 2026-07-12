@@ -1,492 +1,205 @@
+/* --- 基礎設定 --- */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Lora", "Noto Serif TC", "Noto Serif Thai", serif;
+    font-family: "Noto Sans TC", sans-serif;
 }
 
 body {
+    background-color: #000;
+    color: #fff;
     height: 100vh;
     overflow: hidden;
-    background-color: #000;
 }
 
-/* 背景影片樣式 (取代原先的 YouTube 播放器) */
 #bg-video {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 100vw;
-    height: 100vh;
+    top: 50%; left: 50%;
+    width: 100vw; height: 100vh;
     object-fit: cover;
     transform: translate(-50%, -50%);
-    z-index: -999;
-    filter: brightness(0.6);
-    pointer-events: none;
+    z-index: -1;
+    filter: brightness(0.4);
 }
 
-.watermark {
+/* --- 視圖與內容區 --- */
+#content-area {
+    padding: 20px;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+h1 { margin-bottom: 20px; font-size: 24px; }
+
+.music-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    list-style: none;
+}
+
+.music-grid li {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+.music-grid li:hover { background: rgba(255, 255, 255, 0.15); }
+
+.music-grid li img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    object-fit: cover;
+}
+
+/* --- 底部固定播放器 (Mini Player) --- */
+#bottom-player {
     position: fixed;
-    top: 25px;
-    right: 80px;
+    bottom: 60px;
+    left: 10px; right: 10px;
+    height: 65px;
+    background: #181818;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 5px; 
-    z-index: 100;
+    padding: 0 15px;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    cursor: pointer;
 }
 
-.watermark img {
-    width: 18px;
-    height: 18px;
-    filter: brightness(0) invert(1) opacity(0.4);
+#mini-img {
+    width: 45px; height: 45px;
+    border-radius: 4px;
+    object-fit: cover;
 }
 
-.watermark span {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 15px;
-    letter-spacing: 0.5px;
-}
+.mini-info { flex: 1; margin-left: 15px; overflow: hidden; }
 
-.main-container {
-    position: relative;
+/* --- 底部導航欄 --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background: #000;
     display: flex;
+    justify-content: space-around;
     align-items: center;
-    justify-content: flex-start;
-    height: 100vh;
-    width: 100vw;
-    padding-left: 5%;
-    gap: 50px;
-    z-index: 10;
+    border-top: 1px solid #333;
+    z-index: 2000;
 }
+
+.bottom-nav a {
+    color: #b3b3b3;
+    text-decoration: none;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* --- 全螢幕播放頁 (Full Player) --- */
+/* 確保全螢幕播放器完全遮蓋其他內容 */
+#full-player {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000; /* 改為純黑色，不要半透明，以免蓋住後面的列表 */
+    z-index: 5000; /* 提高層級 */
+    display: none;
+    flex-direction: column;
+}
+
+#full-player.active { display: flex; }
 
 .player-card {
-    width: 320px;
-    padding: 25px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
-    color: #fff;
-    flex-shrink: 0;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
 }
 
-.img-area {
+.player-header {
+    display: flex;
+    justify-content: space-between;
     width: 100%;
-    height: 250px;
-    border-radius: 15px;
-    overflow: hidden;
-    position: relative;
+    align-items: center;
+    margin-bottom: 20px;
 }
+
+.player-header button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.main-view-container {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 視圖切換樣式 */
+.active-view { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.inactive-view { display: none; }
 
 .img-area img {
-    width: 100%;
-    height: 100%;
+    width: 300px;
+    height: 300px;
+    border-radius: 12px;
     object-fit: cover;
+    margin-bottom: 20px;
 }
 
-.song-details {
-    margin-top: 25px;
-}
-
-.song-details .name {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #fff;
-}
-
-.song-details .artist {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.5); 
-    font-weight: 400;
-}
-
-.progress-area {
-    height: 6px;
-    width: 100%;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50px;
-    cursor: pointer;
-    margin: 30px 0 10px 0;
-}
-
-.progress-bar {
-    height: inherit;
-    width: 0%;
-    border-radius: inherit;
-    background: #fff;
-    position: relative;
-}
-
-.timer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 5px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 30px 0 20px;
-    padding: 0 5px;
-}
-
-.controls i {
-    font-size: 24px;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.2s, opacity 0.3s;
-}
-
-.controls i:active {
-    transform: scale(0.9);
-}
-
-.play-pause {
-    height: 54px;
-    width: 54px;
-    background: #fff;
-    color: #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.repeat-btn-container {
-    position: relative;
-    cursor: pointer;
-    opacity: 0.4; 
-    transition: all 0.3s ease;
-    padding: 10px; 
-}
-
-.repeat-btn-container:hover {
-    opacity: 1;
-}
-
-.repeat-btn-container i {
-    font-size: 22px; 
-    color: #fff;
-}
-
-.repeat-one {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 11px;
-    font-weight: 900;
-    color: #fff;
-    pointer-events: none;
-}
-
-.repeat-btn-container.active {
-    opacity: 1;
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
-}
-
-#show-list {
-    opacity: 0.5;
-}
-
-#show-list:hover {
-    opacity: 1;
-}
-
-.volume-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 35px;
-    gap: 12px;
-    padding: 10px 0;
-}
-
-#volume-slider {
-    width: 200px; 
-    cursor: pointer;
-    accent-color: #fff;
-    height: 6px; 
-    opacity: 0.6;
-    transition: opacity 0.3s;
-    -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
-}
-
+/* 歌詞區樣式 */
 .lyrics-area {
-    width: 850px;
-    height: 550px;
-    overflow: hidden;
+    width: 100%;
+    height: 400px;
+    overflow-y: auto;
     mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-}
-
-#lyrics-wrapper {
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    text-align: center;
 }
 
 .lyric-line {
-    padding: 30px 60px;
-    opacity: 0.3;
-    transition: all 0.5s ease;
+    padding: 15px;
+    opacity: 0.5;
+    transition: all 0.3s ease; /* 加入過渡效果 */
+    font-size: 18px;
     color: #fff;
-    font-size: 26px; 
-    line-height: 1.6;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
-
 .lyric-line.active {
     opacity: 1;
-    transform: scale(1.05);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 15px rgba(255, 255, 255, 0.3), 0 2px 5px rgba(0, 0, 0, 1);
+    color: #1db954; /* 綠色發亮，可自行更改 */
+    font-size: 22px; /* 變大一點更醒目 */
+    font-weight: bold;
 }
 
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+/* --- 通用 --- */
+.disclaimer-footer { display: none; }
+
+.progress-container {
+    width: 300px;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+    margin: 20px 0;
+}
+
+.progress-bar {
+    width: 0%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85); 
-    backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    border-radius: 15px;
-    pointer-events: none;
-}
-#main-img {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#main-img.visible {
-    opacity: 1;
-}
-
-.loader {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #fff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.music-list {
-    position: fixed;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1000;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    display: flex;
-    flex-direction: column;
-    color: #fff;
-}
-
-@media (min-width: 769px) {
-    .music-list {
-        top: 0;
-        right: -400px;
-        width: 350px;
-        height: 100vh;
-    }
-    .music-list.show {
-        right: 0;
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-    }
-}
-
-@media (max-width: 768px) {
-    .music-list {
-        left: 0;
-        bottom: -100%;
-        width: 100%;
-        height: 75vh;
-        border-radius: 25px 25px 0 0;
-        touch-action: pan-y;
-    }
-    .music-list.show {
-        bottom: 0;
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
-    }
-    .volume-area {
-        display: none;
-    }
-    .music-list ul li:hover {
-        background: transparent !important;
-        transition: none;
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-touch-callout: none;
-        touch-action: pan-y;
-    }
-    .music-list ul li.playing {
-       background: rgba(255, 255, 255, 0.15) !important;
-       border-left: 4px solid #fff;
-    }
-}
-
-.music-list .header {
-    padding: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.music-list .header .row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.music-list .header i {
-    cursor: pointer;
-    font-size: 20px;
-    opacity: 0.7;
-    transition: 0.2s;
-}
-
-.music-list .header i:hover {
-    opacity: 1;
-}
-
-.music-list ul {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 0;
-}
-
-.music-list ul::-webkit-scrollbar {
-    width: 5px;
-}
-.music-list ul::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-}
-
-.music-list ul li {
-    list-style: none;
-    padding: 15px 25px;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.2s ease;
-    user-select: none;
-}
-
-.music-list ul li:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.music-list ul li.playing {
-    background: rgba(255, 255, 255, 0.15);
-    border-left: 4px solid #fff;
-}
-
-.music-list ul li .row {
-    flex: 1; 
-    pointer-events: none; 
-}
-
-.music-list ul li .row span {
-    font-size: 15px;
-    color: #fff;
-    display: block;
-}
-
-.music-list ul li .row p {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 2px;
-}
-
-.music-list ul li {
-    list-style: none;
-    padding: 12px 20px;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.2s ease;
-    
-    display: flex;
-    align-items: center;
-}
-
-.music-list ul li:active {
-    cursor: grabbing;
-}
-
-.drag-handle {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-    opacity: 0.4;
-    cursor: grab;
-    flex-shrink: 0;
-    touch-action: manipulation; 
-    -webkit-user-select: none;
-    user-select: none;
-}
-.drag-handle:active {
-    cursor: grabbing;
-}
-
-.sortable-ghost {
-    opacity: 0.8 !important; 
-    background: rgba(255, 255, 255, 0.3) !important; 
-    border: 1px solid #fff;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); 
-}
-.sortable-chosen {
-    background: rgba(255, 255, 255, 0.1) !important;
-}
-#password-screen {
-    backdrop-filter: blur(10px); 
-}
-
-#password-input:focus {
-    border-color: #fff !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-}
-
-#password-screen button:hover {
-    background: #cccccc !important;
-}
-.disclaimer-footer {
-    position: fixed !important;
-    bottom: 10px !important;
-    left: 0 !important;
-    right: 0 !important;
-    text-align: center !important;
-    font-size: 11px !important;
-    color: rgba(255, 255, 255, 0.4) !important;
-    letter-spacing: 0.5px !important;
-    z-index: 99999 !important;
-    pointer-events: none !important;
-    padding: 0 20px !important;
-    display: block !important;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    background: #1db954; /* Spotify 綠 */
+    border-radius: 2px;
 }

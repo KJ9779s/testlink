@@ -3,88 +3,81 @@
 	<head>
 		<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>不是設計愛情 是設計我</title>
+				<title>KOKO MUSIC</title>
 				<link rel="stylesheet" href="style.css">
 					<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 	<body>
-
-		<div class="watermark">
-			<img src="threads.png">
-				<span>kjsy97</span>
-			</div>
-
-		<!-- 背景影片區塊 -->
 		<video id="bg-video" autoplay="" loop="" muted="" playsinline="" preload="auto">
 			<source src="" type="video/mp4">
     </video>
 
-		<div class="main-container">
-			<div class="wrapper">
-				<div class="player-card">
-					<div class="img-area">
-						<div id="loading-overlay" class="loading-overlay">
-							<div class="loader"></div>
-							<span>Loading...</span>
-						</div>
-						<img src="" alt="Music Cover" id="main-img">
-                </div>
-
-					<div class="song-details">
-						<p class="name"></p>
-						<p class="artist"></p>
-					</div>
-
-					<div class="progress-area">
-						<div class="progress-bar"></div>
-						<div class="timer">
-							<span class="current">0:00</span>
-							<span class="duration">0:00</span>
-						</div>
-					</div>
-
-					<div class="controls">
-						<div id="repeat-plist" class="repeat-btn-container" title="單曲循環">
-							<i class="fas fa-redo-alt"></i>
-							<span class="repeat-one">1</span>
-						</div>
-						<i id="prev" class="fas fa-step-backward"></i>
-						<div class="play-pause">
-							<i class="fas fa-play"></i>
-						</div>
-						<i id="next" class="fas fa-step-forward"></i>
-						<i id="show-list" class="fas fa-list"></i>
-					</div>
-
-					<div class="volume-area">
-						<i class="fas fa-volume-up"></i>
-						<input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
-                </div>
-				</div>
+		<div id="content-area">
+			<div id="home-view" class="view">
+				<h1>所有歌曲</h1>
+				<ul id="home-list" class="music-grid"></ul>
 			</div>
-
-			<div class="lyrics-area">
-				<div id="lyrics-wrapper"></div>
+			<div id="library-view" class="view" style="display:none;">
+				<h1>喜愛歌曲</h1>
+				<ul id="library-list" class="music-grid"></ul>
 			</div>
-
-			<div class="music-list">
-				<div class="header">
-					<div class="row">
-						<i class="fas fa-list"></i>
-						<span>播放清單</span>
-					</div>
-					<i id="close-list" class="fas fa-times"></i>
-				</div>
-				<ul></ul>
-			</div>
-
-			<footer class="disclaimer-footer">
-				本網頁僅供粉絲個人應援使用，非商業用途。網頁內所有圖片、音訊及影片之著作權均屬藝人及其所屬經紀公司所有。若有侵權請告知，將立即配合移除。
-			</footer>
 		</div>
 
-		<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-		<script src="script.js"></script>
+		<div id="bottom-player" onclick="togglePlayerView()">
+			<img src="" id="mini-img" alt="Cover">
+				<div class="mini-info">
+					<p id="mini-name">選擇一首歌</p>
+				</div>
+				<i id="mini-play" class="fas fa-play"></i>
+			</div>
 
+		<div id="full-player">
+			<div class="player-card">
+				<div class="player-header">
+					<button onclick="togglePlayerView()">
+						<i class="fas fa-chevron-down"></i>
+					</button>
+					<p>正在播放</p>
+					<button id="view-switch-btn" onclick="toggleLyricsView()">
+						<i class="fas fa-list-ul"></i>
+					</button>
+				</div>
+				<div class="main-view-container">
+					<div id="cover-view" class="active-view">
+						<div class="img-area">
+							<img src="" alt="Cover" id="main-img">
+						</div>
+						<div class="song-details">
+							<p class="name"></p>
+							<p class="artist"></p>
+						</div>
+					</div>
+					<div id="lyrics-view" class="inactive-view">
+						<div class="lyrics-area">
+							<div id="lyrics-wrapper"></div>
+						</div>
+					</div>
+				</div>
+				<!-- 進度條區塊：解決 script.js 錯誤的核心 -->
+				<div class="progress-container">
+					<div class="progress-bar"></div>
+				</div>
+			</div>
+		</div>
+
+		<nav class="bottom-nav">
+			<a href="#" onclick="showView('home')">
+				<i class="fas fa-home"></i>
+				<br>首頁
+			</a>
+			<a href="#" onclick="showView('library')">
+				<i class="fas fa-music"></i>
+				<br>音樂庫
+			</a>
+		</nav>
+
+		<script src="data.js"></script>
+		<script src="lyrics.js"></script>
+		<script src="script.js"></script>
 	</body>
 </html>
