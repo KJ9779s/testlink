@@ -1024,7 +1024,9 @@ let mainAudio = new Audio();
 let isPlaying = false;
 let isRepeat = false;
 let currentLyricIndex = -1;
-let sortableInstance = null; // 確保實例變數已宣告
+let sortableInstance = null;
+
+// --- 核心功能函數 ---
 
 function saveMusicOrder() {
     localStorage.setItem("musicPlaylistOrder", JSON.stringify(allMusic.map(m => m.id)));
@@ -1037,9 +1039,7 @@ function restoreMusicOrder() {
         allMusic.sort((a, b) => {
             let ia = orderIds.indexOf(a.id);
             let ib = orderIds.indexOf(b.id);
-            if (ia === -1) ia = 9999;
-            if (ib === -1) ib = 9999;
-            return ia - ib;
+            return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
         });
     }
 }
@@ -1055,19 +1055,12 @@ function initSortable() {
     sortableInstance = new Sortable(ulTag, {
         handle: '.drag-handle',
         animation: 150,
-        delay: 90,
-        delayOnTouchOnly: true,
-        touchStartThreshold: 5,
-        forceFallback: true,
-        fallbackTolerance: 3,
         onEnd: function (evt) {
             const playingId = allMusic[musicIndex].id;
             const movedItem = allMusic.splice(evt.oldIndex, 1)[0];
             allMusic.splice(evt.newIndex, 0, movedItem);
-
             musicIndex = allMusic.findIndex(m => m.id === playingId);
             saveMusicOrder();
-            
             ulTag.querySelectorAll("li").forEach((li, index) => li.setAttribute("li-index", index));
             playingNow();
         },
@@ -1077,16 +1070,12 @@ function initSortable() {
 function renderList() {
     ulTag.innerHTML = "";
     allMusic.forEach((music, index) => {
-        let liTag = `<li li-index="${index}">
-                        <i class="fas fa-bars drag-handle"></i> 
-                        <div class="row">
-                            <span>${music.name}</span>
-                            <p>${music.artist}</p>
-                        </div>
-                    </li>`;
-        ulTag.insertAdjacentHTML("beforeend", liTag);
+        ulTag.insertAdjacentHTML("beforeend", `
+            <li li-index="${index}">
+                <i class="fas fa-bars drag-handle"></i> 
+                <div class="row"><span>${music.name}</span><p>${music.artist}</p></div>
+            </li>`);
     });
-
     ulTag.querySelectorAll("li").forEach(li => {
         li.addEventListener("click", (e) => {
             if (e.target.classList.contains('drag-handle')) return;
@@ -1101,11 +1090,12 @@ function renderList() {
 function playingNow() {
     const playingId = allMusic[musicIndex].id;
     ulTag.querySelectorAll("li").forEach(li => {
-        const index = parseInt(li.getAttribute("li-index"));
-        const music = allMusic[index];
+        const music = allMusic[parseInt(li.getAttribute("li-index"))];
         li.classList.toggle("playing", music.id === playingId);
     });
 }
+
+// --- 載入與播放邏輯 ---
 
 function loadMusic(index) {
     loadingOverlay.style.display = "flex";
@@ -1115,7 +1105,6 @@ function loadMusic(index) {
     musicName.innerText = music.name;
     musicArtist.innerText = music.artist;
     
-    // 修正：先綁定事件，後賦值 src，並處理快取情況
     musicImg.onload = () => {
         musicImg.style.opacity = "1";
         musicImg.classList.add("visible");
@@ -1124,21 +1113,31 @@ function loadMusic(index) {
     musicImg.src = music.img;
     if (musicImg.complete) musicImg.onload();
     
+    // 設定 preload="metadata" 讓瀏覽器僅載入音頻資訊，提升效率[cite: 2]
     mainAudio.src = `music/s${music.id}.mp3`;
+    mainAudio.preload = "metadata"; 
     displayLyrics(music.lyrics);
     
     if (bgVideo) {
-        const videoSrc = `video/v${music.id}.mp4`;
-        if (bgVideo.getAttribute('src') !== videoSrc) {
-            bgVideo.src = videoSrc;
-            bgVideo.load();
-            bgVideo.play().catch(e => console.log("自動播放被阻擋")); 
-        }
+        bgVideo.src = `video/v${music.id}.mp4`;
+        bgVideo.load();
     }
     
     mainAudio.load();
-    playingNow(); 
+    playingNow();
     updateMediaSession();
+    
+    // 每次載入歌曲時，自動預載下一首[cite: 2]
+    preloadNextMusic(index);
+}
+
+function preloadNextMusic(index) {
+    const nextIndex = (index + 1) % allMusic.length;
+    const nextMusic = allMusic[nextIndex];
+    const img = new Image(); img.src = nextMusic.img;
+    const audio = new Audio(`music/s${nextMusic.id}.mp3`); audio.preload = "auto";
+    const video = document.createElement('video'); video.src = `video/v${nextMusic.id}.mp4`; video.preload = "auto";
+    console.log(`已在背景預載: ${nextMusic.name}`);
 }
 
 function playSong() {
@@ -1157,6 +1156,8 @@ function pauseSong() {
     syncPlaybackState();
 }
 
+// --- 輔助功能 ---
+
 function nextMusic() {
     musicIndex = (musicIndex + 1) % allMusic.length;
     loadMusic(musicIndex);
@@ -1173,9 +1174,7 @@ function updateMediaSession() {
     if ('mediaSession' in navigator) {
         const music = allMusic[musicIndex];
         navigator.mediaSession.metadata = new MediaMetadata({
-            title: music.name,
-            artist: music.artist,
-            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+            title: music.name, artist: music.artist, artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
         });
         navigator.mediaSession.setActionHandler('play', playSong);
         navigator.mediaSession.setActionHandler('pause', pauseSong);
@@ -1190,9 +1189,10 @@ function syncPlaybackState() {
     }
 }
 
+// --- 事件監聽 ---
+
 mainAudio.addEventListener("timeupdate", () => {
-    const cur = mainAudio.currentTime;
-    const dur = mainAudio.duration;
+    const cur = mainAudio.currentTime, dur = mainAudio.duration;
     if (dur) {
         progressBar.style.width = `${(cur / dur) * 100}%`;
         let cM = Math.floor(cur / 60), cS = Math.floor(cur % 60);
@@ -1236,62 +1236,21 @@ function updateLyrics(currentTime) {
     }
 }
 
+// --- 初始化啟動 ---
+
 window.addEventListener("load", () => {
     initList();
-    // 直接載入，不需要 setTimeout 延遲
     loadMusic(musicIndex);
-    // 預載下一首，提升切換體驗
-    preloadNextMusic(musicIndex); 
 });
 
-// 鍵盤快捷鍵控制
 window.addEventListener("keydown", (e) => {
-    // 預防網頁自動捲動（當按下空白鍵或方向鍵時）
-    const keysToBlock = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-    if (keysToBlock.includes(e.code)) {
-        e.preventDefault();
-    }
-
+    const keys = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (keys.includes(e.code)) e.preventDefault();
     switch (e.code) {
-        case "Space": // 空白鍵：播放/暫停
-            isPlaying ? pauseSong() : playSong();
-            break;
-        case "ArrowLeft": // 左鍵：快退 10 秒
-            mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 10);
-            syncPlaybackState(); // 同步媒體控制狀態
-            break;
-        case "ArrowRight": // 右鍵：快進 10 秒
-            mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 10);
-            syncPlaybackState(); // 同步媒體控制狀態
-            break;
-        case "ArrowUp": // 上鍵：音量增加
-            volumeSlider.value = Math.min(1, parseFloat(volumeSlider.value) + 0.05);
-            mainAudio.volume = volumeSlider.value;
-            break;
-        case "ArrowDown": // 下鍵：音量減少
-            volumeSlider.value = Math.max(0, parseFloat(volumeSlider.value) - 0.05);
-            mainAudio.volume = volumeSlider.value;
-            break;
+        case "Space": isPlaying ? pauseSong() : playSong(); break;
+        case "ArrowLeft": mainAudio.currentTime -= 10; syncPlaybackState(); break;
+        case "ArrowRight": mainAudio.currentTime += 10; syncPlaybackState(); break;
+        case "ArrowUp": volumeSlider.value = Math.min(1, +volumeSlider.value + 0.05); mainAudio.volume = volumeSlider.value; break;
+        case "ArrowDown": volumeSlider.value = Math.max(0, +volumeSlider.value - 0.05); mainAudio.volume = volumeSlider.value; break;
     }
 });
-
-// 在 script.js 加入預載函數
-function preloadNextMusic(index) {
-    const nextIndex = (index + 1) % allMusic.length;
-    const nextMusic = allMusic[nextIndex];
-    
-    // 預載圖片
-    const img = new Image();
-    img.src = nextMusic.img;
-    
-    // 預載音訊 (使用 Audio 物件但不播放)
-    const audio = new Audio(`music/s${nextMusic.id}.mp3`);
-    audio.preload = "auto"; 
-    
-    // 預載影片 (如果有的話)
-    const video = document.createElement('video');
-    video.src = `video/v${nextMusic.id}.mp4`;
-    video.preload = "auto";
-    
-    console.log(`已預載歌曲: ${nextMusic.name}`);
-}
