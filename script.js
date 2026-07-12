@@ -7,6 +7,7 @@ let isPlaying = false;
 let currentLyricIndex = -1;
 
 const app = {
+    // DOM 元素選取
     homeList: document.getElementById("home-list"),
     libraryList: document.getElementById("library-list"),
     miniPlayer: document.getElementById("bottom-player"),
@@ -65,29 +66,79 @@ const app = {
     playSong() {
         mainAudio.play();
         isPlaying = true;
-        this.miniPlayIcon.className = "fas fa-pause";
+    
+    // 定義播放中要顯示的圖示
+        const pauseIcon = '<i class="fas fa-pause"></i>';
+    
+    // 更新所有位置的按鈕
+        if (document.getElementById("mini-play-btn")) {
+            document.getElementById("mini-play-btn").innerHTML = pauseIcon;
+        }
+        if (document.getElementById("play-pause-btn")) {
+            document.getElementById("play-pause-btn").innerHTML = pauseIcon;
+        }
+    // 更新底部導航上方原本的播放圖示 (若仍需保留)
+        if (this.miniPlayIcon) {
+            this.miniPlayIcon.className = "fas fa-pause";
+        }
+    },
+
+    pauseSong() {
+        mainAudio.pause();
+        isPlaying = false;
+    
+    // 定義暫停時要顯示的圖示
+        const playIcon = '<i class="fas fa-play"></i>';
+    
+    // 更新所有位置的按鈕
+        if (document.getElementById("mini-play-btn")) {
+            document.getElementById("mini-play-btn").innerHTML = playIcon;
+        }
+        if (document.getElementById("play-pause-btn")) {
+            document.getElementById("play-pause-btn").innerHTML = playIcon;
+        }
+    // 更新底部導航上方原本的播放圖示
+        if (this.miniPlayIcon) {
+            this.miniPlayIcon.className = "fas fa-play";
+        }
+    },
+
+    togglePlay() {
+        if (isPlaying) this.pauseSong();
+        else this.playSong();
+    },
+
+    nextSong() {
+        musicIndex = (musicIndex + 1) % allMusic.length;
+        this.loadMusic(musicIndex);
+        this.playSong();
+    },
+
+    prevSong() {
+        musicIndex = (musicIndex - 1 + allMusic.length) % allMusic.length;
+        this.loadMusic(musicIndex);
+        this.playSong();
+    },
+
+    seek(e) {
+        const container = e.currentTarget;
+        const width = container.clientWidth;
+        const clickX = e.offsetX;
+        const duration = mainAudio.duration;
+        mainAudio.currentTime = (clickX / width) * duration;
     },
 
     setupAudioEvents() {
         mainAudio.addEventListener("timeupdate", (e) => {
             const { currentTime, duration } = e.target;
-        
-        // 檢查 progressBar 是否存在，避免出現 'reading style' 的 null 錯誤
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
             }
-        
-        // 更新歌詞滾動與發亮效果
             this.updateLyrics(currentTime);
         });
 
-        mainAudio.addEventListener("ended", () => {
-            musicIndex = (musicIndex + 1) % allMusic.length;
-            this.loadMusic(musicIndex);
-            this.playSong();
-        });
+        mainAudio.addEventListener("ended", () => this.nextSong());
     },
-
 
     displayLyrics(lyrics) {
         const wrapper = document.getElementById("lyrics-wrapper");
@@ -98,30 +149,23 @@ const app = {
 
     updateLyrics(currentTime) {
         const lyrics = allMusic[musicIndex].lyrics;
-    // 找出當前時間對應的歌詞索引
         let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
-    
+        
         if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
             currentLyricIndex = activeIndex;
-        
-        // 移除所有發亮效果，並加上當前行的效果[cite: 4]
             const lines = document.querySelectorAll(".lyric-line");
             lines.forEach((line, index) => {
                 line.classList.toggle("active", index === activeIndex);
             });
-
-        // 核心：自動捲動[cite: 4]
             const activeLine = lines[activeIndex];
             if (activeLine) {
-                activeLine.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
+                activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
     }
 };
 
+// --- 全域輔助函式 ---
 function showView(viewName) {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     document.getElementById(`${viewName}-view`).style.display = 'block';
@@ -136,7 +180,6 @@ function toggleLyricsView() {
     const lyricsView = document.getElementById('lyrics-view');
     const switchBtn = document.getElementById('view-switch-btn');
 
-    // 切換顯示狀態
     if (coverView.style.display !== 'none') {
         coverView.style.display = 'none';
         lyricsView.style.display = 'flex';

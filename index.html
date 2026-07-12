@@ -8,10 +8,13 @@
 					<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 	<body>
+
+		<!-- 背景影片 -->
 		<video id="bg-video" autoplay="" loop="" muted="" playsinline="" preload="auto">
 			<source src="" type="video/mp4">
     </video>
 
+		<!-- 主要內容區域 (首頁/音樂庫切換) -->
 		<div id="content-area">
 			<div id="home-view" class="view">
 				<h1>所有歌曲</h1>
@@ -23,16 +26,32 @@
 			</div>
 		</div>
 
-		<div id="bottom-player" onclick="togglePlayerView()">
-			<img src="" id="mini-img" alt="Cover">
-				<div class="mini-info">
-					<p id="mini-name">選擇一首歌</p>
+		<!-- 底部固定播放器 (Mini Player) -->
+		<div id="bottom-player">
+			<div class="mini-main" onclick="togglePlayerView()">
+				<img src="" id="mini-img" alt="Cover">
+					<div class="mini-info">
+						<p id="mini-name">選擇一首歌</p>
+					</div>
 				</div>
-				<i id="mini-play" class="fas fa-play"></i>
+			<!-- 底部播放器的控制器 -->
+			<div class="mini-controls">
+				<button onclick="app.prevSong()">
+					<i class="fas fa-step-backward"></i>
+				</button>
+				<button onclick="app.togglePlay()" id="mini-play-btn">
+					<i class="fas fa-play"></i>
+				</button>
+				<button onclick="app.nextSong()">
+					<i class="fas fa-step-forward"></i>
+				</button>
 			</div>
+		</div>
 
+		<!-- 全螢幕播放頁 -->
 		<div id="full-player">
 			<div class="player-card">
+				<!-- 頂部導航列 -->
 				<div class="player-header">
 					<button onclick="togglePlayerView()">
 						<i class="fas fa-chevron-down"></i>
@@ -42,29 +61,48 @@
 						<i class="fas fa-list-ul"></i>
 					</button>
 				</div>
+
+				<!-- 視圖切換容器 -->
 				<div class="main-view-container">
+					<!-- 封面視圖 -->
 					<div id="cover-view" class="active-view">
 						<div class="img-area">
 							<img src="" alt="Cover" id="main-img">
-						</div>
+                    </div>
 						<div class="song-details">
 							<p class="name"></p>
 							<p class="artist"></p>
 						</div>
 					</div>
+					<!-- 歌詞視圖 -->
 					<div id="lyrics-view" class="inactive-view">
 						<div class="lyrics-area">
 							<div id="lyrics-wrapper"></div>
 						</div>
 					</div>
 				</div>
-				<!-- 進度條區塊：解決 script.js 錯誤的核心 -->
-				<div class="progress-container">
-					<div class="progress-bar"></div>
+
+				<!-- 音訊控制區 -->
+				<div class="controls-area">
+					<div class="progress-container" onclick="app.seek(event)">
+						<div class="progress-bar"></div>
+					</div>
+					<div class="main-controls">
+						<button onclick="app.prevSong()">
+							<i class="fas fa-step-backward"></i>
+						</button>
+						<button onclick="app.togglePlay()" id="play-pause-btn">
+							<i class="fas fa-pause"></i>
+						</button>
+						<button onclick="app.nextSong()">
+							<i class="fas fa-step-forward"></i>
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
 
+		<!-- 底部導航欄 -->
 		<nav class="bottom-nav">
 			<a href="#" onclick="showView('home')">
 				<i class="fas fa-home"></i>
@@ -76,6 +114,7 @@
 			</a>
 		</nav>
 
+		<!-- 載入順序 -->
 		<script src="data.js"></script>
 		<script src="lyrics.js"></script>
 		<script src="script.js"></script>

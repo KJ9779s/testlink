@@ -71,7 +71,14 @@ h1 { margin-bottom: 20px; font-size: 24px; }
     padding: 0 15px;
     z-index: 1000;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.mini-main {
+    display: flex;
+    align-items: center;
+    flex: 1;
     cursor: pointer;
+    overflow: hidden;
 }
 
 #mini-img {
@@ -80,7 +87,22 @@ h1 { margin-bottom: 20px; font-size: 24px; }
     object-fit: cover;
 }
 
-.mini-info { flex: 1; margin-left: 15px; overflow: hidden; }
+.mini-info { flex: 1; margin-left: 15px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+.mini-controls {
+    display: flex;
+    gap: 15px;
+    margin-left: 10px;
+}
+
+.mini-controls button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    width: 30px;
+}
 
 /* --- 底部導航欄 --- */
 .bottom-nav {
@@ -104,15 +126,15 @@ h1 { margin-bottom: 20px; font-size: 24px; }
 }
 
 /* --- 全螢幕播放頁 (Full Player) --- */
-/* 確保全螢幕播放器完全遮蓋其他內容 */
 #full-player {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: #000; /* 改為純黑色，不要半透明，以免蓋住後面的列表 */
-    z-index: 5000; /* 提高層級 */
-    display: none;
+    background: #000;
+    z-index: 5000;
+    display: none; 
     flex-direction: column;
+    padding: 20px;
 }
 
 #full-player.active { display: flex; }
@@ -175,31 +197,50 @@ h1 { margin-bottom: 20px; font-size: 24px; }
 .lyric-line {
     padding: 15px;
     opacity: 0.5;
-    transition: all 0.3s ease; /* 加入過渡效果 */
+    transition: all 0.3s ease;
     font-size: 18px;
     color: #fff;
 }
 .lyric-line.active {
     opacity: 1;
-    color: #1db954; /* 綠色發亮，可自行更改 */
-    font-size: 22px; /* 變大一點更醒目 */
+    color: #1db954;
+    font-size: 22px;
     font-weight: bold;
 }
 
-/* --- 通用 --- */
-.disclaimer-footer { display: none; }
+/* --- 控制區域樣式 --- */
+.controls-area { width: 100%; max-width: 400px; margin-top: auto; padding-bottom: 20px; }
 
 .progress-container {
-    width: 300px;
-    height: 4px;
+    width: 100%;
+    height: 5px;
     background: #444;
-    border-radius: 2px;
-    margin: 20px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
 }
 
 .progress-bar {
     width: 0%;
     height: 100%;
-    background: #1db954; /* Spotify 綠 */
-    border-radius: 2px;
+    background: #1db954;
+    border-radius: 5px;
+    transition: width 0.1s;
 }
+
+.main-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.main-controls button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+#play-pause-btn { font-size: 50px; }
