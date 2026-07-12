@@ -6,8 +6,14 @@ let mainAudio = new Audio();
 let isPlaying = false;
 let currentLyricIndex = -1;
 
+// 輔助函式：將秒數轉為分:秒格式
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
 const app = {
-    // DOM 元素選取
     homeList: document.getElementById("home-list"),
     libraryList: document.getElementById("library-list"),
     miniPlayer: document.getElementById("bottom-player"),
@@ -66,41 +72,19 @@ const app = {
     playSong() {
         mainAudio.play();
         isPlaying = true;
-    
-    // 定義播放中要顯示的圖示
         const pauseIcon = '<i class="fas fa-pause"></i>';
-    
-    // 更新所有位置的按鈕
-        if (document.getElementById("mini-play-btn")) {
-            document.getElementById("mini-play-btn").innerHTML = pauseIcon;
-        }
-        if (document.getElementById("play-pause-btn")) {
-            document.getElementById("play-pause-btn").innerHTML = pauseIcon;
-        }
-    // 更新底部導航上方原本的播放圖示 (若仍需保留)
-        if (this.miniPlayIcon) {
-            this.miniPlayIcon.className = "fas fa-pause";
-        }
+        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
+        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
     },
 
     pauseSong() {
         mainAudio.pause();
         isPlaying = false;
-    
-    // 定義暫停時要顯示的圖示
         const playIcon = '<i class="fas fa-play"></i>';
-    
-    // 更新所有位置的按鈕
-        if (document.getElementById("mini-play-btn")) {
-            document.getElementById("mini-play-btn").innerHTML = playIcon;
-        }
-        if (document.getElementById("play-pause-btn")) {
-            document.getElementById("play-pause-btn").innerHTML = playIcon;
-        }
-    // 更新底部導航上方原本的播放圖示
-        if (this.miniPlayIcon) {
-            this.miniPlayIcon.className = "fas fa-play";
-        }
+        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = playIcon;
+        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = playIcon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-play";
     },
 
     togglePlay() {
@@ -133,6 +117,9 @@ const app = {
             const { currentTime, duration } = e.target;
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
+                // 更新時間文字顯示
+                document.getElementById("current-time").innerText = formatTime(currentTime);
+                document.getElementById("total-duration").innerText = formatTime(duration);
             }
             this.updateLyrics(currentTime);
         });
