@@ -6,9 +6,11 @@ let mainAudio = new Audio();
 let isPlaying = false;
 let currentLyricIndex = -1;
 let isTranslated = false;
+let isLoop = false;
 
 // 輔助函式：將秒數轉為分:秒格式
 function formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -54,11 +56,12 @@ const app = {
 
     loadMusic(index) {
         const music = allMusic[musicIndex];
-        document.getElementById("mini-img").src = music.img;
-        document.getElementById("mini-name").innerText = music.name;
-        document.getElementById("main-img").src = music.img;
-        document.querySelector(".song-details .name").innerText = music.name;
-        document.querySelector(".song-details .artist").innerText = music.artist;
+        // 確保元素存在再賦值
+        if(document.getElementById("mini-img")) document.getElementById("mini-img").src = music.img;
+        if(document.getElementById("mini-name")) document.getElementById("mini-name").innerText = music.name;
+        if(document.getElementById("main-img")) document.getElementById("main-img").src = music.img;
+        if(document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
+        if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
 
         mainAudio.src = `music/s${music.id}.mp3`;
         if (this.bgVideo) {
@@ -110,7 +113,18 @@ const app = {
         const width = container.clientWidth;
         const clickX = e.offsetX;
         const duration = mainAudio.duration;
-        mainAudio.currentTime = (clickX / width) * duration;
+        if (!isNaN(duration)) mainAudio.currentTime = (clickX / width) * duration;
+    },
+
+    toggleLoop() {
+        isLoop = !isLoop;
+        mainAudio.loop = isLoop;
+        // 使用更直覺的方式更新所有按鈕樣式
+        const buttons = document.querySelectorAll("#mini-loop-btn, #full-loop-btn");
+        buttons.forEach(btn => {
+            btn.style.color = isLoop ? "#ff85a2" : "#fff";
+        });
+        console.log("Loop mode:", isLoop); // 除錯用
     },
 
     setupAudioEvents() {
@@ -118,21 +132,24 @@ const app = {
             const { currentTime, duration } = e.target;
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
-                // 更新時間文字顯示
                 document.getElementById("current-time").innerText = formatTime(currentTime);
                 document.getElementById("total-duration").innerText = formatTime(duration);
             }
             this.updateLyrics(currentTime);
         });
 
-        mainAudio.addEventListener("ended", () => this.nextSong());
+        mainAudio.addEventListener("ended", () => {
+            if (!isLoop) this.nextSong();
+        });
     },
 
     displayLyrics(lyrics) {
         const wrapper = document.getElementById("lyrics-wrapper");
-        wrapper.innerHTML = lyrics.map(line => 
-            `<div class="lyric-line"><div class="main-text">${line.text}</div></div>`
-        ).join("");
+        if (!wrapper) return;
+        wrapper.innerHTML = lyrics.map(line => {
+            const textToDisplay = (isTranslated && line.translation) ? line.translation : line.text;
+            return `<div class="lyric-line"><div class="main-text">${textToDisplay}</div></div>`;
+        }).join("");
     },
 
     updateLyrics(currentTime) {
@@ -145,65 +162,44 @@ const app = {
             lines.forEach((line, index) => {
                 line.classList.toggle("active", index === activeIndex);
             });
-            const activeLine = lines[activeIndex];
-            if (activeLine) {
-                activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (lines[activeIndex]) {
+                lines[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
     },
 
     toggleTranslation() {
-    // 1. 取得當前捲動位置
         const wrapper = document.getElementById("lyrics-wrapper");
+        if (!wrapper) return;
         const scrollTop = wrapper.scrollTop; 
-    
         isTranslated = !isTranslated;
-        const music = allMusic[musicIndex];
-    
-    // 2. 重新渲染內容
-        this.displayLyrics(music.lyrics);
-    
-    // 3. 使用 requestAnimationFrame 確保在 DOM 更新完成後才設定捲動位置
+        this.displayLyrics(allMusic[musicIndex].lyrics);
         requestAnimationFrame(() => {
             wrapper.scrollTop = scrollTop;
         });
-    },
-
-    displayLyrics(lyrics) {
-        const wrapper = document.getElementById("lyrics-wrapper");
-        wrapper.innerHTML = lyrics.map(line => {
-            const textToDisplay = (isTranslated && line.translation) ? line.translation : line.text;
-            return `
-                <div class="lyric-line">
-                    <div class="main-text">${textToDisplay}</div>
-                </div>`;
-        }).join("");
-    
-    // 重新校正當前播放行的發亮狀態
-        const lines = document.querySelectorAll(".lyric-line");
-        if (lines[currentLyricIndex]) {
-            lines[currentLyricIndex].classList.add("active");
-        
-        // 確保切換翻譯後，當前行依然在視野內
-            lines[currentLyricIndex].scrollIntoView({ block: 'center' });
-        }
     }
 };
 
-// --- 全域輔助函式 ---
+// 全域掛載
+window.showView = showView;
+window.togglePlayerView = togglePlayerView;
+window.toggleLyricsView = toggleLyricsView;
+
 function showView(viewName) {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-    document.getElementById(`${viewName}-view`).style.display = 'block';
+    const target = document.getElementById(`${viewName}-view`);
+    if(target) target.style.display = 'block';
 }
 
 function togglePlayerView() {
-    app.fullPlayer.classList.toggle('active');
+    if(app.fullPlayer) app.fullPlayer.classList.toggle('active');
 }
 
 function toggleLyricsView() {
     const coverView = document.getElementById('cover-view');
     const lyricsView = document.getElementById('lyrics-view');
     const switchBtn = document.getElementById('view-switch-btn');
+    if(!coverView || !lyricsView) return;
 
     if (coverView.style.display !== 'none') {
         coverView.style.display = 'none';

@@ -26,7 +26,7 @@
 			</div>
 		</div>
 
-		<!-- 底部固定播放器 -->
+		<!-- 底部固定播放器 (Mini Player) -->
 		<div id="bottom-player">
 			<div class="mini-main" onclick="togglePlayerView()">
 				<img src="" id="mini-img" alt="Cover">
@@ -43,6 +43,10 @@
 				</button>
 				<button onclick="app.nextSong()">
 					<i class="fas fa-step-forward"></i>
+				</button>
+				<!-- 底部循環按鈕 -->
+				<button onclick="app.toggleLoop()" id="mini-loop-btn">
+					<i class="fas fa-redo"></i>
 				</button>
 			</div>
 		</div>
@@ -80,7 +84,7 @@
 					</div>
 				</div>
 
-				<!-- 音訊控制區 (已加入時間顯示) -->
+				<!-- 音訊控制區 -->
 				<div class="controls-area">
 					<div class="progress-container" onclick="app.seek(event)">
 						<div class="progress-bar"></div>
@@ -98,6 +102,10 @@
 						</button>
 						<button onclick="app.nextSong()">
 							<i class="fas fa-step-forward"></i>
+						</button>
+						<!-- 全螢幕循環按鈕 -->
+						<button onclick="app.toggleLoop()" id="full-loop-btn">
+							<i class="fas fa-redo"></i>
 						</button>
 					</div>
 				</div>
