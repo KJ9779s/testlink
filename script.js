@@ -29,6 +29,12 @@ const app = {
         this.renderAllSongs();
         this.renderLibrary();
         this.setupAudioEvents();
+        this.setDefaultCover();
+    },
+    setDefaultCover() {
+        const defaultImg = "default-cover.jpg"; // 請確保路徑正確
+        if (document.getElementById("mini-img")) document.getElementById("mini-img").src = defaultImg;
+        if (document.getElementById("main-img")) document.getElementById("main-img").src = defaultImg;
     },
 
     renderAllSongs() {
