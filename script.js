@@ -1235,3 +1235,34 @@ window.addEventListener("load", () => {
     initList();
     setTimeout(() => loadMusic(musicIndex), 100);
 });
+
+// 鍵盤快捷鍵控制
+window.addEventListener("keydown", (e) => {
+    // 預防網頁自動捲動（當按下空白鍵或方向鍵時）
+    const keysToBlock = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (keysToBlock.includes(e.code)) {
+        e.preventDefault();
+    }
+
+    switch (e.code) {
+        case "Space": // 空白鍵：播放/暫停
+            isPlaying ? pauseSong() : playSong();
+            break;
+        case "ArrowLeft": // 左鍵：快退 10 秒
+            mainAudio.currentTime = Math.max(0, mainAudio.currentTime - 10);
+            syncPlaybackState(); // 同步媒體控制狀態
+            break;
+        case "ArrowRight": // 右鍵：快進 10 秒
+            mainAudio.currentTime = Math.min(mainAudio.duration, mainAudio.currentTime + 10);
+            syncPlaybackState(); // 同步媒體控制狀態
+            break;
+        case "ArrowUp": // 上鍵：音量增加
+            volumeSlider.value = Math.min(1, parseFloat(volumeSlider.value) + 0.05);
+            mainAudio.volume = volumeSlider.value;
+            break;
+        case "ArrowDown": // 下鍵：音量減少
+            volumeSlider.value = Math.max(0, parseFloat(volumeSlider.value) - 0.05);
+            mainAudio.volume = volumeSlider.value;
+            break;
+    }
+});
