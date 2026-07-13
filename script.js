@@ -8,7 +8,7 @@ let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
 let hls = null; 
-let likedSongs = []; // 初始設為 0 首
+let likedSongs = []; 
 let currentPlaylistId = null; 
 
 function formatTime(seconds) {
@@ -33,26 +33,21 @@ const app = {
         this.setupAudioEvents();
         this.setDefaultCover();
         this.setupInitialMediaSession();
-        // 初始化導航狀態
         this.updateNavState('home');
     },
 
-    // --- 切換按讚狀態 ---
     toggleLike(id, event, isFromPlayer = false) {
         if (event) event.stopPropagation();
-        
         if (likedSongs.includes(id)) {
             likedSongs = likedSongs.filter(songId => songId !== id);
         } else {
             likedSongs.push(id);
         }
-
         if (currentPlaylistId) {
             this.openPlaylist(currentPlaylistId);
         } else {
             this.renderLibrary();
         }
-
         if (isFromPlayer) this.updatePlayerLikeBtn();
     },
 
@@ -69,7 +64,6 @@ const app = {
         btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
     },
 
-    // --- 導航列狀態更新 ---
     updateNavState(viewName) {
         document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
         const activeBtn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
@@ -162,8 +156,8 @@ const app = {
 
     selectAndPlay(index) {
         musicIndex = index;
+        isPlaying = true; // 設定預期狀態為播放
         this.loadMusic(musicIndex);
-        this.playSong();
     },
 
     loadMusic(index) {
@@ -183,26 +177,40 @@ const app = {
             hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(mainAudio);
+            // 監聽資源就緒後自動播放
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                if (isPlaying) this.playSong();
+            });
         } else {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
+            mainAudio.onloadedmetadata = () => {
+                if (isPlaying) this.playSong();
+            };
         }
 
         if (this.bgVideo) {
             this.bgVideo.src = `video/v${music.id}.mp4`;
-            this.bgVideo.play().catch(e => {});
+            this.bgVideo.load();
+            this.bgVideo.oncanplay = () => {
+                if (isPlaying) this.bgVideo.play().catch(e => {});
+            };
         }
         
         this.displayLyrics(music.lyrics);
-        mainAudio.load();
     },
 
-    playSong() {
-        mainAudio.play();
-        isPlaying = true;
-        const pauseIcon = '<i class="fas fa-pause"></i>';
-        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
-        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
-        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
+    async playSong() {
+        try {
+            await mainAudio.play();
+            isPlaying = true;
+            const pauseIcon = '<i class="fas fa-pause"></i>';
+            if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
+            if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
+            if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
+        } catch (err) {
+            console.warn("自動播放失敗，請檢查瀏覽器限制");
+            isPlaying = false;
+        }
     },
 
     pauseSong() {
@@ -222,13 +230,11 @@ const app = {
     nextSong() {
         musicIndex = (musicIndex + 1) % allMusic.length;
         this.loadMusic(musicIndex);
-        this.playSong();
     },
 
     prevSong() {
         musicIndex = (musicIndex - 1 + allMusic.length) % allMusic.length;
         this.loadMusic(musicIndex);
-        this.playSong();
     },
 
     seek(e) {
@@ -276,7 +282,6 @@ const app = {
     updateLyrics(currentTime) {
         const lyrics = allMusic[musicIndex].lyrics;
         let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
-        
         if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
             currentLyricIndex = activeIndex;
             const lines = document.querySelectorAll(".lyric-line");
@@ -306,8 +311,6 @@ window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById(`${viewName}-view`);
     if(target) target.style.display = 'block';
-    
-    // 更新發光狀態
     app.updateNavState(viewName);
 };
 
@@ -320,7 +323,6 @@ window.toggleLyricsView = () => {
     const lyricsView = document.getElementById('lyrics-view');
     const switchBtn = document.getElementById('view-switch-btn');
     if(!coverView || !lyricsView) return;
-
     if (coverView.style.display !== 'none') {
         coverView.style.display = 'none';
         lyricsView.style.display = 'flex';
