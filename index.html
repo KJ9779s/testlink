@@ -9,16 +9,16 @@
 </head>
 <body>
 
-    <!-- 背景影片 -->
+    <!-- 背景影片：加入 preload="none" 優化載入效能 -->
     <video 
-  		id="bg-video"
-  		src="video/v1.mp4" 
-  		autoplay 
-  		loop 
-  		muted          
-  		playsinline    
-  		preload="auto">
-	</video>
+        id="bg-video"
+        src="video/v1.mp4" 
+        autoplay 
+        loop 
+        muted          
+        playsinline    
+        preload="none">
+    </video>
 
     <!-- 主要內容區域 -->
     <div id="content-area">
