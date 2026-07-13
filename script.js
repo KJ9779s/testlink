@@ -1,5 +1,4 @@
-﻿// 確保歌詞資料與音樂清單已合併
-mergeLyricsToMusic(allMusic);
+﻿mergeLyricsToMusic(allMusic);
 
 let musicIndex = 0;
 let mainAudio = new Audio();
@@ -8,7 +7,7 @@ let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
 let hls = null; 
-let likedSongs = []; // 初始設為 0 首
+let likedSongs = []; 
 let currentPlaylistId = null; 
 
 function formatTime(seconds) {
@@ -28,16 +27,29 @@ const app = {
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
+        // 1. & 2. 初始化 HLS 實例 (常駐)
+        if (Hls.isSupported()) {
+            hls = new Hls({
+                lowLatencyMode: true
+            });
+            hls.attachMedia(mainAudio);
+        }
+        
         this.renderAllSongs();
         this.renderLibrary();
         this.setupAudioEvents();
         this.setDefaultCover();
         this.setupInitialMediaSession();
-        // 初始化導航狀態
         this.updateNavState('home');
     },
 
-    // --- 切換按讚狀態 ---
+    // 1. 預載下一首功能
+    preloadNextMusic() {
+        const nextIndex = (musicIndex + 1) % allMusic.length;
+        const nextMusic = allMusic[nextIndex];
+        fetch(`music/s${nextMusic.id}/s${nextMusic.id}.m3u8`).catch(() => {});
+    },
+
     toggleLike(id, event, isFromPlayer = false) {
         if (event) event.stopPropagation();
         
@@ -69,7 +81,6 @@ const app = {
         btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
     },
 
-    // --- 導航列狀態更新 ---
     updateNavState(viewName) {
         document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
         const activeBtn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
@@ -178,11 +189,11 @@ const app = {
         this.updatePlayerLikeBtn();
 
         const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
-        if (Hls.isSupported()) {
-            if (hls) hls.destroy();
-            hls = new Hls();
-            hls.loadSource(streamUrl);
+        
+        if (Hls.isSupported() && hls) {
+            // 確保 HLS 實例連接到 audio 元素
             hls.attachMedia(mainAudio);
+            hls.loadSource(streamUrl);
         } else {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
         }
@@ -194,6 +205,8 @@ const app = {
         
         this.displayLyrics(music.lyrics);
         mainAudio.load();
+        
+        this.preloadNextMusic();
     },
 
     playSong() {
@@ -306,8 +319,6 @@ window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById(`${viewName}-view`);
     if(target) target.style.display = 'block';
-    
-    // 更新發光狀態
     app.updateNavState(viewName);
 };
 
