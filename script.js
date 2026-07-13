@@ -27,11 +27,14 @@ const app = {
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
-        // 1. & 2. 初始化 HLS 實例 (常駐)
+        // 1. 讀取儲存的資料
+        likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
+        const savedMusicIndex = localStorage.getItem('musicIndex');
+        const savedTime = localStorage.getItem('currentTime');
+
+        // 2. 初始化 HLS
         if (Hls.isSupported()) {
-            hls = new Hls({
-                lowLatencyMode: true
-            });
+            hls = new Hls({ lowLatencyMode: true });
             hls.attachMedia(mainAudio);
         }
         
@@ -41,6 +44,17 @@ const app = {
         this.setDefaultCover();
         this.setupInitialMediaSession();
         this.updateNavState('home');
+
+        // 3. 恢復上次播放狀態 (延遲執行確保 Audio 載入)
+        if (savedMusicIndex !== null) {
+            musicIndex = parseInt(savedMusicIndex);
+            this.loadMusic(musicIndex);
+            
+            // 恢復時間
+            mainAudio.addEventListener('loadedmetadata', () => {
+                if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
+            }, { once: true });
+        }
     },
 
     // 1. 預載下一首功能
@@ -58,6 +72,8 @@ const app = {
         } else {
             likedSongs.push(id);
         }
+
+        localStorage.setItem('likedSongs', JSON.stringify(likedSongs));
 
         if (currentPlaylistId) {
             this.openPlaylist(currentPlaylistId);
@@ -179,6 +195,7 @@ const app = {
         // 如果有傳入 playlistId (例如從按讚清單點擊)，則更新為該 ID
         // 如果是從首頁點擊 (沒傳入參數)，則強制為 null
         currentPlaylistId = playlistId; 
+        localStorage.setItem('musicIndex', musicIndex);
         
         this.loadMusic(musicIndex);
         this.playSong();
@@ -300,6 +317,9 @@ const app = {
     setupAudioEvents() {
         mainAudio.addEventListener("timeupdate", (e) => {
             const { currentTime, duration } = e.target;
+            if (Math.floor(currentTime) % 5 === 0) {
+                localStorage.setItem('currentTime', currentTime);
+            }
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
                 document.getElementById("current-time").innerText = formatTime(currentTime);
@@ -309,6 +329,7 @@ const app = {
         });
 
         mainAudio.addEventListener("ended", () => {
+            localStorage.setItem('currentTime', 0);
             if (!isLoop) this.nextSong();
         });
     },
