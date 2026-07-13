@@ -4,6 +4,8 @@
     padding: 0;
     box-sizing: border-box;
     font-family: "Noto Sans TC", sans-serif;
+    /* 禁止手機端雙擊縮放行為 */
+    touch-action: manipulation;
 }
 
 body {
@@ -34,7 +36,7 @@ body {
 h1 { 
     margin-bottom: 20px; 
     font-size: 24px; 
-    padding-left: 5px; /* 與條列式清單稍微對齊 */
+    padding-left: 5px;
 }
 
 .music-grid {
@@ -63,7 +65,7 @@ h1 {
     object-fit: cover;
 }
 
-/* --- 新增：音樂庫條列式清單樣式 --- */
+/* --- 音樂庫條列式清單樣式 --- */
 .music-list {
     list-style: none;
     padding: 0;
@@ -87,7 +89,6 @@ h1 {
     object-fit: cover;
 }
 
-/* 播放清單預設封面 (漸層色塊模擬) */
 .playlist-cover {
     width: 60px;
     height: 60px;
@@ -162,6 +163,15 @@ h1 {
     text-decoration: none;
     font-size: 12px;
     text-align: center;
+    transition: all 0.3s ease;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+/* 導航選中發光效果 */
+.bottom-nav a.active {
+    color: #fff;
+    text-shadow: 0 0 10px #ff85a2, 0 0 20px #ff85a2;
 }
 
 /* --- 全螢幕播放頁 (Full Player) --- */
@@ -212,7 +222,6 @@ h1 {
     align-items: center;
 }
 
-/* 視圖切換樣式 */
 .active-view { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .inactive-view { display: none; }
 
@@ -224,7 +233,6 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* 歌詞區樣式 */
 .lyrics-area {
     width: 100%;
     height: 400px;
@@ -242,7 +250,7 @@ h1 {
 }
 .lyric-line.active {
     opacity: 1;
-    color: #ff85a2 !important; /* 歌詞發亮改為粉色 */
+    color: #ff85a2 !important;
     font-size: 22px;
     font-weight: bold;
 }
@@ -291,9 +299,7 @@ h1 {
 
 #play-pause-btn { font-size: 50px; }
 
-#lyrics-view {
-    position: relative; /* 確保內部絕對定位參考 */
-}
+#lyrics-view { position: relative; }
 
 #btn-translate {
     position: absolute;
@@ -312,8 +318,7 @@ h1 {
 #btn-translate:hover { background: #ff85a2; color: #000; }
 
 .mini-controls button, .main-controls button {
-    transition: color 0.3s ease; /* 加入顏色變化的過渡效果 */
+    transition: color 0.3s ease;
 }
 
-/* 確保全螢幕循環按鈕大小一致 */
 #full-loop-btn { font-size: 30px !important; }

@@ -8,8 +8,8 @@ let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
 let hls = null; 
-let likedSongs = []; // 已按讚歌曲的 ID 列表
-let currentPlaylistId = null; // 新增：記錄目前所在的清單頁面 ID
+let likedSongs = []; // 初始設為 0 首
+let currentPlaylistId = null; 
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -33,6 +33,8 @@ const app = {
         this.setupAudioEvents();
         this.setDefaultCover();
         this.setupInitialMediaSession();
+        // 初始化導航狀態
+        this.updateNavState('home');
     },
 
     // --- 切換按讚狀態 ---
@@ -45,30 +47,33 @@ const app = {
             likedSongs.push(id);
         }
 
-        // 如果在清單頁，重新渲染該清單以保持在當前頁面
         if (currentPlaylistId) {
             this.openPlaylist(currentPlaylistId);
         } else {
             this.renderLibrary();
         }
 
-        // 如果是從播放器操作，更新播放器圖示
         if (isFromPlayer) this.updatePlayerLikeBtn();
     },
 
-    // 專門給全螢幕播放器按鈕呼叫
     toggleLikeInPlayer() {
         const currentMusic = allMusic[musicIndex];
         if (currentMusic) this.toggleLike(currentMusic.id, null, true);
     },
 
-    // 更新播放器愛心樣式
     updatePlayerLikeBtn() {
         const btn = document.getElementById("full-player-like-btn");
         if (!btn) return;
         const currentMusic = allMusic[musicIndex];
         const isLiked = likedSongs.includes(currentMusic.id);
         btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
+    },
+
+    // --- 導航列狀態更新 ---
+    updateNavState(viewName) {
+        document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
+        const activeBtn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
+        if(activeBtn) activeBtn.classList.add('active');
     },
 
     setupInitialMediaSession() {
@@ -170,7 +175,7 @@ const app = {
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
 
         this.updateMediaSession();
-        this.updatePlayerLikeBtn(); // 更新愛心狀態
+        this.updatePlayerLikeBtn();
 
         const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
         if (Hls.isSupported()) {
@@ -301,6 +306,9 @@ window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById(`${viewName}-view`);
     if(target) target.style.display = 'block';
+    
+    // 更新發光狀態
+    app.updateNavState(viewName);
 };
 
 window.togglePlayerView = () => {

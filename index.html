@@ -9,21 +9,26 @@
 </head>
 <body>
 
+    <!-- 背景影片 -->
     <video id="bg-video" autoplay="" loop="" muted="" playsinline="" preload="auto">
         <source src="" type="video/mp4">
     </video>
 
+    <!-- 主要內容區域 -->
     <div id="content-area">
         <div id="home-view" class="view">
             <h1>所有歌曲</h1>
             <ul id="home-list" class="music-grid"></ul>
         </div>
+        
+        <!-- 音樂庫頁面 -->
         <div id="library-view" class="view" style="display:none;">
             <h1>9779s 的音樂庫</h1>
             <ul id="library-list" class="music-list"></ul>
         </div>
     </div>
 
+    <!-- 底部固定播放器 (Mini Player) -->
     <div id="bottom-player">
         <div class="mini-main" onclick="togglePlayerView()">
             <img src="default-cover.jpg" id="mini-img" alt="Cover">
@@ -39,6 +44,7 @@
         </div>
     </div>
 
+    <!-- 全螢幕播放頁 -->
     <div id="full-player">
         <div class="player-card">
             <div class="player-header">
@@ -71,6 +77,7 @@
                 </div>
             </div>
 
+            <!-- 音訊控制區 -->
             <div class="controls-area">
                 <div class="progress-container" onclick="app.seek(event)">
                     <div class="progress-bar"></div>
@@ -89,9 +96,14 @@
         </div>
     </div>
 
+    <!-- 底部導航欄 -->
     <nav class="bottom-nav">
-        <a href="#" onclick="showView('home')"><i class="fas fa-home"></i><br>首頁</a>
-        <a href="#" onclick="showView('library')"><i class="fas fa-music"></i><br>音樂庫</a>
+        <a href="#" onclick="showView('home')" class="active">
+            <i class="fas fa-home"></i><br>首頁
+        </a>
+        <a href="#" onclick="showView('library')">
+            <i class="fas fa-music"></i><br>音樂庫
+        </a>
     </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
