@@ -58,6 +58,15 @@ const app = {
         }
     },
 
+    // 新增：統一更新翻譯按鈕顏色的函式
+    updateTranslationBtnStyle() {
+        const btn = document.getElementById("btn-translate");
+        if (btn) {
+            // 如果 isTranslated 為 true，則變為粉色，否則為白色
+            btn.style.color = isTranslated ? "#ff85a2" : "#fff";
+        }
+    },
+
     // 1. 預載下一首功能
     preloadNextMusic() {
         const nextIndex = (musicIndex + 1) % allMusic.length;
@@ -248,6 +257,7 @@ const app = {
         }
         
         this.displayLyrics(music.lyrics);
+        this.updateTranslationBtnStyle();
         mainAudio.load();
         
         this.preloadNextMusic();
@@ -414,12 +424,15 @@ const app = {
         const wrapper = document.getElementById("lyrics-wrapper");
         if (!wrapper) return;
         const scrollTop = wrapper.scrollTop; 
-        isTranslated = !isTranslated;
+        
+        isTranslated = !isTranslated; // 切換狀態
+        this.updateTranslationBtnStyle(); // 同步更新顏色
+        
         this.displayLyrics(allMusic[musicIndex].lyrics);
         requestAnimationFrame(() => {
             wrapper.scrollTop = scrollTop;
         });
-    }
+    },
 };
 
 window.app = app;
