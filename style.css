@@ -27,20 +27,31 @@ body {
 
 /* --- 視圖與內容區 --- */
 #content-area {
-    /* 這裡的高度改為父層的高度，並確保內部子層可以捲動 */
     position: relative;
-    height: calc(100vh - 185px); /* 185px = 底部播放器(65) + 導航欄(60) + 上下間距 */
-    overflow: hidden; /* 父層不捲動，由子層捲動 */
+    /* 調整高度以確保不被播放器遮擋 */
+    height: calc(100vh - 125px); 
+    overflow: hidden; 
 }
 
 .view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
+    
+    /* 讓每個頁面各自擁有獨立捲軸 */
     overflow-y: auto;
-    padding: 40px 30px; /* 從 20px 改為 40px(上下) 30px(左右) */
     -webkit-overflow-scrolling: touch;
+    
+    padding: 40px 30px;
     box-sizing: border-box;
-    scrollbar-width: thin;
-    scrollbar-color: #555 #000;
+    
+    /* 預設隱藏 */
+    display: none;
+}
+.view.active {
+    display: block;
 }
 
 /* Chrome, Safari, Edge 捲軸樣式 */

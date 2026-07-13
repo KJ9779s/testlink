@@ -352,9 +352,17 @@ const app = {
 
 window.app = app;
 window.showView = (viewName) => {
-    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-    const target = document.getElementById(`${viewName}-view`);
-    if(target) target.style.display = 'block';
+    // 移除所有 view 的 active
+    document.querySelectorAll(".view").forEach(v => {
+        v.classList.remove("active");
+    });
+
+    // 賦予目標 view active class
+    const target = document.getElementById(viewName + "-view");
+    if (target) {
+        target.classList.add("active");
+    }
+
     app.updateNavState(viewName);
 };
 
