@@ -1,4 +1,5 @@
-﻿mergeLyricsToMusic(allMusic);
+﻿// 確保歌詞資料與音樂清單已合併
+mergeLyricsToMusic(allMusic);
 
 let musicIndex = 0;
 let mainAudio = new Audio();
@@ -6,18 +7,9 @@ let isPlaying = false;
 let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
-let hls = null;
-let likedSongs = [];
-let currentPlaylistId = null;
-
-// --- 優化手機瀏覽器相容性 ---
-mainAudio.preload = "auto";
-mainAudio.playsInline = true;
-mainAudio.setAttribute("playsinline", "");
-
-let userInteracted = false;
-document.addEventListener("click", () => { userInteracted = true; }, { once: true });
-document.addEventListener("touchstart", () => { userInteracted = true; }, { once: true });
+let hls = null; 
+let likedSongs = []; // 初始設為 0 首
+let currentPlaylistId = null; 
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -41,211 +33,303 @@ const app = {
         this.setupAudioEvents();
         this.setDefaultCover();
         this.setupInitialMediaSession();
+        // 初始化導航狀態
         this.updateNavState('home');
     },
 
-    updatePlayButton() {
-        const pauseIcon = '<i class="fas fa-pause"></i>';
-        const playIcon = '<i class="fas fa-play"></i>';
-        const icon = isPlaying ? pauseIcon : playIcon;
+    // --- 切換按讚狀態 ---
+    toggleLike(id, event, isFromPlayer = false) {
+        if (event) event.stopPropagation();
+        
+        if (likedSongs.includes(id)) {
+            likedSongs = likedSongs.filter(songId => songId !== id);
+        } else {
+            likedSongs.push(id);
+        }
 
-        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = icon;
-        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = icon;
-        if (this.miniPlayIcon) this.miniPlayIcon.className = isPlaying ? "fas fa-pause" : "fas fa-play";
+        if (currentPlaylistId) {
+            this.openPlaylist(currentPlaylistId);
+        } else {
+            this.renderLibrary();
+        }
+
+        if (isFromPlayer) this.updatePlayerLikeBtn();
     },
 
-    async playSong() {
-        try {
-            await mainAudio.play();
-            isPlaying = true;
-            this.updatePlayButton();
-        } catch (err) {
-            console.log("Play failed", err);
-            isPlaying = false;
+    toggleLikeInPlayer() {
+        const currentMusic = allMusic[musicIndex];
+        if (currentMusic) this.toggleLike(currentMusic.id, null, true);
+    },
+
+    updatePlayerLikeBtn() {
+        const btn = document.getElementById("full-player-like-btn");
+        if (!btn) return;
+        const currentMusic = allMusic[musicIndex];
+        const isLiked = likedSongs.includes(currentMusic.id);
+        btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
+    },
+
+    // --- 導航列狀態更新 ---
+    updateNavState(viewName) {
+        document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
+        const activeBtn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
+        if(activeBtn) activeBtn.classList.add('active');
+    },
+
+    setupInitialMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: "請選擇歌曲",
+                artist: "不是設計愛情 是設計我",
+                artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
+            navigator.mediaSession.setActionHandler('play', () => this.playSong());
+            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
+        }
+    },
+    
+    setDefaultCover() {
+        const defaultImg = "default-cover.jpg";
+        if (document.getElementById("mini-img")) document.getElementById("mini-img").src = defaultImg;
+        if (document.getElementById("main-img")) document.getElementById("main-img").src = defaultImg;
+    },
+
+    updateMediaSession() {
+        const music = allMusic[musicIndex];
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: music.name,
+                artist: music.artist,
+                artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+            });
         }
     },
 
-    pauseSong() {
-        mainAudio.pause();
-        isPlaying = false;
-        this.updatePlayButton();
+    renderAllSongs() {
+        if(this.homeList) {
+            this.homeList.innerHTML = allMusic.map((m, i) => `
+                <li onclick="app.selectAndPlay(${i})">
+                    <img src="${m.img}"> <p>${m.name}</p>
+                </li>
+            `).join("");
+        }
     },
 
-    togglePlay() {
-        isPlaying ? this.pauseSong() : this.playSong();
+    renderLibrary() {
+        currentPlaylistId = null;
+        if(this.libraryList) {
+            const playlists = [
+                { id: 'liked', name: "已按讚的歌曲", count: `${likedSongs.length} 首歌曲`, icon: "heart" },
+                { id: 'new', name: "新集數", count: "昨日已更新", icon: "bell" }
+            ];
+            this.libraryList.innerHTML = playlists.map(p => `
+                <li onclick="app.openPlaylist('${p.id}')">
+                    <div class="playlist-cover"></div> 
+                    <div>
+                        <p style="margin:0; font-weight:bold;">${p.name}</p>
+                        <small style="color:#aaa;">${p.count}</small>
+                    </div>
+                </li>
+            `).join("");
+        }
+    },
+
+    openPlaylist(id) {
+        currentPlaylistId = id;
+        const songs = (id === 'liked') ? allMusic.filter(m => likedSongs.includes(m.id)) : allMusic;
+        this.libraryList.innerHTML = `
+            <li onclick="app.renderLibrary()" style="font-weight:bold; cursor:pointer; margin-bottom:10px;">← 返回</li>
+            ${songs.map((m, i) => {
+                const isLiked = likedSongs.includes(m.id);
+                return `
+                <li onclick="app.selectAndPlay(${allMusic.indexOf(m)})" style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center;">
+                        <img src="${m.img}" style="width:50px; height:50px; border-radius:4px;"> 
+                        <div style="margin-left:15px;">
+                            <p style="margin:0;">${m.name}</p>
+                            <small style="color:#aaa;">${m.artist}</small>
+                        </div>
+                    </div>
+                    <button onclick="app.toggleLike(${m.id}, event)" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">
+                        <i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>
+                    </button>
+                </li>`;
+            }).join("")}
+        `;
     },
 
     selectAndPlay(index) {
         musicIndex = index;
-        userInteracted = true;
-        isPlaying = true;
         this.loadMusic(musicIndex);
+        this.playSong();
     },
 
     loadMusic(index) {
         const music = allMusic[musicIndex];
-        if (document.getElementById("mini-img")) document.getElementById("mini-img").src = music.img;
-        if (document.getElementById("mini-name")) document.getElementById("mini-name").innerText = music.name;
-        if (document.getElementById("main-img")) document.getElementById("main-img").src = music.img;
-        if (document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
-        if (document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
+        if(document.getElementById("mini-img")) document.getElementById("mini-img").src = music.img;
+        if(document.getElementById("mini-name")) document.getElementById("mini-name").innerText = music.name;
+        if(document.getElementById("main-img")) document.getElementById("main-img").src = music.img;
+        if(document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
+        if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
 
         this.updateMediaSession();
         this.updatePlayerLikeBtn();
 
-        const streamUrl = `music/s${music.id}/s${music.id}.m3u8`;
+        const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
         if (Hls.isSupported()) {
             if (hls) hls.destroy();
             hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(mainAudio);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                this.updateMediaSession(); // 確保資源載入後同步更新 Metadata
-                if (isPlaying) this.playSong();
-            });
         } else {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
         }
 
         if (this.bgVideo) {
             this.bgVideo.src = `video/v${music.id}.mp4`;
-            this.bgVideo.load();
             this.bgVideo.play().catch(e => {});
         }
+        
         this.displayLyrics(music.lyrics);
+        mainAudio.load();
+    },
+
+    playSong() {
+        mainAudio.play();
+        isPlaying = true;
+        const pauseIcon = '<i class="fas fa-pause"></i>';
+        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
+        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
+    },
+
+    pauseSong() {
+        mainAudio.pause();
+        isPlaying = false;
+        const playIcon = '<i class="fas fa-play"></i>';
+        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = playIcon;
+        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = playIcon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-play";
+    },
+
+    togglePlay() {
+        if (isPlaying) this.pauseSong();
+        else this.playSong();
     },
 
     nextSong() {
         musicIndex = (musicIndex + 1) % allMusic.length;
         this.loadMusic(musicIndex);
+        this.playSong();
     },
 
     prevSong() {
         musicIndex = (musicIndex - 1 + allMusic.length) % allMusic.length;
         this.loadMusic(musicIndex);
+        this.playSong();
     },
 
-    setupInitialMediaSession() {
-        if (!('mediaSession' in navigator)) return;
-        navigator.mediaSession.setActionHandler("previoustrack", () => this.prevSong());
-        navigator.mediaSession.setActionHandler("nexttrack", () => this.nextSong());
-        navigator.mediaSession.setActionHandler("play", () => this.playSong());
-        navigator.mediaSession.setActionHandler("pause", () => this.pauseSong());
-        ["seekbackward", "seekforward", "seekto"].forEach(action => {
-            try { navigator.mediaSession.setActionHandler(action, null); } catch (e) {}
+    seek(e) {
+        const container = e.currentTarget;
+        const width = container.clientWidth;
+        const clickX = e.offsetX;
+        const duration = mainAudio.duration;
+        if (!isNaN(duration)) mainAudio.currentTime = (clickX / width) * duration;
+    },
+
+    toggleLoop() {
+        isLoop = !isLoop;
+        mainAudio.loop = isLoop;
+        const buttons = document.querySelectorAll("#mini-loop-btn, #full-loop-btn");
+        buttons.forEach(btn => {
+            btn.style.color = isLoop ? "#ff85a2" : "#fff";
         });
     },
 
-    updateMediaSession() {
-        const music = allMusic[musicIndex];
-        if (!('mediaSession' in navigator)) return;
-
-        const update = () => {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: music.name,
-                artist: music.artist,
-                album: "9779s Music",
-                artwork: [{ src: music.img, sizes: "512x512", type: "image/jpeg" }]
-            });
-            if (!isNaN(mainAudio.duration)) {
-                try {
-                    navigator.mediaSession.setPositionState({
-                        duration: mainAudio.duration,
-                        playbackRate: 1,
-                        position: mainAudio.currentTime
-                    });
-                } catch (e) {}
-            }
-        };
-
-        if (mainAudio.readyState >= 1) update();
-        else mainAudio.addEventListener("loadedmetadata", update, { once: true });
-    },
-
     setupAudioEvents() {
-        mainAudio.addEventListener("timeupdate", () => {
-            const { currentTime, duration } = mainAudio;
-            
-            // 處理進度條觸發 nextSong 的邊界問題
-            if (duration && currentTime >= duration - 0.5 && duration > 0) return;
-
+        mainAudio.addEventListener("timeupdate", (e) => {
+            const { currentTime, duration } = e.target;
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
                 document.getElementById("current-time").innerText = formatTime(currentTime);
                 document.getElementById("total-duration").innerText = formatTime(duration);
             }
             this.updateLyrics(currentTime);
-
-            if ('mediaSession' in navigator && !isNaN(duration)) {
-                try {
-                    navigator.mediaSession.setPositionState({
-                        duration: duration,
-                        playbackRate: mainAudio.playbackRate,
-                        position: currentTime
-                    });
-                } catch (e) {}
-            }
         });
-        
-        mainAudio.addEventListener("ended", () => { 
-            if (!isLoop) this.nextSong(); 
-            else { mainAudio.currentTime = 0; mainAudio.play(); }
+
+        mainAudio.addEventListener("ended", () => {
+            if (!isLoop) this.nextSong();
         });
     },
 
-    // --- 其他 UI 邏輯 ---
-    toggleLike(id, event, isFromPlayer = false) {
-        if (event) event.stopPropagation();
-        likedSongs.includes(id) ? likedSongs = likedSongs.filter(s => s !== id) : likedSongs.push(id);
-        currentPlaylistId ? this.openPlaylist(currentPlaylistId) : this.renderLibrary();
-        if (isFromPlayer) this.updatePlayerLikeBtn();
+    displayLyrics(lyrics) {
+        const wrapper = document.getElementById("lyrics-wrapper");
+        if (!wrapper) return;
+        wrapper.innerHTML = lyrics.map(line => {
+            const textToDisplay = (isTranslated && line.translation) ? line.translation : line.text;
+            return `<div class="lyric-line"><div class="main-text">${textToDisplay}</div></div>`;
+        }).join("");
     },
-    toggleLikeInPlayer() { if (allMusic[musicIndex]) this.toggleLike(allMusic[musicIndex].id, null, true); },
-    updatePlayerLikeBtn() {
-        const btn = document.getElementById("full-player-like-btn");
-        if (!btn) return;
-        const isLiked = likedSongs.includes(allMusic[musicIndex].id);
-        btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
-    },
-    updateNavState(viewName) {
-        document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
-        const btn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
-        if(btn) btn.classList.add('active');
-    },
-    setDefaultCover() {
-        const d = "default-cover.jpg";
-        if (document.getElementById("mini-img")) document.getElementById("mini-img").src = d;
-        if (document.getElementById("main-img")) document.getElementById("main-img").src = d;
-    },
-    renderAllSongs() { if(this.homeList) this.homeList.innerHTML = allMusic.map((m, i) => `<li onclick="app.selectAndPlay(${i})"><img src="${m.img}"> <p>${m.name}</p></li>`).join(""); },
-    renderLibrary() {
-        currentPlaylistId = null;
-        if(this.libraryList) this.libraryList.innerHTML = [{id:'liked',name:"已按讚的歌曲"},{id:'new',name:"新集數"}].map(p => `<li onclick="app.openPlaylist('${p.id}')"><div><p style="margin:0; font-weight:bold;">${p.name}</p></div></li>`).join("");
-    },
-    openPlaylist(id) {
-        currentPlaylistId = id;
-        const songs = id === 'liked' ? allMusic.filter(m => likedSongs.includes(m.id)) : allMusic;
-        this.libraryList.innerHTML = `<li onclick="app.renderLibrary()">← 返回</li>` + songs.map((m,i) => `<li onclick="app.selectAndPlay(${allMusic.indexOf(m)})">${m.name}</li>`).join("");
-    },
-    seek(e) {
-        const d = mainAudio.duration;
-        if (!isNaN(d)) mainAudio.currentTime = (e.offsetX / e.currentTarget.clientWidth) * d;
-    },
-    toggleLoop() { isLoop = !isLoop; mainAudio.loop = isLoop; },
-    displayLyrics(lyrics) { const w = document.getElementById("lyrics-wrapper"); if(w) w.innerHTML = lyrics.map(l => `<div class="lyric-line"><div class="main-text">${(isTranslated && l.translation) ? l.translation : l.text}</div></div>`).join(""); },
+
     updateLyrics(currentTime) {
         const lyrics = allMusic[musicIndex].lyrics;
-        let idx = lyrics.findLastIndex(l => currentTime >= l.time);
-        if(idx !== -1 && idx !== currentLyricIndex) {
-            currentLyricIndex = idx;
-            document.querySelectorAll(".lyric-line").forEach((l, i) => l.classList.toggle("active", i === idx));
+        let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
+        
+        if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
+            currentLyricIndex = activeIndex;
+            const lines = document.querySelectorAll(".lyric-line");
+            lines.forEach((line, index) => {
+                line.classList.toggle("active", index === activeIndex);
+            });
+            if (lines[activeIndex]) {
+                lines[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     },
-    toggleTranslation() { isTranslated = !isTranslated; this.displayLyrics(allMusic[musicIndex].lyrics); }
+
+    toggleTranslation() {
+        const wrapper = document.getElementById("lyrics-wrapper");
+        if (!wrapper) return;
+        const scrollTop = wrapper.scrollTop; 
+        isTranslated = !isTranslated;
+        this.displayLyrics(allMusic[musicIndex].lyrics);
+        requestAnimationFrame(() => {
+            wrapper.scrollTop = scrollTop;
+        });
+    }
 };
 
 window.app = app;
-window.showView = (v) => { document.querySelectorAll('.view').forEach(e => e.style.display = 'none'); document.getElementById(v+'-view').style.display = 'block'; app.updateNavState(v); };
-window.togglePlayerView = () => { if(app.fullPlayer) app.fullPlayer.classList.toggle('active'); };
-window.toggleLyricsView = () => { /* 保持原樣 */ };
+window.showView = (viewName) => {
+    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+    const target = document.getElementById(`${viewName}-view`);
+    if(target) target.style.display = 'block';
+    
+    // 更新發光狀態
+    app.updateNavState(viewName);
+};
+
+window.togglePlayerView = () => {
+    if(app.fullPlayer) app.fullPlayer.classList.toggle('active');
+};
+
+window.toggleLyricsView = () => {
+    const coverView = document.getElementById('cover-view');
+    const lyricsView = document.getElementById('lyrics-view');
+    const switchBtn = document.getElementById('view-switch-btn');
+    if(!coverView || !lyricsView) return;
+
+    if (coverView.style.display !== 'none') {
+        coverView.style.display = 'none';
+        lyricsView.style.display = 'flex';
+        switchBtn.innerHTML = '<i class="fas fa-image"></i>';
+    } else {
+        coverView.style.display = 'flex';
+        lyricsView.style.display = 'none';
+        switchBtn.innerHTML = '<i class="fas fa-list-ul"></i>';
+    }
+};
+
 window.addEventListener("load", () => app.init());
