@@ -148,14 +148,15 @@ const app = {
     },
 
     openPlaylist(id) {
-        currentPlaylistId = id;
+        currentPlaylistId = id; // 設定當前清單 ID
         const songs = (id === 'liked') ? allMusic.filter(m => likedSongs.includes(m.id)) : allMusic;
+        
         this.libraryList.innerHTML = `
             <li onclick="app.renderLibrary()" style="font-weight:bold; cursor:pointer; margin-bottom:10px;">← 返回</li>
             ${songs.map((m, i) => {
                 const isLiked = likedSongs.includes(m.id);
                 return `
-                <li onclick="app.selectAndPlay(${allMusic.indexOf(m)})" style="display:flex; align-items:center; justify-content:space-between;">
+                <li onclick="app.selectAndPlay(${allMusic.indexOf(m)}, '${id}')" style="display:flex; align-items:center; justify-content:space-between;">
                     <div style="display:flex; align-items:center;">
                         <img src="${m.img}" style="width:50px; height:50px; border-radius:4px;"> 
                         <div style="margin-left:15px;">
@@ -171,8 +172,14 @@ const app = {
         `;
     },
 
-    selectAndPlay(index) {
+    // 在 app 物件中修改此方法
+    selectAndPlay(index, playlistId = null) {
         musicIndex = index;
+        
+        // 如果有傳入 playlistId (例如從按讚清單點擊)，則更新為該 ID
+        // 如果是從首頁點擊 (沒傳入參數)，則強制為 null
+        currentPlaylistId = playlistId; 
+        
         this.loadMusic(musicIndex);
         this.playSong();
     },
@@ -232,14 +239,43 @@ const app = {
         else this.playSong();
     },
 
+    getCurrentPlaylist() {
+        if (currentPlaylistId === 'liked') {
+            return allMusic.filter(m => likedSongs.includes(m.id));
+        }
+        // 如果 currentPlaylistId 為 null，預設回傳全部歌曲
+        return allMusic;
+    },
+
     nextSong() {
-        musicIndex = (musicIndex + 1) % allMusic.length;
+        const playlist = this.getCurrentPlaylist();
+        const currentSong = allMusic[musicIndex];
+        
+        // 找到當前歌曲在「當前模式清單」的位置
+        let currentIndexInPlaylist = playlist.indexOf(currentSong);
+        
+        // 如果因為切換模式導致當前歌曲不在列表內 (例如在按讚清單點完移除)，重置為 0
+        if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
+        
+        const nextIndexInPlaylist = (currentIndexInPlaylist + 1) % playlist.length;
+        const nextSong = playlist[nextIndexInPlaylist];
+        
+        musicIndex = allMusic.indexOf(nextSong);
         this.loadMusic(musicIndex);
         this.playSong();
     },
 
     prevSong() {
-        musicIndex = (musicIndex - 1 + allMusic.length) % allMusic.length;
+        const playlist = this.getCurrentPlaylist();
+        const currentSong = allMusic[musicIndex];
+        let currentIndexInPlaylist = playlist.indexOf(currentSong);
+        
+        if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
+        
+        const prevIndexInPlaylist = (currentIndexInPlaylist - 1 + playlist.length) % playlist.length;
+        const prevSong = playlist[prevIndexInPlaylist];
+        
+        musicIndex = allMusic.indexOf(prevSong);
         this.loadMusic(musicIndex);
         this.playSong();
     },
