@@ -81,6 +81,7 @@ const app = {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: "請選擇歌曲",
                 artist: "不是設計愛情 是設計我",
+                album: '專輯名稱',
                 artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
             navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
