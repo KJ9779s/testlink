@@ -8,7 +8,7 @@ let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
 let hls = null; 
-let likedSongs = []; 
+let likedSongs = []; // 初始設為 0 首
 let currentPlaylistId = null; 
 
 function formatTime(seconds) {
@@ -30,25 +30,29 @@ const app = {
     init() {
         this.renderAllSongs();
         this.renderLibrary();
-        
-        // 延遲執行初始化與事件綁定，優先保證 UI 渲染完成
-        setTimeout(() => {
-            this.setupAudioEvents();
-            this.setDefaultCover();
-            this.setupInitialMediaSession();
-            this.updateNavState('home');
-        }, 0);
+        this.setupAudioEvents();
+        this.setDefaultCover();
+        this.setupInitialMediaSession();
+        // 初始化導航狀態
+        this.updateNavState('home');
     },
 
+    // --- 切換按讚狀態 ---
     toggleLike(id, event, isFromPlayer = false) {
         if (event) event.stopPropagation();
+        
         if (likedSongs.includes(id)) {
             likedSongs = likedSongs.filter(songId => songId !== id);
         } else {
             likedSongs.push(id);
         }
-        if (currentPlaylistId) this.openPlaylist(currentPlaylistId);
-        else this.renderLibrary();
+
+        if (currentPlaylistId) {
+            this.openPlaylist(currentPlaylistId);
+        } else {
+            this.renderLibrary();
+        }
+
         if (isFromPlayer) this.updatePlayerLikeBtn();
     },
 
@@ -65,6 +69,7 @@ const app = {
         btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
     },
 
+    // --- 導航列狀態更新 ---
     updateNavState(viewName) {
         document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
         const activeBtn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
@@ -82,9 +87,6 @@ const app = {
             navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
             navigator.mediaSession.setActionHandler('play', () => this.playSong());
             navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
-            navigator.mediaSession.setActionHandler('seekto', null);
         }
     },
     
@@ -102,9 +104,6 @@ const app = {
                 artist: music.artist,
                 artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
             });
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
-            navigator.mediaSession.setActionHandler('seekto', null);
         }
     },
 
@@ -178,30 +177,23 @@ const app = {
         this.updateMediaSession();
         this.updatePlayerLikeBtn();
 
-        // 錯開資源請求，先處理音訊，後處理影片
-        setTimeout(() => {
-            const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
-            if (Hls.isSupported()) {
-                if (hls) hls.destroy();
-                hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(mainAudio);
-            } else {
-                mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
-            }
-            mainAudio.load();
-        }, 50);
+        const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
+        if (Hls.isSupported()) {
+            if (hls) hls.destroy();
+            hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(mainAudio);
+        } else {
+            mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
+        }
 
         if (this.bgVideo) {
-            this.bgVideo.pause();
             this.bgVideo.src = `video/v${music.id}.mp4`;
-            this.bgVideo.load();
-            mainAudio.onplay = () => {
-                this.bgVideo.play().catch(e => {});
-            };
+            this.bgVideo.play().catch(e => {});
         }
         
         this.displayLyrics(music.lyrics);
+        mainAudio.load();
     },
 
     playSong() {
@@ -251,7 +243,9 @@ const app = {
         isLoop = !isLoop;
         mainAudio.loop = isLoop;
         const buttons = document.querySelectorAll("#mini-loop-btn, #full-loop-btn");
-        buttons.forEach(btn => btn.style.color = isLoop ? "#ff85a2" : "#fff");
+        buttons.forEach(btn => {
+            btn.style.color = isLoop ? "#ff85a2" : "#fff";
+        });
     },
 
     setupAudioEvents() {
@@ -264,7 +258,10 @@ const app = {
             }
             this.updateLyrics(currentTime);
         });
-        mainAudio.addEventListener("ended", () => { if (!isLoop) this.nextSong(); });
+
+        mainAudio.addEventListener("ended", () => {
+            if (!isLoop) this.nextSong();
+        });
     },
 
     displayLyrics(lyrics) {
@@ -279,11 +276,16 @@ const app = {
     updateLyrics(currentTime) {
         const lyrics = allMusic[musicIndex].lyrics;
         let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
+        
         if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
             currentLyricIndex = activeIndex;
             const lines = document.querySelectorAll(".lyric-line");
-            lines.forEach((line, index) => line.classList.toggle("active", index === activeIndex));
-            if (lines[activeIndex]) lines[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            lines.forEach((line, index) => {
+                line.classList.toggle("active", index === activeIndex);
+            });
+            if (lines[activeIndex]) {
+                lines[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     },
 
@@ -293,7 +295,9 @@ const app = {
         const scrollTop = wrapper.scrollTop; 
         isTranslated = !isTranslated;
         this.displayLyrics(allMusic[musicIndex].lyrics);
-        requestAnimationFrame(() => wrapper.scrollTop = scrollTop);
+        requestAnimationFrame(() => {
+            wrapper.scrollTop = scrollTop;
+        });
     }
 };
 
@@ -302,16 +306,21 @@ window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById(`${viewName}-view`);
     if(target) target.style.display = 'block';
+    
+    // 更新發光狀態
     app.updateNavState(viewName);
 };
 
-window.togglePlayerView = () => { if(app.fullPlayer) app.fullPlayer.classList.toggle('active'); };
+window.togglePlayerView = () => {
+    if(app.fullPlayer) app.fullPlayer.classList.toggle('active');
+};
 
 window.toggleLyricsView = () => {
     const coverView = document.getElementById('cover-view');
     const lyricsView = document.getElementById('lyrics-view');
     const switchBtn = document.getElementById('view-switch-btn');
     if(!coverView || !lyricsView) return;
+
     if (coverView.style.display !== 'none') {
         coverView.style.display = 'none';
         lyricsView.style.display = 'flex';
