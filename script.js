@@ -1,5 +1,4 @@
-﻿// 確保歌詞資料與音樂清單已合併
-mergeLyricsToMusic(allMusic);
+﻿mergeLyricsToMusic(allMusic);
 
 let musicIndex = 0;
 let mainAudio = new Audio();
@@ -72,27 +71,21 @@ const app = {
 
     setupInitialMediaSession() {
         if ('mediaSession' in navigator) {
-        // 設定 Metadata
             const music = allMusic[musicIndex];
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: music ? music.name : "請選擇歌曲",
                 artist: music ? music.artist : "不是設計愛情 是設計我",
                 artwork: [{ src: music ? music.img : 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
-
-        // 【關鍵修改】：明確指定 Action，移除預設的 seek 行為
             navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
             navigator.mediaSession.setActionHandler('play', () => this.playSong());
             navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
-
-        // 明確將 seek 行為設為 null，強制系統改用上下首按鈕
+            // 強制移除快轉行為，顯示上下首
             try {
                 navigator.mediaSession.setActionHandler('seekbackward', null);
                 navigator.mediaSession.setActionHandler('seekforward', null);
-            } catch (e) {
-                console.log("此設備不支援移除 Seek 動作");
-            }
+            } catch (e) {}
         }
     },
     
@@ -108,7 +101,8 @@ const app = {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: music.name,
                 artist: music.artist,
-                artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+                artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }],
+                duration: mainAudio.duration || 0 // 必須加入 duration，系統才會判定為音樂而非影片流
             });
         }
     },
@@ -168,7 +162,7 @@ const app = {
 
     selectAndPlay(index) {
         musicIndex = index;
-        isPlaying = true; // 設定預期狀態為播放
+        isPlaying = true;
         this.loadMusic(musicIndex);
     },
 
@@ -189,7 +183,6 @@ const app = {
             hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(mainAudio);
-            // 監聽資源就緒後自動播放
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 if (isPlaying) this.playSong();
             });
@@ -220,7 +213,6 @@ const app = {
             if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
             if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
         } catch (err) {
-            console.warn("自動播放失敗，請檢查瀏覽器限制");
             isPlaying = false;
         }
     },
@@ -276,7 +268,10 @@ const app = {
             }
             this.updateLyrics(currentTime);
         });
-
+        // 加入 metadata 加載監聽，確保鎖定畫面資訊即時更新
+        mainAudio.addEventListener("loadedmetadata", () => {
+            this.updateMediaSession();
+        });
         mainAudio.addEventListener("ended", () => {
             if (!isLoop) this.nextSong();
         });
@@ -319,17 +314,14 @@ const app = {
 };
 
 window.app = app;
+// ... (其餘維持不變)
 window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById(`${viewName}-view`);
     if(target) target.style.display = 'block';
     app.updateNavState(viewName);
 };
-
-window.togglePlayerView = () => {
-    if(app.fullPlayer) app.fullPlayer.classList.toggle('active');
-};
-
+window.togglePlayerView = () => { if(app.fullPlayer) app.fullPlayer.classList.toggle('active'); };
 window.toggleLyricsView = () => {
     const coverView = document.getElementById('cover-view');
     const lyricsView = document.getElementById('lyrics-view');
@@ -345,5 +337,4 @@ window.toggleLyricsView = () => {
         switchBtn.innerHTML = '<i class="fas fa-list-ul"></i>';
     }
 };
-
 window.addEventListener("load", () => app.init());
