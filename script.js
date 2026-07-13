@@ -7,8 +7,8 @@ let isPlaying = false;
 let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
+let hls = null; // 串流實例
 
-// 輔助函式：將秒數轉為分:秒格式
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -35,14 +35,11 @@ const app = {
 
     setupInitialMediaSession() {
         if ('mediaSession' in navigator) {
-            // 先設定一個預設值，避免系統顯示空白
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: "請選擇歌曲",
                 artist: "不是設計愛情 是設計我",
                 artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
-
-            // 強制綁定上下首，這會蓋掉預設的 +-10秒
             navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
             navigator.mediaSession.setActionHandler('play', () => this.playSong());
@@ -56,45 +53,36 @@ const app = {
         if (document.getElementById("main-img")) document.getElementById("main-img").src = defaultImg;
     },
 
-    // 核心功能：更新手機控制中心資訊[cite: 5]
     updateMediaSession() {
         const music = allMusic[musicIndex];
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: music.name,
                 artist: music.artist,
-                artwork: [
-                    { src: music.img, sizes: '512x512', type: 'image/jpeg' }
-                ]
+                artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
             });
-
-            // 設定控制中心按鈕行為[cite: 5]
-            navigator.mediaSession.setActionHandler('play', () => this.playSong());
-            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
-            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
-            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
-            
-            // 移除 +-10秒 按鈕，改為顯示上下首[cite: 5]
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
         }
     },
 
     renderAllSongs() {
-        this.homeList.innerHTML = allMusic.map((m, i) => `
-            <li onclick="app.selectAndPlay(${i})">
-                <img src="${m.img}"> <p>${m.name}</p>
-            </li>
-        `).join("");
+        if(this.homeList) {
+            this.homeList.innerHTML = allMusic.map((m, i) => `
+                <li onclick="app.selectAndPlay(${i})">
+                    <img src="${m.img}"> <p>${m.name}</p>
+                </li>
+            `).join("");
+        }
     },
 
     renderLibrary() {
-        const favIds = [1, 3, 5]; 
-        this.libraryList.innerHTML = allMusic.filter(m => favIds.includes(m.id)).map((m) => `
-            <li onclick="app.selectAndPlay(${allMusic.indexOf(m)})">
-                <img src="${m.img}"> <p>${m.name}</p>
-            </li>
-        `).join("");
+        if(this.libraryList) {
+            const favIds = [1, 3, 5]; 
+            this.libraryList.innerHTML = allMusic.filter(m => favIds.includes(m.id)).map((m) => `
+                <li onclick="app.selectAndPlay(${allMusic.indexOf(m)})">
+                    <img src="${m.img}"> <p>${m.name}</p>
+                </li>
+            `).join("");
+        }
     },
 
     selectAndPlay(index) {
@@ -111,10 +99,19 @@ const app = {
         if(document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
 
-        // 更新 Media Session 資訊[cite: 5]
         this.updateMediaSession();
 
-        mainAudio.src = `music/s${music.id}.mp3`;
+        // HLS 串流載入邏輯
+        const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
+        if (Hls.isSupported()) {
+            if (hls) hls.destroy();
+            hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(mainAudio);
+        } else {
+            mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
+        }
+
         if (this.bgVideo) {
             this.bgVideo.src = `video/v${music.id}.mp4`;
             this.bgVideo.play().catch(e => {});
@@ -229,22 +226,19 @@ const app = {
     }
 };
 
-// 全域掛載
-window.showView = showView;
-window.togglePlayerView = togglePlayerView;
-window.toggleLyricsView = toggleLyricsView;
-
-function showView(viewName) {
+// 保持你原本的視圖切換邏輯
+window.app = app;
+window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById(`${viewName}-view`);
     if(target) target.style.display = 'block';
-}
+};
 
-function togglePlayerView() {
+window.togglePlayerView = () => {
     if(app.fullPlayer) app.fullPlayer.classList.toggle('active');
-}
+};
 
-function toggleLyricsView() {
+window.toggleLyricsView = () => {
     const coverView = document.getElementById('cover-view');
     const lyricsView = document.getElementById('lyrics-view');
     const switchBtn = document.getElementById('view-switch-btn');
@@ -259,6 +253,6 @@ function toggleLyricsView() {
         lyricsView.style.display = 'none';
         switchBtn.innerHTML = '<i class="fas fa-list-ul"></i>';
     }
-}
+};
 
 window.addEventListener("load", () => app.init());
