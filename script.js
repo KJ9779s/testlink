@@ -340,12 +340,30 @@ const app = {
     },
 
     toggleLoop() {
+        const loopBtn = document.getElementById("full-loop-btn");
+        const translateBtn = document.getElementById("btn-translate");
+
+        // 1. 切換循環狀態
         isLoop = !isLoop;
         mainAudio.loop = isLoop;
-        const buttons = document.querySelectorAll("#mini-loop-btn, #full-loop-btn");
-        buttons.forEach(btn => {
-            btn.style.color = isLoop ? "#ff85a2" : "#fff";
-        });
+
+        // 2. 互斥邏輯：如果開啟循環，可選擇是否關閉翻譯顯示
+        // 若你希望兩個可以同時開，請移除下面這段
+        /*
+        isTranslated = false;
+        translateBtn.classList.remove('active');
+        translateBtn.style.color = "#fff";
+        this.displayLyrics(allMusic[musicIndex].lyrics);
+        */
+
+        // 3. 更新按鈕樣式
+        if (isLoop) {
+            loopBtn.classList.add('active');
+            loopBtn.style.color = "#ff85a2";
+        } else {
+            loopBtn.classList.remove('active');
+            loopBtn.style.color = "#fff";
+        }
     },
 
     // 取得新集數的顯示狀態文字 (今日/昨日/日期)
@@ -422,16 +440,29 @@ const app = {
 
     toggleTranslation() {
         const wrapper = document.getElementById("lyrics-wrapper");
-        if (!wrapper) return;
-        const scrollTop = wrapper.scrollTop; 
+        const translateBtn = document.getElementById("btn-translate");
+        const loopBtn = document.getElementById("full-loop-btn");
+
+        // 1. 切換翻譯狀態
+        isTranslated = !isTranslated;
         
-        isTranslated = !isTranslated; // 切換狀態
-        this.updateTranslationBtnStyle(); // 同步更新顏色
+        // 2. 互斥邏輯：如果開啟翻譯，則強制關閉循環 (視需求而定，或是只改樣式)
+        // 這裡如果你想讓兩者並存，就移除下面這一行；若要完全互斥，請保留
+        isLoop = false; 
+        mainAudio.loop = false;
+        loopBtn.classList.remove('active'); // 強制移除循環按鈕的 active
+        loopBtn.style.color = "#fff";
+
+        // 3. 更新當前按鈕樣式
+        if (isTranslated) {
+            translateBtn.classList.add('active');
+            translateBtn.style.color = "#ff85a2";
+        } else {
+            translateBtn.classList.remove('active');
+            translateBtn.style.color = "#fff";
+        }
         
         this.displayLyrics(allMusic[musicIndex].lyrics);
-        requestAnimationFrame(() => {
-            wrapper.scrollTop = scrollTop;
-        });
     },
 };
 
