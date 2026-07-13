@@ -147,9 +147,10 @@ const app = {
     renderLibrary() {
         currentPlaylistId = null;
         if(this.libraryList) {
+            const updateText = this.getNewReleaseStatus(); // 使用新函式取得文字
             const playlists = [
                 { id: 'liked', name: "已按讚的歌曲", count: `${likedSongs.length} 首歌曲`, icon: "heart" },
-                { id: 'new', name: "新集數", count: "昨日已更新", icon: "bell" }
+                { id: 'new', name: "新集數", count: updateText, icon: "bell" }
             ];
             this.libraryList.innerHTML = playlists.map(p => `
                 <li onclick="app.openPlaylist('${p.id}')">
@@ -164,8 +165,16 @@ const app = {
     },
 
     openPlaylist(id) {
-        currentPlaylistId = id; // 設定當前清單 ID
-        const songs = (id === 'liked') ? allMusic.filter(m => likedSongs.includes(m.id)) : allMusic;
+        currentPlaylistId = id;
+        let songs = [];
+        
+        if (id === 'liked') {
+            songs = allMusic.filter(m => likedSongs.includes(m.id));
+        } else if (id === 'new') {
+            songs = this.getNewReleases(); // 使用新函式取得清單
+        } else {
+            songs = allMusic;
+        }
         
         this.libraryList.innerHTML = `
             <li onclick="app.renderLibrary()" style="font-weight:bold; cursor:pointer; margin-bottom:10px;">← 返回</li>
@@ -312,6 +321,33 @@ const app = {
         buttons.forEach(btn => {
             btn.style.color = isLoop ? "#ff85a2" : "#fff";
         });
+    },
+
+    // 取得新集數的顯示狀態文字 (今日/昨日/日期)
+    getNewReleaseStatus() {
+        const sorted = [...allMusic].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const latestSong = sorted[0];
+        if (!latestSong) return "無更新";
+        
+        const releaseDate = new Date(latestSong.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dateOnly = new Date(releaseDate);
+        dateOnly.setHours(0, 0, 0, 0);
+        
+        const diffTime = today - dateOnly;
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+        if (diffDays === 0) return "今日已更新";
+        if (diffDays === 1) return "昨日已更新";
+        return `${releaseDate.getMonth() + 1}月${releaseDate.getDate()}日更新`;
+    },
+
+    // 取得最新的 6 首歌曲
+    getNewReleases() {
+        const sorted = [...allMusic].sort((a, b) => new Date(b.date) - new Date(a.date));
+        return sorted.slice(0, 6);
     },
 
     setupAudioEvents() {
