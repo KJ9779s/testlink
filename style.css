@@ -10,6 +10,9 @@
 
 body {
     background-color: #000;
+    background-image: url('back.jpg');
+    background-size: cover;
+    background-position: center;
     color: #fff;
     height: 100vh;
     overflow: hidden;
