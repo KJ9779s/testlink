@@ -72,15 +72,27 @@ const app = {
 
     setupInitialMediaSession() {
         if ('mediaSession' in navigator) {
+        // 設定 Metadata
+            const music = allMusic[musicIndex];
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: "請選擇歌曲",
-                artist: "不是設計愛情 是設計我",
-                artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
+                title: music ? music.name : "請選擇歌曲",
+                artist: music ? music.artist : "不是設計愛情 是設計我",
+                artwork: [{ src: music ? music.img : 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
+
+        // 【關鍵修改】：明確指定 Action，移除預設的 seek 行為
             navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
             navigator.mediaSession.setActionHandler('play', () => this.playSong());
             navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
+
+        // 明確將 seek 行為設為 null，強制系統改用上下首按鈕
+            try {
+                navigator.mediaSession.setActionHandler('seekbackward', null);
+                navigator.mediaSession.setActionHandler('seekforward', null);
+            } catch (e) {
+                console.log("此設備不支援移除 Seek 動作");
+            }
         }
     },
     
