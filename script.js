@@ -504,3 +504,13 @@ window.toggleLyricsView = () => {
 };
 
 window.addEventListener("load", () => app.init());
+
+window.closeAnnouncement = () => {
+    const bar = document.getElementById("announcement-bar");
+    if (bar) {
+        bar.style.display = "none";
+        // 如果關閉後需要調整內容區高度，可在此操作
+        const contentArea = document.getElementById("content-area");
+        if (contentArea) contentArea.style.marginTop = "0px";
+    }
+};
