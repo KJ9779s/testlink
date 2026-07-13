@@ -35,15 +35,22 @@ const app = {
 
     setupInitialMediaSession() {
         if ('mediaSession' in navigator) {
+        // 設定預設 metadata
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: "請選擇歌曲",
                 artist: "不是設計愛情 是設計我",
                 artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
-            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
-            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
-            navigator.mediaSession.setActionHandler('play', () => this.playSong());
-            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
+
+        // 強制綁定上下首
+            navigator.mediaSession.setActionHandler('previoustrack', () => app.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => app.nextSong());
+            navigator.mediaSession.setActionHandler('play', () => app.playSong());
+            navigator.mediaSession.setActionHandler('pause', () => app.pauseSong());
+
+        // 關鍵：將快進/快退綁定為 null，系統就會自動將其移除，騰出空間給上下首按鈕
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
         }
     },
     
@@ -61,6 +68,12 @@ const app = {
                 artist: music.artist,
                 artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
             });
+        
+        // 確保切換歌曲後，按鈕行為依然是上下首，而不是 +-10 秒
+            navigator.mediaSession.setActionHandler('previoustrack', () => app.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => app.nextSong());
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
         }
     },
 
