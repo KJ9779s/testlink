@@ -7,7 +7,9 @@ let isPlaying = false;
 let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
-let hls = null; // 串流實例
+let hls = null; 
+let likedSongs = [1, 3, 5]; // 已按讚歌曲的 ID 列表
+let currentPlaylistId = null; // 新增：記錄目前所在的清單頁面 ID
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -33,24 +35,53 @@ const app = {
         this.setupInitialMediaSession();
     },
 
+    // --- 切換按讚狀態 ---
+    toggleLike(id, event, isFromPlayer = false) {
+        if (event) event.stopPropagation();
+        
+        if (likedSongs.includes(id)) {
+            likedSongs = likedSongs.filter(songId => songId !== id);
+        } else {
+            likedSongs.push(id);
+        }
+
+        // 如果在清單頁，重新渲染該清單以保持在當前頁面
+        if (currentPlaylistId) {
+            this.openPlaylist(currentPlaylistId);
+        } else {
+            this.renderLibrary();
+        }
+
+        // 如果是從播放器操作，更新播放器圖示
+        if (isFromPlayer) this.updatePlayerLikeBtn();
+    },
+
+    // 專門給全螢幕播放器按鈕呼叫
+    toggleLikeInPlayer() {
+        const currentMusic = allMusic[musicIndex];
+        if (currentMusic) this.toggleLike(currentMusic.id, null, true);
+    },
+
+    // 更新播放器愛心樣式
+    updatePlayerLikeBtn() {
+        const btn = document.getElementById("full-player-like-btn");
+        if (!btn) return;
+        const currentMusic = allMusic[musicIndex];
+        const isLiked = likedSongs.includes(currentMusic.id);
+        btn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>`;
+    },
+
     setupInitialMediaSession() {
         if ('mediaSession' in navigator) {
-        // 設定預設 metadata
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: "請選擇歌曲",
                 artist: "不是設計愛情 是設計我",
                 artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
-
-        // 強制綁定上下首
-            navigator.mediaSession.setActionHandler('previoustrack', () => app.prevSong());
-            navigator.mediaSession.setActionHandler('nexttrack', () => app.nextSong());
-            navigator.mediaSession.setActionHandler('play', () => app.playSong());
-            navigator.mediaSession.setActionHandler('pause', () => app.pauseSong());
-
-        // 關鍵：將快進/快退綁定為 null，系統就會自動將其移除，騰出空間給上下首按鈕
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
+            navigator.mediaSession.setActionHandler('play', () => this.playSong());
+            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
         }
     },
     
@@ -68,12 +99,6 @@ const app = {
                 artist: music.artist,
                 artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
             });
-        
-        // 確保切換歌曲後，按鈕行為依然是上下首，而不是 +-10 秒
-            navigator.mediaSession.setActionHandler('previoustrack', () => app.prevSong());
-            navigator.mediaSession.setActionHandler('nexttrack', () => app.nextSong());
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
         }
     },
 
@@ -88,14 +113,46 @@ const app = {
     },
 
     renderLibrary() {
+        currentPlaylistId = null;
         if(this.libraryList) {
-            const favIds = [1, 3, 5]; 
-            this.libraryList.innerHTML = allMusic.filter(m => favIds.includes(m.id)).map((m) => `
-                <li onclick="app.selectAndPlay(${allMusic.indexOf(m)})">
-                    <img src="${m.img}"> <p>${m.name}</p>
+            const playlists = [
+                { id: 'liked', name: "已按讚的歌曲", count: `${likedSongs.length} 首歌曲`, icon: "heart" },
+                { id: 'new', name: "新集數", count: "昨日已更新", icon: "bell" }
+            ];
+            this.libraryList.innerHTML = playlists.map(p => `
+                <li onclick="app.openPlaylist('${p.id}')">
+                    <div class="playlist-cover"></div> 
+                    <div>
+                        <p style="margin:0; font-weight:bold;">${p.name}</p>
+                        <small style="color:#aaa;">${p.count}</small>
+                    </div>
                 </li>
             `).join("");
         }
+    },
+
+    openPlaylist(id) {
+        currentPlaylistId = id;
+        const songs = (id === 'liked') ? allMusic.filter(m => likedSongs.includes(m.id)) : allMusic;
+        this.libraryList.innerHTML = `
+            <li onclick="app.renderLibrary()" style="font-weight:bold; cursor:pointer; margin-bottom:10px;">← 返回</li>
+            ${songs.map((m, i) => {
+                const isLiked = likedSongs.includes(m.id);
+                return `
+                <li onclick="app.selectAndPlay(${allMusic.indexOf(m)})" style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center;">
+                        <img src="${m.img}" style="width:50px; height:50px; border-radius:4px;"> 
+                        <div style="margin-left:15px;">
+                            <p style="margin:0;">${m.name}</p>
+                            <small style="color:#aaa;">${m.artist}</small>
+                        </div>
+                    </div>
+                    <button onclick="app.toggleLike(${m.id}, event)" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">
+                        <i class="${isLiked ? 'fas' : 'far'} fa-heart" style="${isLiked ? 'color:#ff85a2;' : ''}"></i>
+                    </button>
+                </li>`;
+            }).join("")}
+        `;
     },
 
     selectAndPlay(index) {
@@ -113,8 +170,8 @@ const app = {
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
 
         this.updateMediaSession();
+        this.updatePlayerLikeBtn(); // 更新愛心狀態
 
-        // HLS 串流載入邏輯
         const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
         if (Hls.isSupported()) {
             if (hls) hls.destroy();
@@ -239,7 +296,6 @@ const app = {
     }
 };
 
-// 保持你原本的視圖切換邏輯
 window.app = app;
 window.showView = (viewName) => {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');

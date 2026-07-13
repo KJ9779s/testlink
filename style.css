@@ -30,7 +30,12 @@ body {
     overflow-y: auto;
 }
 
-h1 { margin-bottom: 20px; font-size: 24px; }
+/* 確保所有頁面的標題樣式統一 */
+h1 { 
+    margin-bottom: 20px; 
+    font-size: 24px; 
+    padding-left: 5px; /* 與條列式清單稍微對齊 */
+}
 
 .music-grid {
     display: grid;
@@ -56,6 +61,40 @@ h1 { margin-bottom: 20px; font-size: 24px; }
     border-radius: 4px;
     margin-bottom: 10px;
     object-fit: cover;
+}
+
+/* --- 新增：音樂庫條列式清單樣式 --- */
+.music-list {
+    list-style: none;
+    padding: 0;
+}
+
+.music-list li {
+    display: flex;
+    align-items: center;
+    padding: 12px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.music-list li:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.music-list li img {
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+/* 播放清單預設封面 (漸層色塊模擬) */
+.playlist-cover {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #5b247a 0%, #1bcedf 100%);
+    border-radius: 4px;
+    margin-right: 15px;
+    flex-shrink: 0;
 }
 
 /* --- 底部固定播放器 (Mini Player) --- */

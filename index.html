@@ -1,133 +1,102 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-TW">
-	<head>
-		<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>KOKO MUSIC</title>
-				<link rel="stylesheet" href="style.css">
-					<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOKO MUSIC</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-	<body>
+<body>
 
-		<!-- 背景影片 -->
-		<video id="bg-video" autoplay="" loop="" muted="" playsinline="" preload="auto">
-			<source src="" type="video/mp4">
+    <video id="bg-video" autoplay="" loop="" muted="" playsinline="" preload="auto">
+        <source src="" type="video/mp4">
     </video>
 
-		<!-- 主要內容區域 -->
-		<div id="content-area">
-			<div id="home-view" class="view">
-				<h1>所有歌曲</h1>
-				<ul id="home-list" class="music-grid"></ul>
-			</div>
-			<div id="library-view" class="view" style="display:none;">
-				<h1>喜愛歌曲</h1>
-				<ul id="library-list" class="music-grid"></ul>
-			</div>
-		</div>
+    <div id="content-area">
+        <div id="home-view" class="view">
+            <h1>所有歌曲</h1>
+            <ul id="home-list" class="music-grid"></ul>
+        </div>
+        <div id="library-view" class="view" style="display:none;">
+            <h1>9779s 的音樂庫</h1>
+            <ul id="library-list" class="music-list"></ul>
+        </div>
+    </div>
 
-		<!-- 底部固定播放器 (Mini Player) -->
-		<div id="bottom-player">
-			<div class="mini-main" onclick="togglePlayerView()">
-				<img src="default-cover.jpg" id="mini-img" alt="Cover">
-				
-					<div class="mini-info">
-						<p id="mini-name">選擇一首歌</p>
-					</div>
-				</div>
-			<div class="mini-controls">
-				<button onclick="app.prevSong()">
-					<i class="fas fa-step-backward"></i>
-				</button>
-				<button onclick="app.togglePlay()" id="mini-play-btn">
-					<i class="fas fa-play"></i>
-				</button>
-				<button onclick="app.nextSong()">
-					<i class="fas fa-step-forward"></i>
-				</button>
-				<!-- 底部循環按鈕 -->
-				<button onclick="app.toggleLoop()" id="mini-loop-btn">
-					<i class="fas fa-redo"></i>
-				</button>
-			</div>
-		</div>
+    <div id="bottom-player">
+        <div class="mini-main" onclick="togglePlayerView()">
+            <img src="default-cover.jpg" id="mini-img" alt="Cover">
+            <div class="mini-info">
+                <p id="mini-name">選擇一首歌</p>
+            </div>
+        </div>
+        <div class="mini-controls">
+            <button onclick="app.prevSong()"><i class="fas fa-step-backward"></i></button>
+            <button onclick="app.togglePlay()" id="mini-play-btn"><i class="fas fa-play"></i></button>
+            <button onclick="app.nextSong()"><i class="fas fa-step-forward"></i></button>
+            <button onclick="app.toggleLoop()" id="mini-loop-btn"><i class="fas fa-redo"></i></button>
+        </div>
+    </div>
 
-		<!-- 全螢幕播放頁 -->
-		<div id="full-player">
-			<div class="player-card">
-				<div class="player-header">
-					<button onclick="togglePlayerView()">
-						<i class="fas fa-chevron-down"></i>
-					</button>
-					<p>正在播放</p>
-					<button id="view-switch-btn" onclick="toggleLyricsView()">
-						<i class="fas fa-list-ul"></i>
-					</button>
-				</div>
+    <div id="full-player">
+        <div class="player-card">
+            <div class="player-header">
+                <button onclick="togglePlayerView()"><i class="fas fa-chevron-down"></i></button>
+                <p>正在播放</p>
+                <button id="view-switch-btn" onclick="toggleLyricsView()"><i class="fas fa-list-ul"></i></button>
+            </div>
 
-				<div class="main-view-container">
-					<div id="cover-view" class="active-view">
-						<div class="img-area">
-							<img src="" alt="Cover" id="main-img">
-						</div>
-						<div class="song-details">
-							<p class="name"></p>
-							<p class="artist"></p>
-						</div>
-					</div>
-					<div id="lyrics-view" class="inactive-view">
-						<div class="lyrics-area">
-							<button id="btn-translate" onclick="app.toggleTranslation()">
-								<i class="fas fa-language"></i>
-							</button>
-							<div id="lyrics-wrapper"></div>
-						</div>
-					</div>
-				</div>
+            <div class="main-view-container">
+                <div id="cover-view" class="active-view">
+                    <div class="img-area">
+                        <img src="" alt="Cover" id="main-img">
+                    </div>
+                    <!-- 修正後的結構，確保寬度與圖片對齊且愛心在右側 -->
+                    <div class="song-details" style="width: 300px; display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
+                        <div style="overflow: hidden; text-align: left;">
+                            <p class="name" style="margin:0; font-size: 20px; font-weight: bold;"></p>
+                            <p class="artist" style="margin:0; color: #b3b3b3; font-size: 16px;"></p>
+                        </div>
+                        <button id="full-player-like-btn" onclick="app.toggleLikeInPlayer()" style="background:none; border:none; color:white; cursor:pointer; font-size:24px;">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="lyrics-view" class="inactive-view">
+                    <div class="lyrics-area">
+                        <button id="btn-translate" onclick="app.toggleTranslation()"><i class="fas fa-language"></i></button>
+                        <div id="lyrics-wrapper"></div>
+                    </div>
+                </div>
+            </div>
 
-				<!-- 音訊控制區 -->
-				<div class="controls-area">
-					<div class="progress-container" onclick="app.seek(event)">
-						<div class="progress-bar"></div>
-					</div>
-					<div class="time-labels">
-						<span id="current-time">0:00</span>
-						<span id="total-duration">0:00</span>
-					</div>
-					<div class="main-controls">
-						<button onclick="app.prevSong()">
-							<i class="fas fa-step-backward"></i>
-						</button>
-						<button onclick="app.togglePlay()" id="play-pause-btn">
-							<i class="fas fa-pause"></i>
-						</button>
-						<button onclick="app.nextSong()">
-							<i class="fas fa-step-forward"></i>
-						</button>
-						<!-- 全螢幕循環按鈕 -->
-						<button onclick="app.toggleLoop()" id="full-loop-btn">
-							<i class="fas fa-redo"></i>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
+            <div class="controls-area">
+                <div class="progress-container" onclick="app.seek(event)">
+                    <div class="progress-bar"></div>
+                </div>
+                <div class="time-labels">
+                    <span id="current-time">0:00</span>
+                    <span id="total-duration">0:00</span>
+                </div>
+                <div class="main-controls">
+                    <button onclick="app.prevSong()"><i class="fas fa-step-backward"></i></button>
+                    <button onclick="app.togglePlay()" id="play-pause-btn"><i class="fas fa-pause"></i></button>
+                    <button onclick="app.nextSong()"><i class="fas fa-step-forward"></i></button>
+                    <button onclick="app.toggleLoop()" id="full-loop-btn"><i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		<!-- 底部導航欄 -->
-		<nav class="bottom-nav">
-			<a href="#" onclick="showView('home')">
-				<i class="fas fa-home"></i>
-				<br>首頁
-			</a>
-			<a href="#" onclick="showView('library')">
-				<i class="fas fa-music"></i>
-				<br>音樂庫
-			</a>
-		</nav>
+    <nav class="bottom-nav">
+        <a href="#" onclick="showView('home')"><i class="fas fa-home"></i><br>首頁</a>
+        <a href="#" onclick="showView('library')"><i class="fas fa-music"></i><br>音樂庫</a>
+    </nav>
 
-		<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-		<script src="data.js"></script>
-		<script src="lyrics.js"></script>
-		<script src="script.js"></script>
-	</body>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="data.js"></script>
+    <script src="lyrics.js"></script>
+    <script src="script.js"></script>
+</body>
 </html>
