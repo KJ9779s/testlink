@@ -31,10 +31,35 @@ const app = {
         this.setupAudioEvents();
         this.setDefaultCover();
     },
+    
     setDefaultCover() {
-        const defaultImg = "default-cover.jpg"; // 請確保路徑正確
+        const defaultImg = "default-cover.jpg";
         if (document.getElementById("mini-img")) document.getElementById("mini-img").src = defaultImg;
         if (document.getElementById("main-img")) document.getElementById("main-img").src = defaultImg;
+    },
+
+    // 核心功能：更新手機控制中心資訊[cite: 5]
+    updateMediaSession() {
+        const music = allMusic[musicIndex];
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: music.name,
+                artist: music.artist,
+                artwork: [
+                    { src: music.img, sizes: '512x512', type: 'image/jpeg' }
+                ]
+            });
+
+            // 設定控制中心按鈕行為[cite: 5]
+            navigator.mediaSession.setActionHandler('play', () => this.playSong());
+            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
+            
+            // 移除 +-10秒 按鈕，改為顯示上下首[cite: 5]
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
+        }
     },
 
     renderAllSongs() {
@@ -62,12 +87,14 @@ const app = {
 
     loadMusic(index) {
         const music = allMusic[musicIndex];
-        // 確保元素存在再賦值
         if(document.getElementById("mini-img")) document.getElementById("mini-img").src = music.img;
         if(document.getElementById("mini-name")) document.getElementById("mini-name").innerText = music.name;
         if(document.getElementById("main-img")) document.getElementById("main-img").src = music.img;
         if(document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
+
+        // 更新 Media Session 資訊[cite: 5]
+        this.updateMediaSession();
 
         mainAudio.src = `music/s${music.id}.mp3`;
         if (this.bgVideo) {
@@ -125,12 +152,10 @@ const app = {
     toggleLoop() {
         isLoop = !isLoop;
         mainAudio.loop = isLoop;
-        // 使用更直覺的方式更新所有按鈕樣式
         const buttons = document.querySelectorAll("#mini-loop-btn, #full-loop-btn");
         buttons.forEach(btn => {
             btn.style.color = isLoop ? "#ff85a2" : "#fff";
         });
-        console.log("Loop mode:", isLoop); // 除錯用
     },
 
     setupAudioEvents() {
