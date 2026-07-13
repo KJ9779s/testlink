@@ -8,7 +8,7 @@ let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
 let hls = null; 
-let likedSongs = [1, 3, 5]; // 已按讚歌曲的 ID 列表
+let likedSongs = []; // 已按讚歌曲的 ID 列表
 let currentPlaylistId = null; // 新增：記錄目前所在的清單頁面 ID
 
 function formatTime(seconds) {
