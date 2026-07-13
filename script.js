@@ -30,6 +30,7 @@ const app = {
         this.renderLibrary();
         this.setupAudioEvents();
         this.setDefaultCover();
+        this.setupInitialMediaSession();
     },
     
     setDefaultCover() {
