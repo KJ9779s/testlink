@@ -6,11 +6,11 @@ let isPlaying = false;
 let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
-let hls = null; 
-let likedSongs = []; 
-let currentPlaylistId = null; 
+let hls = null;
+let likedSongs = [];
+let currentPlaylistId = null;
 
-// --- 解鎖 Audio Context 屬性 ---
+// --- 優化手機瀏覽器相容性 ---
 mainAudio.preload = "auto";
 mainAudio.playsInline = true;
 mainAudio.setAttribute("playsinline", "");
@@ -72,8 +72,7 @@ const app = {
     },
 
     togglePlay() {
-        if (isPlaying) this.pauseSong();
-        else this.playSong();
+        isPlaying ? this.pauseSong() : this.playSong();
     },
 
     selectAndPlay(index) {
@@ -101,9 +100,8 @@ const app = {
             hls.loadSource(streamUrl);
             hls.attachMedia(mainAudio);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                mainAudio.play()
-                    .then(() => { isPlaying = true; this.updatePlayButton(); })
-                    .catch(err => console.log("Mobile autoplay blocked", err));
+                this.updateMediaSession(); // 確保資源載入後同步更新 Metadata
+                if (isPlaying) this.playSong();
             });
         } else {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
@@ -149,7 +147,7 @@ const app = {
                 album: "9779s Music",
                 artwork: [{ src: music.img, sizes: "512x512", type: "image/jpeg" }]
             });
-            if (mainAudio.duration) {
+            if (!isNaN(mainAudio.duration)) {
                 try {
                     navigator.mediaSession.setPositionState({
                         duration: mainAudio.duration,
@@ -167,6 +165,10 @@ const app = {
     setupAudioEvents() {
         mainAudio.addEventListener("timeupdate", () => {
             const { currentTime, duration } = mainAudio;
+            
+            // 處理進度條觸發 nextSong 的邊界問題
+            if (duration && currentTime >= duration - 0.5 && duration > 0) return;
+
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
                 document.getElementById("current-time").innerText = formatTime(currentTime);
@@ -174,20 +176,24 @@ const app = {
             }
             this.updateLyrics(currentTime);
 
-            if ('mediaSession' in navigator && !isNaN(mainAudio.duration)) {
+            if ('mediaSession' in navigator && !isNaN(duration)) {
                 try {
                     navigator.mediaSession.setPositionState({
-                        duration: mainAudio.duration,
+                        duration: duration,
                         playbackRate: mainAudio.playbackRate,
-                        position: mainAudio.currentTime
+                        position: currentTime
                     });
                 } catch (e) {}
             }
         });
-        mainAudio.addEventListener("ended", () => { if (!isLoop) this.nextSong(); });
+        
+        mainAudio.addEventListener("ended", () => { 
+            if (!isLoop) this.nextSong(); 
+            else { mainAudio.currentTime = 0; mainAudio.play(); }
+        });
     },
 
-    // --- 其他輔助函式維持不變 ---
+    // --- 其他 UI 邏輯 ---
     toggleLike(id, event, isFromPlayer = false) {
         if (event) event.stopPropagation();
         likedSongs.includes(id) ? likedSongs = likedSongs.filter(s => s !== id) : likedSongs.push(id);
