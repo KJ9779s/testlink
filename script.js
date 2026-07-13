@@ -9,6 +9,7 @@ let isLoop = false;
 let hls = null; 
 let likedSongs = []; 
 let currentPlaylistId = null; 
+let currentPlaylistName = "所有歌曲";
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -62,6 +63,23 @@ const app = {
         const nextIndex = (musicIndex + 1) % allMusic.length;
         const nextMusic = allMusic[nextIndex];
         fetch(`music/s${nextMusic.id}/s${nextMusic.id}.m3u8`).catch(() => {});
+    },
+
+    getPlaylistNameById(id) {
+        if (id === 'liked') return "已按讚的歌曲";
+        if (id === 'new') return "新上架";
+        return "所有歌曲";
+    },
+
+    updatePlaylistLabel() {
+        const name = this.getPlaylistNameById(currentPlaylistId);
+        // 顯示在 Mini Player 的 mini-info 區域
+        const miniLabel = document.getElementById("mini-playlist-label"); 
+        if (miniLabel) miniLabel.innerText = name;
+        
+        // 顯示在 Full Player 的標題區域
+        const fullHeader = document.querySelector(".player-card .player-header p");
+        if (fullHeader) fullHeader.innerText = name;
     },
 
     toggleLike(id, event, isFromPlayer = false) {
@@ -145,12 +163,12 @@ const app = {
     },
 
     renderLibrary() {
-        currentPlaylistId = null;
+        
         if(this.libraryList) {
             const updateText = this.getNewReleaseStatus(); // 使用新函式取得文字
             const playlists = [
                 { id: 'liked', name: "已按讚的歌曲", count: `${likedSongs.length} 首歌曲`, icon: "heart" },
-                { id: 'new', name: "新集數", count: updateText, icon: "bell" }
+                { id: 'new', name: "新上架", count: updateText, icon: "bell" }
             ];
             this.libraryList.innerHTML = playlists.map(p => `
                 <li onclick="app.openPlaylist('${p.id}')">
@@ -166,19 +184,15 @@ const app = {
 
     openPlaylist(id) {
         currentPlaylistId = id;
-        let songs = [];
-        
-        if (id === 'liked') {
-            songs = allMusic.filter(m => likedSongs.includes(m.id));
-        } else if (id === 'new') {
-            songs = this.getNewReleases(); // 使用新函式取得清單
-        } else {
-            songs = allMusic;
-        }
+        currentPlaylistName = this.getPlaylistNameById(id);
+        this.updatePlaylistLabel(); // 更新顯示
+
+        let songs = (id === 'liked') ? allMusic.filter(m => likedSongs.includes(m.id)) : 
+                    (id === 'new') ? this.getNewReleases() : allMusic;
         
         this.libraryList.innerHTML = `
             <li onclick="app.renderLibrary()" style="font-weight:bold; cursor:pointer; margin-bottom:10px;">← 返回</li>
-            ${songs.map((m, i) => {
+            ${songs.map((m) => {
                 const isLiked = likedSongs.includes(m.id);
                 return `
                 <li onclick="app.selectAndPlay(${allMusic.indexOf(m)}, '${id}')" style="display:flex; align-items:center; justify-content:space-between;">
@@ -197,15 +211,11 @@ const app = {
         `;
     },
 
-    // 在 app 物件中修改此方法
     selectAndPlay(index, playlistId = null) {
         musicIndex = index;
-        
-        // 如果有傳入 playlistId (例如從按讚清單點擊)，則更新為該 ID
-        // 如果是從首頁點擊 (沒傳入參數)，則強制為 null
-        currentPlaylistId = playlistId; 
+        currentPlaylistId = playlistId; // 記住是哪個歌單點的
+        this.updatePlaylistLabel();    // 更新標籤
         localStorage.setItem('musicIndex', musicIndex);
-        
         this.loadMusic(musicIndex);
         this.playSong();
     },
@@ -217,9 +227,10 @@ const app = {
         if(document.getElementById("main-img")) document.getElementById("main-img").src = music.img;
         if(document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
-
+        this.updatePlaylistLabel();
         this.updateMediaSession();
         this.updatePlayerLikeBtn();
+       
 
         const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
         
@@ -266,11 +277,15 @@ const app = {
     },
 
     getCurrentPlaylist() {
+    // 只要 currentPlaylistId 有值，它就會根據 ID 過濾歌曲
+    // 如果它是 null (例如你在首頁直接點歌)，它才會回傳全部歌曲
         if (currentPlaylistId === 'liked') {
             return allMusic.filter(m => likedSongs.includes(m.id));
         }
-        // 如果 currentPlaylistId 為 null，預設回傳全部歌曲
-        return allMusic;
+        if (currentPlaylistId === 'new') {
+            return this.getNewReleases();
+        }
+        return allMusic; // 預設全部
     },
 
     nextSong() {
