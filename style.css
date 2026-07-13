@@ -75,24 +75,40 @@ h1 {
 
 .music-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* 稍微加大最小寬度 */
-    gap: 30px; /* 從 20px 加大到 30px */
+    /* 手機版：強制分成 4 欄 */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 10px; /* 手機版空間有限，將 gap 縮小 */
     list-style: none;
 }
 
-/* 增加卡片內部的 padding 與字體 */
+/* 針對卡片樣式的優化 */
 .music-grid li {
     background: rgba(255, 255, 255, 0.05);
-    padding: 15px; /* 增加內距 */
-    border-radius: 12px;
+    padding: 8px; /* 縮小內距，讓圖可以更大一點 */
+    border-radius: 8px;
     cursor: pointer;
     text-align: center;
     transition: background 0.3s;
 }
 
 .music-grid li p {
-    font-size: 15px; /* 歌曲名稱稍微加大 */
+    font-size: 10px; /* 手機上一列四個，字必須縮小，否則會變形 */
     margin-top: 5px;
+    white-space: nowrap;      /* 文字不換行 */
+    overflow: hidden;         /* 超出隱藏 */
+    text-overflow: ellipsis;  /* 顯示為省略號 */
+}
+@media (min-width: 600px) {
+    .music-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 30px;
+    }
+    .music-grid li {
+        padding: 15px;
+    }
+    .music-grid li p {
+        font-size: 15px;
+    }
 }
 
 .music-grid li:hover { background: rgba(255, 255, 255, 0.15); }
