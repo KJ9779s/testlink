@@ -193,12 +193,8 @@ const app = {
     },
 
     openPlaylist(id) {
-        currentPlaylistId = id;
-        currentPlaylistName = this.getPlaylistNameById(id);
-        this.updatePlaylistLabel(); 
 
         let songs;
-
         if (id === 'liked') {
             songs = allMusic.filter(m => likedSongs.includes(m.id));
         } else if (id === 'new') {
@@ -232,7 +228,9 @@ const app = {
 
     selectAndPlay(index, playlistId = null) {
         musicIndex = index;
-        currentPlaylistId = playlistId; 
+        if(playlistId) { 
+            currentPlaylistId = playlistId; 
+        }
         this.updatePlaylistLabel();  
         localStorage.setItem('musicIndex', musicIndex);
         this.loadMusic(musicIndex);
