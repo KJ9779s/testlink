@@ -361,20 +361,26 @@ const app = {
     },
 
     toggleLoop() {
-        const loopBtn = document.getElementById("full-loop-btn");
-        const translateBtn = document.getElementById("btn-translate");
+    
+        const miniLoopBtn = document.getElementById("mini-loop-btn");
+        const fullLoopBtn = document.getElementById("full-loop-btn");
 
+    
         isLoop = !isLoop;
         mainAudio.loop = isLoop;
 
-
-        if (isLoop) {
-            loopBtn.classList.add('active');
-            loopBtn.style.color = "#ff85a2";
-        } else {
-            loopBtn.classList.remove('active');
-            loopBtn.style.color = "#fff";
-        }
+    
+        [miniLoopBtn, fullLoopBtn].forEach(btn => {
+            if (btn) {
+                if (isLoop) {
+                    btn.classList.add('active');
+                    btn.style.color = "#ff85a2";
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.color = "#fff";
+                }
+            }
+        });
     },
 
 
@@ -518,7 +524,7 @@ window.closeAnnouncement = () => {
     const bar = document.getElementById("announcement-bar");
     if (bar) {
         bar.style.display = "none";
-
+        // 如果關閉後需要調整內容區高度，可在此操作
         const contentArea = document.getElementById("content-area");
         if (contentArea) contentArea.style.marginTop = "0px";
     }
