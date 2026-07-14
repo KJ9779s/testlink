@@ -76,7 +76,7 @@ body {
 /* 確保所有頁面的標題樣式統一 */
 h1 { 
     margin-bottom: 30px; 
-    font-size: 32px; /* 從 24px 加大 */
+    font-size: 32px; 
     padding-left: 5px;
 }
 
@@ -88,13 +88,13 @@ h1 {
     grid-template-rows: repeat(2, 1fr); 
     gap: 20px; /* 卡片間距 */
     list-style: none;
-    height: 100%; /* 確保撐滿容器，讓 2x2 填滿畫面 */
+    height: 100%; 
 }
 
 /* 歌曲卡片樣式 */
 .music-grid li {
     background: rgba(255, 255, 255, 0.05);
-    padding: 15px; /* 手機端增加 padding 讓卡片看起來更大 */
+    padding: 15px; 
     border-radius: 16px;
     cursor: pointer;
     text-align: center;
@@ -103,12 +103,12 @@ h1 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100%; /* 強制填滿 grid 區域 */
+    height: 100%;
 }
 
 /* 圖片放大 */
 .music-grid li img {
-    width: 90%; /* 圖片佔滿卡片大部分空間 */
+    width: 90%; 
     aspect-ratio: 1 / 1;
     border-radius: 10px;
     margin-bottom: 12px;
@@ -117,7 +117,7 @@ h1 {
 
 /* 文字樣式 */
 .music-grid li p {
-    font-size: 14px; /* 手機端字體適度調整 */
+    font-size: 14px; 
     margin-top: 5px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -135,7 +135,7 @@ h1 {
     }
 
     .music-grid li {
-        height: auto; /* 電腦版恢復自然高度 */
+        height: auto; 
         padding: 15px;
     }
 }
@@ -143,7 +143,7 @@ h1 {
 .music-grid li:hover { background: rgba(255, 255, 255, 0.15); }
 
 
-/* --- 音樂庫條列式清單樣式 --- */
+
 .music-list {
     list-style: none;
     padding: 0;
@@ -152,10 +152,10 @@ h1 {
 .music-list li {
     display: flex;
     align-items: center;
-    padding: 18px 15px; /* 增加點擊區域 */
+    padding: 18px 15px; 
     border-radius: 12px;
     cursor: pointer;
-    font-size: 16px; /* 整體文字加大 */
+    font-size: 16px; 
 }
 
 .music-list li:hover {
@@ -340,7 +340,7 @@ h1 {
     margin-top: 5px;
 }
 
-/* --- 控制區域樣式 --- */
+
 .controls-area { width: 100%; max-width: 400px; margin-top: auto; padding-bottom: 20px; }
 
 .progress-container {
@@ -393,7 +393,7 @@ h1 {
     z-index: 10;
 }
 
-/* 修改為僅在支援滑鼠的裝置上才執行 hover 效果 */
+
 @media (hover: hover) {
     #btn-translate:hover { 
         background: #ff85a2; 
@@ -420,7 +420,7 @@ h1 {
     align-items: center;
     z-index: 3000;
     font-size: 14px;
-    /* 可選：加入毛玻璃效果 */
+
     backdrop-filter: blur(5px);
 }
 
@@ -432,14 +432,14 @@ h1 {
     margin-left: 10px;
 }
 
-/* 調整內容區域，避免被公告欄遮擋 */
+
 #content-area {
-    margin-top: 40px; /* 根據公告欄高度調整 */
+    margin-top: 40px; 
     height: calc(100dvh - 125px - 40px);
 }
 
 .sizzy-cover {
-    background-image: url('images/sizzy_cover.jpg') !important; /* 加入 !important 強制覆蓋漸層 */
+    background-image: url('images/sizzy_cover.jpg') !important; 
     background-size: cover;
     background-position: center;
 }

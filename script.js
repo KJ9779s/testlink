@@ -46,7 +46,7 @@ const app = {
         this.setupInitialMediaSession();
         this.updateNavState('home');
 
-        // 3. 恢復上次播放狀態 (延遲執行確保 Audio 載入)
+        // 3. 恢復上次播放狀態 
         if (savedMusicIndex !== null) {
             musicIndex = parseInt(savedMusicIndex);
             this.loadMusic(musicIndex);
@@ -58,11 +58,9 @@ const app = {
         }
     },
 
-    // 新增：統一更新翻譯按鈕顏色的函式
     updateTranslationBtnStyle() {
         const btn = document.getElementById("btn-translate");
         if (btn) {
-            // 如果 isTranslated 為 true，則變為粉色，否則為白色
             btn.style.color = isTranslated ? "#ff85a2" : "#fff";
         }
     },
@@ -175,7 +173,7 @@ const app = {
     renderLibrary() {
         
         if(this.libraryList) {
-            const updateText = this.getNewReleaseStatus(); // 使用新函式取得文字
+            const updateText = this.getNewReleaseStatus(); 
             const playlists = [
                 { id: 'liked', name: "已按讚的歌曲", count: `${likedSongs.length} 首歌曲`, icon: "heart" },
                 { id: 'new', name: "新上架", count: updateText, icon: "bell" },
@@ -197,7 +195,7 @@ const app = {
     openPlaylist(id) {
         currentPlaylistId = id;
         currentPlaylistName = this.getPlaylistNameById(id);
-        this.updatePlaylistLabel(); // 更新顯示
+        this.updatePlaylistLabel(); 
 
         let songs;
 
@@ -234,8 +232,8 @@ const app = {
 
     selectAndPlay(index, playlistId = null) {
         musicIndex = index;
-        currentPlaylistId = playlistId; // 記住是哪個歌單點的
-        this.updatePlaylistLabel();    // 更新標籤
+        currentPlaylistId = playlistId; 
+        this.updatePlaylistLabel();  
         localStorage.setItem('musicIndex', musicIndex);
         this.loadMusic(musicIndex);
         this.playSong();
@@ -274,7 +272,7 @@ const app = {
                 this.bgVideo.play().catch(e => {});
             }
         }
-        // -------------------------
+       
         
         this.displayLyrics(music.lyrics);
         this.updateTranslationBtnStyle();
@@ -307,8 +305,7 @@ const app = {
     },
 
     getCurrentPlaylist() {
-    // 只要 currentPlaylistId 有值，它就會根據 ID 過濾歌曲
-    // 如果它是 null (例如你在首頁直接點歌)，它才會回傳全部歌曲
+
         if (currentPlaylistId === 'liked') {
             return allMusic.filter(m => likedSongs.includes(m.id));
         }
@@ -316,20 +313,20 @@ const app = {
             return this.getNewReleases();
         }
         if (currentPlaylistId === 'sizzy') {
-            // 這裡要與 openPlaylist 的篩選條件完全一致
+
             return allMusic.filter(m => m.id >= 21 && m.id <= 26);
         }
-        return allMusic; // 預設全部
+        return allMusic; 
     },
 
     nextSong() {
         const playlist = this.getCurrentPlaylist();
         const currentSong = allMusic[musicIndex];
         
-        // 找到當前歌曲在「當前模式清單」的位置
+
         let currentIndexInPlaylist = playlist.indexOf(currentSong);
         
-        // 如果因為切換模式導致當前歌曲不在列表內 (例如在按讚清單點完移除)，重置為 0
+
         if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
         
         const nextIndexInPlaylist = (currentIndexInPlaylist + 1) % playlist.length;
@@ -367,20 +364,10 @@ const app = {
         const loopBtn = document.getElementById("full-loop-btn");
         const translateBtn = document.getElementById("btn-translate");
 
-        // 1. 切換循環狀態
         isLoop = !isLoop;
         mainAudio.loop = isLoop;
 
-        // 2. 互斥邏輯：如果開啟循環，可選擇是否關閉翻譯顯示
-        // 若你希望兩個可以同時開，請移除下面這段
-        /*
-        isTranslated = false;
-        translateBtn.classList.remove('active');
-        translateBtn.style.color = "#fff";
-        this.displayLyrics(allMusic[musicIndex].lyrics);
-        */
 
-        // 3. 更新按鈕樣式
         if (isLoop) {
             loopBtn.classList.add('active');
             loopBtn.style.color = "#ff85a2";
@@ -390,7 +377,7 @@ const app = {
         }
     },
 
-    // 取得新集數的顯示狀態文字 (今日/昨日/日期)
+
     getNewReleaseStatus() {
         const sorted = [...allMusic].sort((a, b) => new Date(b.date) - new Date(a.date));
         const latestSong = sorted[0];
@@ -411,7 +398,7 @@ const app = {
         return `${releaseDate.getMonth() + 1}月${releaseDate.getDate()}日更新`;
     },
 
-    // 取得最新的 6 首歌曲
+
     getNewReleases() {
         const sorted = [...allMusic].sort((a, b) => new Date(b.date) - new Date(a.date));
         return sorted.slice(0, 6);
@@ -467,17 +454,16 @@ const app = {
         const translateBtn = document.getElementById("btn-translate");
         const loopBtn = document.getElementById("full-loop-btn");
 
-        // 1. 切換翻譯狀態
+
         isTranslated = !isTranslated;
         
-        // 2. 互斥邏輯：如果開啟翻譯，則強制關閉循環 (視需求而定，或是只改樣式)
-        // 這裡如果你想讓兩者並存，就移除下面這一行；若要完全互斥，請保留
+
         isLoop = false; 
         mainAudio.loop = false;
-        loopBtn.classList.remove('active'); // 強制移除循環按鈕的 active
+        loopBtn.classList.remove('active');
         loopBtn.style.color = "#fff";
 
-        // 3. 更新當前按鈕樣式
+       
         if (isTranslated) {
             translateBtn.classList.add('active');
             translateBtn.style.color = "#ff85a2";
@@ -492,12 +478,11 @@ const app = {
 
 window.app = app;
 window.showView = (viewName) => {
-    // 移除所有 view 的 active
+
     document.querySelectorAll(".view").forEach(v => {
         v.classList.remove("active");
     });
 
-    // 賦予目標 view active class
     const target = document.getElementById(viewName + "-view");
     if (target) {
         target.classList.add("active");
@@ -533,7 +518,7 @@ window.closeAnnouncement = () => {
     const bar = document.getElementById("announcement-bar");
     if (bar) {
         bar.style.display = "none";
-        // 如果關閉後需要調整內容區高度，可在此操作
+
         const contentArea = document.getElementById("content-area");
         if (contentArea) contentArea.style.marginTop = "0px";
     }
