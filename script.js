@@ -77,6 +77,7 @@ const app = {
     getPlaylistNameById(id) {
         if (id === 'liked') return "已按讚的歌曲";
         if (id === 'new') return "新上架";
+        if (id === 'sizzy') return "sizzy";
         return "所有歌曲";
     },
 
@@ -135,7 +136,7 @@ const app = {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: "請選擇歌曲",
                 artist: "不是設計愛情 是設計我",
-                artwork: [{ src: 'default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
+                artwork: [{ src: 'images/default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
             });
             navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
             navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
@@ -145,7 +146,7 @@ const app = {
     },
     
     setDefaultCover() {
-        const defaultImg = "default-cover.jpg";
+        const defaultImg = "images/default-cover.jpg";
         if (document.getElementById("mini-img")) document.getElementById("mini-img").src = defaultImg;
         if (document.getElementById("main-img")) document.getElementById("main-img").src = defaultImg;
     },
@@ -177,11 +178,13 @@ const app = {
             const updateText = this.getNewReleaseStatus(); // 使用新函式取得文字
             const playlists = [
                 { id: 'liked', name: "已按讚的歌曲", count: `${likedSongs.length} 首歌曲`, icon: "heart" },
-                { id: 'new', name: "新上架", count: updateText, icon: "bell" }
+                { id: 'new', name: "新上架", count: updateText, icon: "bell" },
+                { id: 'sizzy', name: "SIZZY", count: "6 首歌曲", icon: "music" }
             ];
             this.libraryList.innerHTML = playlists.map(p => `
                 <li onclick="app.openPlaylist('${p.id}')">
-                    <div class="playlist-cover"></div> 
+                    <!-- 將這裡的 class 改為動態 -->
+                    <div class="playlist-cover ${p.id}-cover"></div> 
                     <div>
                         <p style="margin:0; font-weight:bold;">${p.name}</p>
                         <small style="color:#aaa;">${p.count}</small>
@@ -196,8 +199,17 @@ const app = {
         currentPlaylistName = this.getPlaylistNameById(id);
         this.updatePlaylistLabel(); // 更新顯示
 
-        let songs = (id === 'liked') ? allMusic.filter(m => likedSongs.includes(m.id)) : 
-                    (id === 'new') ? this.getNewReleases() : allMusic;
+        let songs;
+
+        if (id === 'liked') {
+            songs = allMusic.filter(m => likedSongs.includes(m.id));
+        } else if (id === 'new') {
+            songs = this.getNewReleases();
+        } else if (id === 'sizzy') {
+            songs = allMusic.filter(m => m.id >= 21 && m.id <= 26);
+        } else {
+            songs = allMusic;
+        }
         
         this.libraryList.innerHTML = `
             <li onclick="app.renderLibrary()" style="font-weight:bold; cursor:pointer; margin-bottom:10px;">← 返回</li>
@@ -240,11 +252,9 @@ const app = {
         this.updateMediaSession();
         this.updatePlayerLikeBtn();
        
-
         const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
         
         if (Hls.isSupported() && hls) {
-            // 確保 HLS 實例連接到 audio 元素
             hls.attachMedia(mainAudio);
             hls.loadSource(streamUrl);
         } else {
@@ -252,9 +262,19 @@ const app = {
         }
 
         if (this.bgVideo) {
-            this.bgVideo.src = `video/v${music.id}.mp4`;
-            this.bgVideo.play().catch(e => {});
+            if (music.id >= 21) {
+                this.bgVideo.style.display = 'none';
+                document.body.style.backgroundImage = `url('images/s${music.id}.jpg')`;
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundPosition = "center";
+            } else {
+                this.bgVideo.style.display = 'block';
+                document.body.style.backgroundImage = "url('images/back.jpg')";
+                this.bgVideo.src = `video/v${music.id}.mp4`;
+                this.bgVideo.play().catch(e => {});
+            }
         }
+        // -------------------------
         
         this.displayLyrics(music.lyrics);
         this.updateTranslationBtnStyle();
@@ -294,6 +314,10 @@ const app = {
         }
         if (currentPlaylistId === 'new') {
             return this.getNewReleases();
+        }
+        if (currentPlaylistId === 'sizzy') {
+            // 這裡要與 openPlaylist 的篩選條件完全一致
+            return allMusic.filter(m => m.id >= 21 && m.id <= 26);
         }
         return allMusic; // 預設全部
     },

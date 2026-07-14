@@ -140,4 +140,48 @@ const allMusic = [
         img: "https://i.pinimg.com/736x/f7/85/f5/f785f5af46813dab59734e9c909c675d.jpg",
         date: "2026-07-13"
     },
+    {
+        id: 21,
+        name: "รับผิดชอบใจฉันด้วย (LOVE RESPONSE)",
+        artist: "SIZZY x EARTHMIX",
+        img: "images/s21.jpg",
+        date: "2026-07-14"
+    },
+    {
+        id: 22,
+        name: "เปลี่ยนคะแนนเป็นแฟนได้ไหม (Love Score)",
+        artist: "SIZZY x NANON",
+        img: "images/s22.jpg",
+        date: "2026-07-14"
+    },
+    {
+        id: 23,
+        name: "ห้ามใจ (Unstoppable)",
+        artist: "SIZZY",
+        img: "images/s23.jpg",
+        date: "2026-07-14"
+    },
+    {
+        id: 24,
+        name: "พิสูจน์ (Prove It)",
+        artist: "SIZZY",
+        img: "images/s24.jpg",
+        date: "2026-07-14"
+    },
+    {
+        id: 25,
+        name: "ชักช้า (Loading Love)",
+        artist: "SIZZY",
+        img: "images/s25.jpg",
+        date: "2026-07-14"
+    },
+    {
+        id: 26,
+        name: "HUI LAY HUI",
+        artist: "LYKN x SIZZY",
+        img: "images/s26.jpg",
+        date: "2026-07-14"
+    },
+
+
 ];

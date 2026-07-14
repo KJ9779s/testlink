@@ -10,7 +10,7 @@
 
 body {
     background-color: #000;
-    background-image: url('back.jpg');
+    background-image: url('images/back.jpg');
     background-size: cover;
     background-position: center;
     color: #fff;
@@ -436,4 +436,10 @@ h1 {
 #content-area {
     margin-top: 40px; /* 根據公告欄高度調整 */
     height: calc(100dvh - 125px - 40px);
+}
+
+.sizzy-cover {
+    background-image: url('images/sizzy_cover.jpg') !important; /* 加入 !important 強制覆蓋漸層 */
+    background-size: cover;
+    background-position: center;
 }
