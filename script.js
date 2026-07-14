@@ -228,9 +228,9 @@ const app = {
 
     selectAndPlay(index, playlistId = null) {
         musicIndex = index;
-        if(playlistId) { 
-            currentPlaylistId = playlistId; 
-        }
+        
+        currentPlaylistId = playlistId; 
+        
         this.updatePlaylistLabel();  
         localStorage.setItem('musicIndex', musicIndex);
         this.loadMusic(musicIndex);
