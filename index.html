@@ -27,7 +27,7 @@
         	<ul id="home-list" class="music-grid"></ul>
     	</div>
     
-    <!-- 音樂庫預設沒有 active -->
+    
     	<div id="library-view" class="view">
         	<h1>9779s 的音樂庫</h1>
         	<ul id="library-list" class="music-list"></ul>
@@ -58,13 +58,12 @@
     			<button onclick="togglePlayerView()"><i class="fas fa-chevron-down"></i></button>
     			<p id="full-playlist-label">正在播放</p>
     			<button id="view-switch-btn" onclick="toggleLyricsView()"><i class="fas fa-list-ul"></i></button>
-			</div> <!-- 確保這裡只有關閉 player-header 的 div -->
+			</div> 
             <div class="main-view-container">
                 <div id="cover-view" class="active-view">
                     <div class="img-area">
                         <img src="" alt="Cover" id="main-img">
                     </div>
-                    <!-- 修正後的結構，確保寬度與圖片對齊且愛心在右側 -->
                     <div class="song-details" style="width: 300px; display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
                         <div style="overflow: hidden; text-align: left;">
                             <p class="name" style="margin:0; font-size: 20px; font-weight: bold;"></p>
