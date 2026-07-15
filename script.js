@@ -361,11 +361,16 @@ const app = {
         const playlist = this.getCurrentPlaylist();
         const currentSong = allMusic[musicIndex];
         let idx = playlist.indexOf(currentSong);
+        
+        // 如果找不到，直接從第一首開始
+        if (idx === -1) idx = -1; 
+        
         const nextSong = playlist[(idx + 1) % playlist.length];
         musicIndex = allMusic.indexOf(nextSong);
+        
         localStorage.setItem('musicIndex', musicIndex);
         this.loadMusic(musicIndex);
-        this.playSong();
+        this.playSong(); // 確保這裡被呼叫
     },
 
     prevSong() {
@@ -438,7 +443,7 @@ const app = {
     },
 
     setupAudioEvents() {
-        // 修正：加入 onplaying 與 onpause 防止狀態假死
+        // 確保播放器狀態同步
         mainAudio.onplaying = () => { isPlaying = true; this.updateUIForPlay(); };
         mainAudio.onpause = () => { isPlaying = false; this.updateUIForPause(); };
 
@@ -461,6 +466,19 @@ const app = {
                 document.getElementById("total-duration").innerText = formatTime(duration);
             }
             this.updateLyrics(currentTime);
+        });
+
+        // 這是關鍵：確保播放結束時正確觸發下一首
+        mainAudio.addEventListener("ended", () => {
+            console.log("歌曲結束，準備播放下一首");
+            localStorage.setItem('currentTime', 0);
+            
+            if (isLoop) {
+                mainAudio.currentTime = 0;
+                mainAudio.play();
+            } else {
+                this.nextSong();
+            }
         });
     },
 
