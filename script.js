@@ -2,9 +2,7 @@
 
 let musicIndex = 0;
 let mainAudio = new Audio();
-
 mainAudio.preload = "auto";
-mainAudio.crossOrigin = "anonymous";
 mainAudio.playsInline = true;
 mainAudio.setAttribute("playsinline", "");
 
@@ -51,6 +49,12 @@ const app = {
         this.setupMediaSessionHandlers();
         this.updateNavState('home');
 
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible" && isPlaying && mainAudio.paused) {
+                mainAudio.play().catch(err => console.log("resume failed", err));
+            }
+        });
+
         if (savedMusicIndex !== null) {
             musicIndex = parseInt(savedMusicIndex);
             this.loadMusic(musicIndex);
@@ -65,7 +69,6 @@ const app = {
         if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
         if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
         if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
-        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
     },
 
     updateUIForPause() {
@@ -73,7 +76,6 @@ const app = {
         if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = playIcon;
         if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = playIcon;
         if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-play";
-        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
     },
 
     updateTranslationBtnStyle() {
@@ -320,12 +322,26 @@ const app = {
     },
 
     playSong() {
-        // 移除對 Promise 的過度依賴，改用 onplaying 事件處理 UI
-        mainAudio.play().catch(e => console.log("播放被攔截:", e));
+        if (!mainAudio) return;
+        mainAudio.play()
+        .then(() => {
+            isPlaying = true;
+            this.updateUIForPlay();
+        })
+        .catch(err => {
+            setTimeout(() => {
+                mainAudio.play().then(() => {
+                    isPlaying = true;
+                    this.updateUIForPlay();
+                }).catch(() => {});
+            }, 200);
+        });
     },
 
     pauseSong() {
         mainAudio.pause();
+        isPlaying = false;
+        this.updateUIForPause();
     },
 
     setupMediaSessionHandlers() {
