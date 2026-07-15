@@ -43,7 +43,7 @@ const app = {
         this.renderLibrary();
         this.setupAudioEvents();
         this.setDefaultCover();
-        this.setupInitialMediaSession();
+        this.setupMediaSessionHandlers();
         this.updateNavState('home');
 
         // 3. 恢復上次播放狀態 
@@ -56,6 +56,22 @@ const app = {
                 if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
             }, { once: true });
         }
+    },
+
+    updateUIForPlay() {
+        const pauseIcon = '<i class="fas fa-pause"></i>';
+        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
+        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+    },
+
+    updateUIForPause() {
+        const playIcon = '<i class="fas fa-play"></i>';
+        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = playIcon;
+        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = playIcon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-play";
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
     },
 
     updateTranslationBtnStyle() {
@@ -280,21 +296,29 @@ const app = {
     },
 
     playSong() {
-        mainAudio.play();
-        isPlaying = true;
-        const pauseIcon = '<i class="fas fa-pause"></i>';
-        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
-        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
-        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
+        const playPromise = mainAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                isPlaying = true;
+                this.updateUIForPlay();
+            }).catch(error => console.log("播放被阻擋或出錯:", error));
+        }
     },
 
     pauseSong() {
         mainAudio.pause();
         isPlaying = false;
-        const playIcon = '<i class="fas fa-play"></i>';
-        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = playIcon;
-        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = playIcon;
-        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-play";
+        this.updateUIForPause();
+    },
+
+    setupMediaSessionHandlers() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => this.playSong());
+            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
+            navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+        }
     },
 
     togglePlay() {
