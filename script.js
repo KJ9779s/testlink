@@ -28,34 +28,15 @@ const app = {
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
-        mainAudio.preload = "auto";
-        
         // 1. 讀取儲存的資料
         likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
         const savedMusicIndex = localStorage.getItem('musicIndex');
         const savedTime = localStorage.getItem('currentTime');
-
-
-
+        document.addEventListener("visibilitychange", () => this.handleVisibilityChange());
+        // 2. 初始化 HLS
         if (Hls.isSupported()) {
             hls = new Hls({ lowLatencyMode: true });
             hls.attachMedia(mainAudio);
-    
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    switch(data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            hls.startLoad();
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            hls.destroy();
-                            break;
-                    }
-                }
-            });
         }
         
         this.renderAllSongs();
@@ -74,6 +55,24 @@ const app = {
             mainAudio.addEventListener('loadedmetadata', () => {
                 if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
             }, { once: true });
+        }
+    },
+
+    handleVisibilityChange() {
+        const isHidden = document.hidden;
+        
+        if (isHidden) {
+            // 進入背景：暫停影片以節省效能
+            if (this.bgVideo && !this.bgVideo.paused) {
+                this.bgVideo.pause();
+            }
+        } else {
+            // 回到前台：如果音樂正在播放，且影片不是隱藏狀態，則恢復影片播放
+            if (this.bgVideo && isPlaying && this.bgVideo.style.display !== 'none') {
+                this.bgVideo.play().catch(e => {});
+            }
+            // 確保回到前台時歌詞顯示是正確的
+            this.updateLyrics(mainAudio.currentTime);
         }
     },
 
@@ -299,23 +298,13 @@ const app = {
     },
 
     playSong() {
-    // 確保 HLS 已正確連結
-    if (Hls.isSupported() && hls && hls.media !== mainAudio) {
-        hls.attachMedia(mainAudio);
-    }
-    
-    mainAudio.play().then(() => {
+        mainAudio.play();
         isPlaying = true;
         const pauseIcon = '<i class="fas fa-pause"></i>';
         if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
         if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
         if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
-    }).catch(error => {
-        console.error("播放失敗，嘗試重新載入:", error);
-        // 如果播放失敗，嘗試重新載入當前資源
-        this.loadMusic(musicIndex);
-    });
-},
+    },
 
     pauseSong() {
         mainAudio.pause();
@@ -467,6 +456,9 @@ const app = {
     },
 
     updateLyrics(currentTime) {
+        // 【新增這行】若頁面在背景，直接結束函式，不執行任何更新
+        if (document.hidden) return;
+
         const lyrics = allMusic[musicIndex].lyrics;
         let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
         
