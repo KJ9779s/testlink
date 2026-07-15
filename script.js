@@ -8,12 +8,13 @@ mainAudio.setAttribute("playsinline", "");
 
 
 let isPlaying = false;
+let userPaused = false; // 新增：精確區分使用者暫停與系統暫停
 let currentLyricIndex = -1;
 let isTranslated = false;
 let isLoop = false;
 let hls = null; 
 let likedSongs = []; 
-let currentPlaylistId = null; 
+let currentPlaylistId = null;
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -33,11 +34,9 @@ const app = {
     
     init() {
         likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
-        const savedMusicIndex = localStorage.getItem('musicIndex');
-        const savedTime = localStorage.getItem('currentTime');
+        
 
-        // 1. 修正後的 HLS 初始化
-        if (Hls.isSupported()) {
+       if (Hls.isSupported()) {
             hls = new Hls({ enableWorker: true, lowLatencyMode: false });
         }
 
@@ -49,20 +48,33 @@ const app = {
         this.updateNavState('home');
 
         document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-                if (isPlaying && mainAudio.paused) {
-                    console.log("iOS PWA resume audio");
-                    mainAudio.play().catch(e => console.log("resume failed", e));
-                }
+            if (document.visibilityState === "visible" && isPlaying && !userPaused && mainAudio.paused) {
+                this.playSong();
             }
         });
 
+        const savedMusicIndex = localStorage.getItem('musicIndex');
+        const savedTime = localStorage.getItem('currentTime');
         if (savedMusicIndex !== null) {
             musicIndex = parseInt(savedMusicIndex);
             this.loadMusic(musicIndex);
             mainAudio.addEventListener('loadedmetadata', () => {
                 if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
             }, { once: true });
+        }
+    },
+
+    async resumeAudioContext() {
+        if (window.AudioContext || window.webkitAudioContext) {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioCtx();
+                const source = audioCtx.createMediaElementSource(mainAudio);
+                source.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === "suspended") {
+                await audioCtx.resume();
+            }
         }
     },
 
@@ -278,7 +290,9 @@ const app = {
         const mp3Url = `music/s${music.id}/s${music.id}.mp3`;
         
         if (Hls.isSupported()) {
-            hls.attachMedia(mainAudio);
+            if (hls.media !== mainAudio) {
+                hls.attachMedia(mainAudio);
+            }
             hls.loadSource(streamUrl);
         } else if (mainAudio.canPlayType('application/vnd.apple.mpegurl')) {
             mainAudio.src = streamUrl;
@@ -317,28 +331,25 @@ const app = {
 
     playSong() {
         if (!mainAudio) return;
-        if (mainAudio.paused === false) return;
+        userPaused = false; 
 
         mainAudio.play()
         .then(() => {
             isPlaying = true;
             this.updateUIForPlay();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
         })
         .catch(err => {
-            console.log("play retry", err);
-            setTimeout(() => {
-                mainAudio.pause();
-                mainAudio.play().then(() => {
-                    isPlaying = true;
-                    this.updateUIForPlay();
-                }).catch(() => {});
-            }, 300);
+            console.log("play failed:", err);
         });
     },
 
     pauseSong() {
+        userPaused = true;
         mainAudio.pause();
-        // 這裡會觸發 onpause，該處已加入防誤判邏輯
+        isPlaying = false;
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
+        this.updateUIForPause();
     },
 
     setupMediaSessionHandlers() {
@@ -459,8 +470,7 @@ const app = {
         
         mainAudio.onplaying = () => { isPlaying = true; this.updateUIForPlay(); };
         mainAudio.onpause = () => {
-            // iOS PWA 背景恢復時的防誤判邏輯
-            if (!mainAudio.ended) {
+            if (!mainAudio.ended && userPaused) {
                 isPlaying = false;
                 this.updateUIForPause();
             }
@@ -476,15 +486,14 @@ const app = {
                 });
             }
             if (Math.floor(currentTime) % 5 === 0) localStorage.setItem('currentTime', currentTime);
-            if (this.progressBar && duration) {
-                this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
-                document.getElementById("current-time").innerText = formatTime(currentTime);
-                document.getElementById("total-duration").innerText = formatTime(duration);
+            if (this.progressBar && duration) { 
+                this.progressBar.style.width = `${(currentTime / duration) * 100}%`; 
+                document.getElementById("current-time").innerText = formatTime(currentTime); 
+                document.getElementById("total-duration").innerText = formatTime(duration); 
             }
             this.updateLyrics(currentTime);
         });
 
-        // 這是關鍵：確保播放結束時正確觸發下一首
         mainAudio.addEventListener("ended", () => {
             localStorage.setItem('currentTime', 0);
             if (isLoop) { mainAudio.currentTime = 0; mainAudio.play(); } else { this.nextSong(); }
