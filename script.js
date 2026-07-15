@@ -39,7 +39,6 @@ const app = {
         // 1. 修正後的 HLS 初始化
         if (Hls.isSupported()) {
             hls = new Hls({ enableWorker: true, lowLatencyMode: false });
-            hls.attachMedia(mainAudio);
         }
 
         this.renderAllSongs();
@@ -50,8 +49,11 @@ const app = {
         this.updateNavState('home');
 
         document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible" && isPlaying && mainAudio.paused) {
-                mainAudio.play().catch(err => console.log("resume failed", err));
+            if (document.visibilityState === "visible") {
+                if (isPlaying && mainAudio.paused) {
+                    console.log("iOS PWA resume audio");
+                    mainAudio.play().catch(e => console.log("resume failed", e));
+                }
             }
         });
 
@@ -276,13 +278,11 @@ const app = {
         const mp3Url = `music/s${music.id}/s${music.id}.mp3`;
         
         if (Hls.isSupported()) {
-            // Android Chrome / 其他瀏覽器
+            hls.attachMedia(mainAudio);
             hls.loadSource(streamUrl);
         } else if (mainAudio.canPlayType('application/vnd.apple.mpegurl')) {
-            // iPhone Safari 原生支援
             mainAudio.src = streamUrl;
         } else {
-            // Fallback MP3
             mainAudio.src = mp3Url;
         }
 
@@ -312,36 +312,33 @@ const app = {
         
         this.displayLyrics(music.lyrics);
         this.updateTranslationBtnStyle();
-        
-        // 重要：移除 mainAudio.load()，由 HLS/Browser 自動觸發避免緩衝被清空
-        
-        // 4. 手機版取消 Preload，節省流量與記憶體
-        if (window.innerWidth >= 768) {
-            this.preloadNextMusic();
-        }
+        if (window.innerWidth >= 768) this.preloadNextMusic();
     },
 
     playSong() {
         if (!mainAudio) return;
+        if (mainAudio.paused === false) return;
+
         mainAudio.play()
         .then(() => {
             isPlaying = true;
             this.updateUIForPlay();
         })
         .catch(err => {
+            console.log("play retry", err);
             setTimeout(() => {
+                mainAudio.pause();
                 mainAudio.play().then(() => {
                     isPlaying = true;
                     this.updateUIForPlay();
                 }).catch(() => {});
-            }, 200);
+            }, 300);
         });
     },
 
     pauseSong() {
         mainAudio.pause();
-        isPlaying = false;
-        this.updateUIForPause();
+        // 這裡會觸發 onpause，該處已加入防誤判邏輯
     },
 
     setupMediaSessionHandlers() {
@@ -459,14 +456,18 @@ const app = {
     },
 
     setupAudioEvents() {
-        // 確保播放器狀態同步
+        
         mainAudio.onplaying = () => { isPlaying = true; this.updateUIForPlay(); };
-        mainAudio.onpause = () => { isPlaying = false; this.updateUIForPause(); };
+        mainAudio.onpause = () => {
+            // iOS PWA 背景恢復時的防誤判邏輯
+            if (!mainAudio.ended) {
+                isPlaying = false;
+                this.updateUIForPause();
+            }
+        };
 
         mainAudio.addEventListener("timeupdate", (e) => {
             const { currentTime, duration } = e.target;
-            
-            // 加入 MediaSession PositionState 讓 iOS 控制中心運作正常
             if ('mediaSession' in navigator && duration) {
                 navigator.mediaSession.setPositionState({
                     duration: duration,
@@ -474,7 +475,6 @@ const app = {
                     position: currentTime
                 });
             }
-
             if (Math.floor(currentTime) % 5 === 0) localStorage.setItem('currentTime', currentTime);
             if (this.progressBar && duration) {
                 this.progressBar.style.width = `${(currentTime / duration) * 100}%`;
@@ -486,15 +486,8 @@ const app = {
 
         // 這是關鍵：確保播放結束時正確觸發下一首
         mainAudio.addEventListener("ended", () => {
-            console.log("歌曲結束，準備播放下一首");
             localStorage.setItem('currentTime', 0);
-            
-            if (isLoop) {
-                mainAudio.currentTime = 0;
-                mainAudio.play();
-            } else {
-                this.nextSong();
-            }
+            if (isLoop) { mainAudio.currentTime = 0; mainAudio.play(); } else { this.nextSong(); }
         });
     },
 
