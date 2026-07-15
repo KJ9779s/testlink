@@ -28,15 +28,34 @@ const app = {
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
+        mainAudio.preload = "auto";
+        
         // 1. 讀取儲存的資料
         likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
         const savedMusicIndex = localStorage.getItem('musicIndex');
         const savedTime = localStorage.getItem('currentTime');
 
-        // 2. 初始化 HLS
+
+
         if (Hls.isSupported()) {
             hls = new Hls({ lowLatencyMode: true });
             hls.attachMedia(mainAudio);
+    
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    switch(data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            hls.destroy();
+                            break;
+                    }
+                }
+            });
         }
         
         this.renderAllSongs();
@@ -280,13 +299,23 @@ const app = {
     },
 
     playSong() {
-        mainAudio.play();
+    // 確保 HLS 已正確連結
+    if (Hls.isSupported() && hls && hls.media !== mainAudio) {
+        hls.attachMedia(mainAudio);
+    }
+    
+    mainAudio.play().then(() => {
         isPlaying = true;
         const pauseIcon = '<i class="fas fa-pause"></i>';
         if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
         if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
         if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
-    },
+    }).catch(error => {
+        console.error("播放失敗，嘗試重新載入:", error);
+        // 如果播放失敗，嘗試重新載入當前資源
+        this.loadMusic(musicIndex);
+    });
+},
 
     pauseSong() {
         mainAudio.pause();
