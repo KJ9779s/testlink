@@ -23,22 +23,13 @@ const app = {
     libraryList: document.getElementById("library-list"),
     miniPlayer: document.getElementById("bottom-player"),
     fullPlayer: document.getElementById("full-player"),
-    miniPlayIcon: document.getElementById("mini-play"),
-    
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
-        // 1. 讀取儲存的資料
         likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
         const savedMusicIndex = localStorage.getItem('musicIndex');
         const savedTime = localStorage.getItem('currentTime');
 
-        // 2. 初始化 HLS
-        if (Hls.isSupported()) {
-            hls = new Hls({ lowLatencyMode: true });
-            hls.attachMedia(mainAudio);
-        }
-        
         this.renderAllSongs();
         this.renderLibrary();
         this.setupAudioEvents();
@@ -46,12 +37,10 @@ const app = {
         this.setupInitialMediaSession();
         this.updateNavState('home');
 
-        // 3. 恢復上次播放狀態 
         if (savedMusicIndex !== null) {
             musicIndex = parseInt(savedMusicIndex);
-            this.loadMusic(musicIndex);
+            this.loadMusic(musicIndex, false); // 初始化僅載入不自動播
             
-            // 恢復時間
             mainAudio.addEventListener('loadedmetadata', () => {
                 if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
             }, { once: true });
@@ -65,11 +54,14 @@ const app = {
         }
     },
 
-    // 1. 預載下一首功能
     preloadNextMusic() {
-        const nextIndex = (musicIndex + 1) % allMusic.length;
-        const nextMusic = allMusic[nextIndex];
-        fetch(`music/s${nextMusic.id}/s${nextMusic.id}.m3u8`).catch(() => {});
+        const playlist = this.getCurrentPlaylist();
+        const currentSong = allMusic[musicIndex];
+        let currentIndex = playlist.indexOf(currentSong);
+        if (currentIndex !== -1 && playlist.length > 1) {
+            const nextMusic = playlist[(currentIndex + 1) % playlist.length];
+            fetch(`music/s${nextMusic.id}/s${nextMusic.id}.m3u8`).catch(() => {});
+        }
     },
 
     getPlaylistNameById(id) {
@@ -81,11 +73,10 @@ const app = {
 
     updatePlaylistLabel() {
         const name = this.getPlaylistNameById(currentPlaylistId);
-        // 顯示在 Mini Player 的 mini-info 區域
-        const miniLabel = document.getElementById("mini-playlist-label"); 
+        // 修復：相容 playlist-label 與 mini-playlist-label
+        const miniLabel = document.getElementById("mini-playlist-label") || document.getElementById("playlist-label"); 
         if (miniLabel) miniLabel.innerText = name;
         
-        // 顯示在 Full Player 的標題區域
         const fullHeader = document.querySelector(".player-card .player-header p");
         if (fullHeader) fullHeader.innerText = name;
     },
@@ -151,12 +142,13 @@ const app = {
 
     updateMediaSession() {
         const music = allMusic[musicIndex];
-        if ('mediaSession' in navigator) {
+        if ('mediaSession' in navigator && music) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: music.name,
                 artist: music.artist,
                 artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
             });
+            navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
         }
     },
 
@@ -171,7 +163,6 @@ const app = {
     },
 
     renderLibrary() {
-        
         if(this.libraryList) {
             const updateText = this.getNewReleaseStatus(); 
             const playlists = [
@@ -181,7 +172,6 @@ const app = {
             ];
             this.libraryList.innerHTML = playlists.map(p => `
                 <li onclick="app.openPlaylist('${p.id}')">
-                    <!-- 將這裡的 class 改為動態 -->
                     <div class="playlist-cover ${p.id}-cover"></div> 
                     <div>
                         <p style="margin:0; font-weight:bold;">${p.name}</p>
@@ -193,7 +183,6 @@ const app = {
     },
 
     openPlaylist(id) {
-
         let songs;
         if (id === 'liked') {
             songs = allMusic.filter(m => likedSongs.includes(m.id));
@@ -228,62 +217,94 @@ const app = {
 
     selectAndPlay(index, playlistId = null) {
         musicIndex = index;
-        
         currentPlaylistId = playlistId; 
-        
         this.updatePlaylistLabel();  
         localStorage.setItem('musicIndex', musicIndex);
-        this.loadMusic(musicIndex);
-        this.playSong();
+        this.loadMusic(musicIndex, true);
     },
 
-    loadMusic(index) {
+    // 核心修復：徹底銷毀舊 HLS + 支援 iOS 原生 + 圖片背景
+    loadMusic(index, autoPlay = false) {
         const music = allMusic[musicIndex];
+        if (!music) return;
+
         if(document.getElementById("mini-img")) document.getElementById("mini-img").src = music.img;
         if(document.getElementById("mini-name")) document.getElementById("mini-name").innerText = music.name;
         if(document.getElementById("main-img")) document.getElementById("main-img").src = music.img;
         if(document.querySelector(".song-details .name")) document.querySelector(".song-details .name").innerText = music.name;
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
+        
         this.updatePlaylistLabel();
         this.updateMediaSession();
         this.updatePlayerLikeBtn();
-       
-        const streamUrl = `music/s${music.id}/s${music.id}.m3u8`; 
-        
-        if (Hls.isSupported() && hls) {
-            hls.attachMedia(mainAudio);
+
+        // 更換圖片背景
+        document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('${music.img}')`;
+
+        const streamUrl = `music/s${music.id}/s${music.id}.m3u8`;
+
+        // 1. 銷毀前一個 Hls 實例，防止分片競爭阻塞
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+
+        // 2. 判斷環境掛載
+        if (Hls.isSupported()) {
+            hls = new Hls({ lowLatencyMode: true });
             hls.loadSource(streamUrl);
+            hls.attachMedia(mainAudio);
+        } else if (mainAudio.canPlayType('application/vnd.apple.mpegurl')) {
+            // iOS Safari 原生支援
+            mainAudio.src = streamUrl;
         } else {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
         }
 
-        // 改成純圖片背景：使用歌曲封面，並保留遮罩
-        document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('${music.img}')`;
-       
-        
         this.displayLyrics(music.lyrics);
         this.updateTranslationBtnStyle();
-        mainAudio.load();
+
+        if (autoPlay) {
+            this.playSong();
+        }
         
         this.preloadNextMusic();
     },
 
+    // 核心修復：防止 Promise 中斷導致 UI 卡死，並回報系統 playing
     playSong() {
-        mainAudio.play();
-        isPlaying = true;
-        const pauseIcon = '<i class="fas fa-pause"></i>';
-        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = pauseIcon;
-        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = pauseIcon;
-        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-pause";
+        const playPromise = mainAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                isPlaying = true;
+                this.updatePlayIcons();
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = "playing";
+                }
+            }).catch(err => {
+                console.warn("播放受阻，等待使用者互動或資源載入:", err);
+                isPlaying = false;
+                this.updatePlayIcons();
+            });
+        }
     },
 
+    // 核心修復：向系統明確宣告 paused，防止鎖屏面板被系統直接丟棄
     pauseSong() {
         mainAudio.pause();
         isPlaying = false;
-        const playIcon = '<i class="fas fa-play"></i>';
-        if (document.getElementById("mini-play-btn")) document.getElementById("mini-play-btn").innerHTML = playIcon;
-        if (document.getElementById("play-pause-btn")) document.getElementById("play-pause-btn").innerHTML = playIcon;
-        if (this.miniPlayIcon) this.miniPlayIcon.className = "fas fa-play";
+        this.updatePlayIcons();
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = "paused";
+        }
+    },
+
+    updatePlayIcons() {
+        const icon = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        const miniPlayBtn = document.getElementById("mini-play-btn");
+        const playPauseBtn = document.getElementById("play-pause-btn");
+        if (miniPlayBtn) miniPlayBtn.innerHTML = icon;
+        if (playPauseBtn) playPauseBtn.innerHTML = icon;
     },
 
     togglePlay() {
@@ -292,7 +313,6 @@ const app = {
     },
 
     getCurrentPlaylist() {
-
         if (currentPlaylistId === 'liked') {
             return allMusic.filter(m => likedSongs.includes(m.id));
         }
@@ -300,7 +320,6 @@ const app = {
             return this.getNewReleases();
         }
         if (currentPlaylistId === 'sizzy') {
-
             return allMusic.filter(m => m.id >= 21 && m.id <= 26);
         }
         return allMusic; 
@@ -308,35 +327,28 @@ const app = {
 
     nextSong() {
         const playlist = this.getCurrentPlaylist();
+        if (!playlist.length) return;
+
         const currentSong = allMusic[musicIndex];
-        
-
         let currentIndexInPlaylist = playlist.indexOf(currentSong);
-        
-
         if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
         
         const nextIndexInPlaylist = (currentIndexInPlaylist + 1) % playlist.length;
-        const nextSong = playlist[nextIndexInPlaylist];
-        
-        musicIndex = allMusic.indexOf(nextSong);
-        this.loadMusic(musicIndex);
-        this.playSong();
+        musicIndex = allMusic.indexOf(playlist[nextIndexInPlaylist]);
+        this.loadMusic(musicIndex, true);
     },
 
     prevSong() {
         const playlist = this.getCurrentPlaylist();
+        if (!playlist.length) return;
+
         const currentSong = allMusic[musicIndex];
         let currentIndexInPlaylist = playlist.indexOf(currentSong);
-        
         if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
         
         const prevIndexInPlaylist = (currentIndexInPlaylist - 1 + playlist.length) % playlist.length;
-        const prevSong = playlist[prevIndexInPlaylist];
-        
-        musicIndex = allMusic.indexOf(prevSong);
-        this.loadMusic(musicIndex);
-        this.playSong();
+        musicIndex = allMusic.indexOf(playlist[prevIndexInPlaylist]);
+        this.loadMusic(musicIndex, true);
     },
 
     seek(e) {
@@ -344,19 +356,18 @@ const app = {
         const width = container.clientWidth;
         const clickX = e.offsetX;
         const duration = mainAudio.duration;
-        if (!isNaN(duration)) mainAudio.currentTime = (clickX / width) * duration;
+        if (!isNaN(duration) && duration > 0) {
+            mainAudio.currentTime = (clickX / width) * duration;
+        }
     },
 
     toggleLoop() {
-    
-        const miniLoopBtn = document.getElementById("mini-loop-btn");
-        const fullLoopBtn = document.getElementById("full-loop-btn");
-
-    
         isLoop = !isLoop;
         mainAudio.loop = isLoop;
 
-    
+        const miniLoopBtn = document.getElementById("mini-loop-btn");
+        const fullLoopBtn = document.getElementById("full-loop-btn");
+
         [miniLoopBtn, fullLoopBtn].forEach(btn => {
             if (btn) {
                 if (isLoop) {
@@ -370,7 +381,6 @@ const app = {
         });
     },
 
-
     getNewReleaseStatus() {
         const sorted = [...allMusic].sort((a, b) => new Date(b.date) - new Date(a.date));
         const latestSong = sorted[0];
@@ -383,14 +393,12 @@ const app = {
         const dateOnly = new Date(releaseDate);
         dateOnly.setHours(0, 0, 0, 0);
         
-        const diffTime = today - dateOnly;
-        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        const diffDays = (today - dateOnly) / (1000 * 60 * 60 * 24);
 
         if (diffDays === 0) return "今日已更新";
         if (diffDays === 1) return "昨日已更新";
         return `${releaseDate.getMonth() + 1}月${releaseDate.getDate()}日更新`;
     },
-
 
     getNewReleases() {
         const sorted = [...allMusic].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -409,17 +417,37 @@ const app = {
                 document.getElementById("total-duration").innerText = formatTime(duration);
             }
             this.updateLyrics(currentTime);
+
+            // 定期校準系統控制台時間軸
+            if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession && duration) {
+                try {
+                    navigator.mediaSession.setPositionState({
+                        duration: duration,
+                        playbackRate: mainAudio.playbackRate,
+                        position: currentTime
+                    });
+                } catch(e) {}
+            }
         });
 
         mainAudio.addEventListener("ended", () => {
             localStorage.setItem('currentTime', 0);
             if (!isLoop) this.nextSong();
         });
+
+        // 監聽意外中斷
+        mainAudio.addEventListener("pause", () => {
+            if (isPlaying) {
+                isPlaying = false;
+                this.updatePlayIcons();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
+            }
+        });
     },
 
     displayLyrics(lyrics) {
         const wrapper = document.getElementById("lyrics-wrapper");
-        if (!wrapper) return;
+        if (!wrapper || !lyrics) return;
         wrapper.innerHTML = lyrics.map(line => {
             const textToDisplay = (isTranslated && line.translation) ? line.translation : line.text;
             return `<div class="lyric-line"><div class="main-text">${textToDisplay}</div></div>`;
@@ -427,7 +455,10 @@ const app = {
     },
 
     updateLyrics(currentTime) {
-        const lyrics = allMusic[musicIndex].lyrics;
+        const currentSong = allMusic[musicIndex];
+        if (!currentSong || !currentSong.lyrics) return;
+
+        const lyrics = currentSong.lyrics;
         let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
         
         if (activeIndex !== -1 && activeIndex !== currentLyricIndex) {
@@ -442,45 +473,26 @@ const app = {
         }
     },
 
+    // 修復：點擊翻譯不再意外把單曲循環關掉
     toggleTranslation() {
-        const wrapper = document.getElementById("lyrics-wrapper");
-        const translateBtn = document.getElementById("btn-translate");
-        const loopBtn = document.getElementById("full-loop-btn");
-
-
         isTranslated = !isTranslated;
-        
-
-        isLoop = false; 
-        mainAudio.loop = false;
-        loopBtn.classList.remove('active');
-        loopBtn.style.color = "#fff";
-
-       
-        if (isTranslated) {
-            translateBtn.classList.add('active');
-            translateBtn.style.color = "#ff85a2";
-        } else {
-            translateBtn.classList.remove('active');
-            translateBtn.style.color = "#fff";
+        const translateBtn = document.getElementById("btn-translate");
+        if (translateBtn) {
+            translateBtn.classList.toggle('active', isTranslated);
+            translateBtn.style.color = isTranslated ? "#ff85a2" : "#fff";
         }
-        
-        this.displayLyrics(allMusic[musicIndex].lyrics);
+        if (allMusic[musicIndex]) {
+            this.displayLyrics(allMusic[musicIndex].lyrics);
+        }
     },
 };
 
 window.app = app;
+
 window.showView = (viewName) => {
-
-    document.querySelectorAll(".view").forEach(v => {
-        v.classList.remove("active");
-    });
-
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
     const target = document.getElementById(viewName + "-view");
-    if (target) {
-        target.classList.add("active");
-    }
-
+    if (target) target.classList.add("active");
     app.updateNavState(viewName);
 };
 
@@ -505,13 +517,20 @@ window.toggleLyricsView = () => {
     }
 };
 
+// 核心修復：從 Threads 或桌面切回瀏覽器時，主動救回播放器與 MediaSession
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && app && allMusic[musicIndex]) {
+        app.updateMediaSession();
+        app.updatePlayIcons();
+    }
+});
+
 window.addEventListener("load", () => app.init());
 
 window.closeAnnouncement = () => {
     const bar = document.getElementById("announcement-bar");
     if (bar) {
         bar.style.display = "none";
-        // 如果關閉後需要調整內容區高度，可在此操作
         const contentArea = document.getElementById("content-area");
         if (contentArea) contentArea.style.marginTop = "0px";
     }
