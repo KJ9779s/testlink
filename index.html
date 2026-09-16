@@ -10,22 +10,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-	<!-- 新增公告欄 -->
 	<div id="announcement-bar">
         <span>※ 想聽《Apple Candy》《單曲循環》《Break My Rules》請移步各大串流平台～</span>
         <button onclick="closeAnnouncement()"><i class="fas fa-times"></i></button>
     </div>
 
-    
-
     <!-- 主要內容區域 -->
     <div id="content-area">
-    <!-- 首頁預設為 active -->
     	<div id="home-view" class="view active">
         	<h1>所有歌曲</h1>
         	<ul id="home-list" class="music-grid"></ul>
     	</div>
-    
     
     	<div id="library-view" class="view">
         	<h1>9779s 的音樂庫</h1>
@@ -102,10 +97,10 @@
 
     <!-- 底部導航欄 -->
     <nav class="bottom-nav">
-        <a href="#" onclick="showView('home')" class="active">
+        <a href="#" onclick="showView('home'); return false;" class="active">
             <i class="fas fa-home"></i><br>首頁
         </a>
-        <a href="#" onclick="showView('library')">
+        <a href="#" onclick="showView('library'); return false;">
             <i class="fas fa-music"></i><br>音樂庫
         </a>
     </nav>

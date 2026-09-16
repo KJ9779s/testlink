@@ -23,6 +23,7 @@ const app = {
     libraryList: document.getElementById("library-list"),
     miniPlayer: document.getElementById("bottom-player"),
     fullPlayer: document.getElementById("full-player"),
+    miniPlayIcon: document.getElementById("mini-play"),
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
@@ -34,12 +35,11 @@ const app = {
         this.renderLibrary();
         this.setupAudioEvents();
         this.setDefaultCover();
-        this.setupInitialMediaSession();
         this.updateNavState('home');
 
         if (savedMusicIndex !== null) {
             musicIndex = parseInt(savedMusicIndex);
-            this.loadMusic(musicIndex, false); // 初始化僅載入不自動播
+            this.loadMusic(musicIndex, false);
             
             mainAudio.addEventListener('loadedmetadata', () => {
                 if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
@@ -73,7 +73,6 @@ const app = {
 
     updatePlaylistLabel() {
         const name = this.getPlaylistNameById(currentPlaylistId);
-        // 修復：相容 playlist-label 與 mini-playlist-label
         const miniLabel = document.getElementById("mini-playlist-label") || document.getElementById("playlist-label"); 
         if (miniLabel) miniLabel.innerText = name;
         
@@ -116,24 +115,10 @@ const app = {
 
     updateNavState(viewName) {
         document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
-        const activeBtn = document.querySelector(`.bottom-nav a[onclick="showView('${viewName}')"]`);
+        const activeBtn = document.querySelector(`.bottom-nav a[onclick*="'${viewName}'"]`);
         if(activeBtn) activeBtn.classList.add('active');
     },
 
-    setupInitialMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: "請選擇歌曲",
-                artist: "不是設計愛情 是設計我",
-                artwork: [{ src: 'images/default-cover.jpg', sizes: '512x512', type: 'image/jpeg' }]
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
-            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
-            navigator.mediaSession.setActionHandler('play', () => this.playSong());
-            navigator.mediaSession.setActionHandler('pause', () => this.pauseSong());
-        }
-    },
-    
     setDefaultCover() {
         const defaultImg = "images/default-cover.jpg";
         if (document.getElementById("mini-img")) document.getElementById("mini-img").src = defaultImg;
@@ -142,13 +127,27 @@ const app = {
 
     updateMediaSession() {
         const music = allMusic[musicIndex];
-        if ('mediaSession' in navigator && music) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: music.name,
-                artist: music.artist,
-                artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
-            });
-            navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+        if (!('mediaSession' in navigator) || !music) return;
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: music.name,
+            artist: music.artist,
+            artwork: [{ src: music.img, sizes: '512x512', type: 'image/jpeg' }]
+        });
+
+        navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+
+        const actions = [
+            ['previoustrack', () => this.prevSong()],
+            ['nexttrack', () => this.nextSong()],
+            ['play', () => this.playSong()],
+            ['pause', () => this.pauseSong()]
+        ];
+
+        for (const [action, handler] of actions) {
+            try {
+                navigator.mediaSession.setActionHandler(action, handler);
+            } catch (e) {}
         }
     },
 
@@ -223,7 +222,6 @@ const app = {
         this.loadMusic(musicIndex, true);
     },
 
-    // 核心修復：徹底銷毀舊 HLS + 支援 iOS 原生 + 圖片背景
     loadMusic(index, autoPlay = false) {
         const music = allMusic[musicIndex];
         if (!music) return;
@@ -235,27 +233,22 @@ const app = {
         if(document.querySelector(".song-details .artist")) document.querySelector(".song-details .artist").innerText = music.artist;
         
         this.updatePlaylistLabel();
-        this.updateMediaSession();
         this.updatePlayerLikeBtn();
 
-        // 更換圖片背景
         document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('${music.img}')`;
 
         const streamUrl = `music/s${music.id}/s${music.id}.m3u8`;
 
-        // 1. 銷毀前一個 Hls 實例，防止分片競爭阻塞
         if (hls) {
             hls.destroy();
             hls = null;
         }
 
-        // 2. 判斷環境掛載
         if (Hls.isSupported()) {
             hls = new Hls({ lowLatencyMode: true });
             hls.loadSource(streamUrl);
             hls.attachMedia(mainAudio);
         } else if (mainAudio.canPlayType('application/vnd.apple.mpegurl')) {
-            // iOS Safari 原生支援
             mainAudio.src = streamUrl;
         } else {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
@@ -263,6 +256,7 @@ const app = {
 
         this.displayLyrics(music.lyrics);
         this.updateTranslationBtnStyle();
+        this.updateMediaSession();
 
         if (autoPlay) {
             this.playSong();
@@ -271,25 +265,21 @@ const app = {
         this.preloadNextMusic();
     },
 
-    // 核心修復：防止 Promise 中斷導致 UI 卡死，並回報系統 playing
     playSong() {
         const playPromise = mainAudio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 isPlaying = true;
                 this.updatePlayIcons();
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.playbackState = "playing";
-                }
+                this.updateMediaSession();
             }).catch(err => {
-                console.warn("播放受阻，等待使用者互動或資源載入:", err);
+                console.warn("播放受阻:", err);
                 isPlaying = false;
                 this.updatePlayIcons();
             });
         }
     },
 
-    // 核心修復：向系統明確宣告 paused，防止鎖屏面板被系統直接丟棄
     pauseSong() {
         mainAudio.pause();
         isPlaying = false;
@@ -301,10 +291,11 @@ const app = {
 
     updatePlayIcons() {
         const icon = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
-        const miniPlayBtn = document.getElementById("mini-play-btn");
-        const playPauseBtn = document.getElementById("play-pause-btn");
-        if (miniPlayBtn) miniPlayBtn.innerHTML = icon;
-        if (playPauseBtn) playPauseBtn.innerHTML = icon;
+        const miniBtn = document.getElementById("mini-play-btn");
+        const playBtn = document.getElementById("play-pause-btn");
+        if (miniBtn) miniBtn.innerHTML = icon;
+        if (playBtn) playBtn.innerHTML = icon;
+        if (this.miniPlayIcon) this.miniPlayIcon.className = isPlaying ? "fas fa-pause" : "fas fa-play";
     },
 
     togglePlay() {
@@ -328,7 +319,6 @@ const app = {
     nextSong() {
         const playlist = this.getCurrentPlaylist();
         if (!playlist.length) return;
-
         const currentSong = allMusic[musicIndex];
         let currentIndexInPlaylist = playlist.indexOf(currentSong);
         if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
@@ -341,7 +331,6 @@ const app = {
     prevSong() {
         const playlist = this.getCurrentPlaylist();
         if (!playlist.length) return;
-
         const currentSong = allMusic[musicIndex];
         let currentIndexInPlaylist = playlist.indexOf(currentSong);
         if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
@@ -418,7 +407,6 @@ const app = {
             }
             this.updateLyrics(currentTime);
 
-            // 定期校準系統控制台時間軸
             if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession && duration) {
                 try {
                     navigator.mediaSession.setPositionState({
@@ -435,7 +423,6 @@ const app = {
             if (!isLoop) this.nextSong();
         });
 
-        // 監聽意外中斷
         mainAudio.addEventListener("pause", () => {
             if (isPlaying) {
                 isPlaying = false;
@@ -473,7 +460,6 @@ const app = {
         }
     },
 
-    // 修復：點擊翻譯不再意外把單曲循環關掉
     toggleTranslation() {
         isTranslated = !isTranslated;
         const translateBtn = document.getElementById("btn-translate");
@@ -497,7 +483,10 @@ window.showView = (viewName) => {
 };
 
 window.togglePlayerView = () => {
-    if(app.fullPlayer) app.fullPlayer.classList.toggle('active');
+    if(app.fullPlayer) {
+        app.fullPlayer.classList.toggle('active');
+        restorePageInteraction();
+    }
 };
 
 window.toggleLyricsView = () => {
@@ -517,16 +506,6 @@ window.toggleLyricsView = () => {
     }
 };
 
-// 核心修復：從 Threads 或桌面切回瀏覽器時，主動救回播放器與 MediaSession
-document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && app && allMusic[musicIndex]) {
-        app.updateMediaSession();
-        app.updatePlayIcons();
-    }
-});
-
-window.addEventListener("load", () => app.init());
-
 window.closeAnnouncement = () => {
     const bar = document.getElementById("announcement-bar");
     if (bar) {
@@ -535,3 +514,43 @@ window.closeAnnouncement = () => {
         if (contentArea) contentArea.style.marginTop = "0px";
     }
 };
+
+/* --- 頁面焦點與觸控層狀態復原 --- */
+function restorePageInteraction() {
+    requestAnimationFrame(() => {
+        document.body.style.pointerEvents = "auto";
+
+        const fullPlayer = document.getElementById("full-player");
+        if (fullPlayer) {
+            fullPlayer.style.pointerEvents = fullPlayer.classList.contains("active") ? "auto" : "none";
+        }
+
+        const bottomPlayer = document.getElementById("bottom-player");
+        if (bottomPlayer) bottomPlayer.style.pointerEvents = "auto";
+
+        const bottomNav = document.querySelector(".bottom-nav");
+        if (bottomNav) bottomNav.style.pointerEvents = "auto";
+    });
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        setTimeout(restorePageInteraction, 100);
+        setTimeout(restorePageInteraction, 500);
+        if (app && allMusic[musicIndex]) {
+            app.updateMediaSession();
+            app.updatePlayIcons();
+        }
+    }
+});
+
+window.addEventListener("pageshow", () => {
+    setTimeout(restorePageInteraction, 100);
+    setTimeout(restorePageInteraction, 500);
+});
+
+window.addEventListener("focus", () => {
+    setTimeout(restorePageInteraction, 100);
+});
+
+window.addEventListener("load", () => app.init());
