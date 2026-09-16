@@ -24,7 +24,7 @@ const app = {
     miniPlayer: document.getElementById("bottom-player"),
     fullPlayer: document.getElementById("full-player"),
     miniPlayIcon: document.getElementById("mini-play"),
-    bgVideo: document.getElementById("bg-video"),
+    
     progressBar: document.querySelector(".progress-bar"),
     
     init() {
@@ -32,7 +32,7 @@ const app = {
         likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
         const savedMusicIndex = localStorage.getItem('musicIndex');
         const savedTime = localStorage.getItem('currentTime');
-        document.addEventListener("visibilitychange", () => this.handleVisibilityChange());
+
         // 2. 初始化 HLS
         if (Hls.isSupported()) {
             hls = new Hls({ lowLatencyMode: true });
@@ -55,24 +55,6 @@ const app = {
             mainAudio.addEventListener('loadedmetadata', () => {
                 if (savedTime) mainAudio.currentTime = parseFloat(savedTime);
             }, { once: true });
-        }
-    },
-
-    handleVisibilityChange() {
-        const isHidden = document.hidden;
-        
-        if (isHidden) {
-            // 進入背景：暫停影片以節省效能
-            if (this.bgVideo && !this.bgVideo.paused) {
-                this.bgVideo.pause();
-            }
-        } else {
-            // 回到前台：如果音樂正在播放，且影片不是隱藏狀態，則恢復影片播放
-            if (this.bgVideo && isPlaying && this.bgVideo.style.display !== 'none') {
-                this.bgVideo.play().catch(e => {});
-            }
-            // 確保回到前台時歌詞顯示是正確的
-            this.updateLyrics(mainAudio.currentTime);
         }
     },
 
@@ -275,19 +257,8 @@ const app = {
             mainAudio.src = `music/s${music.id}/s${music.id}.mp3`;
         }
 
-        if (this.bgVideo) {
-            if (music.id >= 21) {
-                this.bgVideo.style.display = 'none';
-                document.body.style.backgroundImage = `url('images/s${music.id}.jpg')`;
-                document.body.style.backgroundSize = "cover";
-                document.body.style.backgroundPosition = "center";
-            } else {
-                this.bgVideo.style.display = 'block';
-                document.body.style.backgroundImage = "url('images/back.jpg')";
-                this.bgVideo.src = `video/v${music.id}.mp4`;
-                this.bgVideo.play().catch(e => {});
-            }
-        }
+        // 改成純圖片背景：使用歌曲封面，並保留遮罩
+        document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('${music.img}')`;
        
         
         this.displayLyrics(music.lyrics);
@@ -456,9 +427,6 @@ const app = {
     },
 
     updateLyrics(currentTime) {
-        // 【新增這行】若頁面在背景，直接結束函式，不執行任何更新
-        if (document.hidden) return;
-
         const lyrics = allMusic[musicIndex].lyrics;
         let activeIndex = lyrics.findLastIndex(l => currentTime >= l.time);
         
